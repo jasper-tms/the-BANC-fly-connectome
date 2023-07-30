@@ -17,6 +17,7 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url='https://github.com/htem/FANC_auto_recon',
     packages=['banc', 'banc.transforms'],
+    package_data={'banc.transforms': ['transform_parameters/*.txt']},
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
