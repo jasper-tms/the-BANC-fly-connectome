@@ -32,6 +32,26 @@ This is the best option if you want to make changes yourself to the code
     cd BANC-fly-connectome
     pip install -e .
 
+### Troubleshooting
+Depending on your Python 3 version and your operating system, you may need to battle some bugs in order to get the `pip install` commands above to succeed.
+
+If you get something that looks like
+
+    .. ERROR:: Could not find a local HDF5 installation.
+       You may need to explicitly state where your local HDF5 headers and
+       library can be found by setting the ``HDF5_DIR`` environment
+       variable or by using the ``--hdf5`` command-line option.
+
+and you're on a Mac, install `brew` (https://brew.sh) if you haven't yet, then use `brew` to install HDF5 with `brew install hdf5`, then put `HDF5_DIR=/opt/homebrew/opt/hdf5` in front of your `pip install` command (e.g. `HDF5_DIR=/opt/homebrew/opt/hdf5 pip install fanc-fly`).
+
+If you get an error that contains
+
+    Error compiling Cython file:
+    ...
+    Cython.Compiler.Errors.CompileError: tables/utilsextension.pyx
+
+try to `pip install` the latest version of `tables` from GitHub by running `HDF5_DIR=/opt/homebrew/opt/hdf5 pip install git+https://github.com/PyTables/PyTables`, or alternatively, use conda to install it (`conda install tables`). After you get this package installed successfully, try installing `fanc-fly` again.
+
 ### Provide credentials
 
 Access to the latest reconstruction of BANC is restricted to authorized users. If you are a member of the BANC community (see [Collaborative community](../../wiki#collaborative-community) on this repo's wiki) and have been granted access, you can generate an API key by visiting [https://global.daf-apis.com/auth/api/v1/create_token](https://global.daf-apis.com/auth/api/v1/create_token) and logging in with your BANC-authorized google account. Copy the key that is displayed, then run the following commands in python to save your key to the appropriate file:

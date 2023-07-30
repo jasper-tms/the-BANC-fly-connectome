@@ -21,7 +21,7 @@ from . import annotations, auth, lookup, statebuilder
 
 def new_cell(pt_position,
              pt_type: "'soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan'",
-             cell_type: "'motor', 'sensory', 'descending', 'ascending', 'central', 'glia'",
+             cell_type: "'motor', 'efferent', 'sensory', 'descending', 'ascending', 'central', 'glia'",
              user_id: int,
              cell_ids_table='cell_ids',
              add_to_soma_table=False,  # TODO implement
@@ -39,16 +39,17 @@ def new_cell(pt_position,
         raise ValueError(f"Segment {segid} already has a cell ID, {cell_ids.loc[cell_ids.pt_root_id == segid, 'id'].values[0]}")
     if pt_type not in ['soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan']:
         raise ValueError(f'pt_type {pt_type} is not valid')
-    if cell_type not in ['motor', 'sensory', 'descending', 'ascending', 'central', 'glia']:
-        raise ValueError(f'cell_type {cell_type} is not valid')
     start_ids = {
         'motor': 100,
+        'efferent': 100,
         'sensory': 1000,
         'descending': 10_000,
         'ascending': 12_000,
         'central': 15_000,
         'glia': 100_000
     }
+    if cell_type not in start_ids.keys():
+        raise ValueError(f'cell_type {cell_type} is not valid')
     start_id = start_ids[cell_type]
     # Annotations that were deleted aren't materialized so they won't be in the
     # cell_ids dataframe, but new annotations can't re-use their IDs.
@@ -78,6 +79,8 @@ def new_cell(pt_position,
             return
         if cell_type == 'motor':
             try_annotate_neuron(segid, 'primary class', 'motor neuron', user_id)
+        if cell_type == 'efferent':
+            try_annotate_neuron(segid, 'primary class', 'efferent non-motor neuron', user_id)
         elif cell_type == 'sensory':
             try_annotate_neuron(segid, 'primary class', 'sensory neuron', user_id)
         elif cell_type == 'descending':
