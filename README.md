@@ -42,7 +42,7 @@ If you get something that looks like
        library can be found by setting the ``HDF5_DIR`` environment
        variable or by using the ``--hdf5`` command-line option.
 
-and you're on a Mac, install `brew` (https://brew.sh) if you haven't yet, then use `brew` to install HDF5 with `brew install hdf5`, then put `HDF5_DIR=/opt/homebrew/opt/hdf5` in front of your `pip install` command (e.g. `HDF5_DIR=/opt/homebrew/opt/hdf5 pip install fanc-fly`).
+and you're on a Mac, install `brew` (https://brew.sh) if you haven't yet, then use `brew` to install HDF5 with `brew install hdf5`, then put `HDF5_DIR=/opt/homebrew/opt/hdf5` in front of your `pip install` command (e.g. `HDF5_DIR=/opt/homebrew/opt/hdf5 pip install banc`).
 
 If you get an error that contains
 
@@ -50,7 +50,7 @@ If you get an error that contains
     ...
     Cython.Compiler.Errors.CompileError: tables/utilsextension.pyx
 
-try to `pip install` the latest version of `tables` from GitHub by running `HDF5_DIR=/opt/homebrew/opt/hdf5 pip install git+https://github.com/PyTables/PyTables`, or alternatively, use conda to install it (`conda install tables`). After you get this package installed successfully, try installing `fanc-fly` again.
+try to `pip install` the latest version of `tables` from GitHub by running `HDF5_DIR=/opt/homebrew/opt/hdf5 pip install git+https://github.com/PyTables/PyTables`, or alternatively, use conda to install it (`conda install tables`). After you get this package installed successfully, try installing `banc` again.
 
 ### Provide credentials
 
