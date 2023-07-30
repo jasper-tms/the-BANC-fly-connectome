@@ -2,7 +2,6 @@
 
 from . import (
     annotations,
-    catmaid,
     connectivity,
     lookup,
     skeletonize,

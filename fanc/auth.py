@@ -9,18 +9,19 @@ from cloudvolume import CloudVolume
 from meshparty import trimesh_io
 
 DATASTACK_NICKNAMES = {
-    'production': 'fanc_production_mar2021',
-    'sandbox': 'fanc_sandbox'
+    'banc': 'brain_and_nerve_cord',
+    'BANC': 'brain_and_nerve_cord',
+    'production': 'brain_and_nerve_cord',
 }
 
-DEFAULT_MESH_CACHE = os.path.expanduser('~/fanc-meshes')
+DEFAULT_MESH_CACHE = os.path.expanduser('~/banc-meshes')
 
 # To enable lazy loading of CAVEclients and cloudvolumes
 _clients = {}
 _cloudvolumes = {}
 
 
-def save_cave_credentials(token, dataset='fanc_production_mar2021', overwrite=False):
+def save_cave_credentials(token, dataset='brain_and_nerve_cord', overwrite=False):
     # If a nickname was used, get the proper datastack name
     dataset = DATASTACK_NICKNAMES.get(dataset, dataset)
 
@@ -35,7 +36,7 @@ def save_cave_credentials(token, dataset='fanc_production_mar2021', overwrite=Fa
           f'~/.cloudvolume/secrets/cave-secret.json under key "{dataset}"')
 
 
-def get_caveclient(dataset='fanc_production_mar2021'):
+def get_caveclient(dataset='brain_and_nerve_cord'):
     # If a nickname was used, get the proper datastack name
     dataset = DATASTACK_NICKNAMES.get(dataset, dataset)
 
@@ -45,7 +46,7 @@ def get_caveclient(dataset='fanc_production_mar2021'):
     return _clients[dataset]
 
 
-def get_cloudvolume(dataset='fanc_production_mar2021'):
+def get_cloudvolume(dataset='brain_and_nerve_cord'):
     # If a nickname was used, get the proper datastack name
     dataset = DATASTACK_NICKNAMES.get(dataset, dataset)
 
@@ -61,7 +62,7 @@ def get_cloudvolume(dataset='fanc_production_mar2021'):
     return _cloudvolumes[dataset]
 
 
-def get_meshmanager(dataset='fanc_production_mar2021',
+def get_meshmanager(dataset='brain_and_nerve_cord',
                     mesh_cache=DEFAULT_MESH_CACHE):
     return trimesh_io.MeshMeta(
         cv_path=get_caveclient().info.segmentation_source(),

@@ -1,4 +1,8 @@
-### Generate a color-depth MIP from a FANC neuron
+### Generate a color-depth MIP from a BANC neuron
+
+This file is currently copied from FANC, and needs to be updated for BANC once it's possible to do so (i.e. after synapse prediction and alignment to the JRC2018 templates have been done)
+
+TODO ask the user to specify if they want to render the neuron's brain arbors or VNC arbors or both, and do what they ask.
 
 ---
 
@@ -10,6 +14,7 @@ Download VNC template transforms by launching python using an environment with `
 
     import flybrains
     flybrains.download_jrc_vnc_transforms()
+    # TODO download brain templates?
 
 Then check that you now have two `.h5` files located at `~/flybrain-data`.
 
