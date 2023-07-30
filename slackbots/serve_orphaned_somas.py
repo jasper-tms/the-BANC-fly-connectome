@@ -125,7 +125,10 @@ def direct_message(message, say):
         return
     if verbosity >= 1:
         print('Posting response:', response)
-    say(response, thread_ts=message['ts'])
+    if len(response) > 1500:
+        say(response, thread_ts=message['ts'])
+    else:
+        say(response)
 
 
 def fetch_orphaned_somas(y_range=[0, 160000], query_size=30, synapse_count_threshold=50):

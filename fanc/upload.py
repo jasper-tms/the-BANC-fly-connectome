@@ -32,7 +32,7 @@ def new_cell(pt_position,
     """
     client = auth.get_caveclient()
     cell_ids = client.materialize.live_live_query(cell_ids_table, timestamp=datetime.utcnow())
-    segid = lookup.segids_from_pts(pt_position)
+    segid = lookup.segid_from_pt(pt_position)
     if segid == 0:
         raise ValueError(f'Point {pt_position} is a location with no segmentation')
     if segid in cell_ids.pt_root_id.values:
@@ -144,7 +144,7 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
     else:
         try:
             iter(neuron)
-            segid = lookup.segids_from_pts(neuron)
+            segid = lookup.segid_from_pt(neuron)
             if segid == 0:
                 raise ValueError(f'Point {neuron} is a location with no segmentation')
             point = lookup.anchor_point(segid, resolve_duplicates=resolve_duplicate_anchor_points)

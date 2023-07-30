@@ -149,7 +149,10 @@ def direct_message(message, say):
                                    fake=fake)
     if verbosity >= 1:
         print('Posting response:', response)
-    say(response, thread_ts=message['ts'])
+    if len(response) > 1500:
+        say(response, thread_ts=message['ts'])
+    else:
+        say(response)
 
 
 def process_message(message: str, user: str, fake=False) -> str:
@@ -265,7 +268,7 @@ def process_message(message: str, user: str, fake=False) -> str:
                 return (f"ERROR: Could not convert the last 3 words to"
                         " integers. Are they point coordinates?"
                         f"\n\n`{[i for i in tokens[1:]]}`")
-            segid_from_point = fanc.lookup.segids_from_pts(point)
+            segid_from_point = fanc.lookup.segid_from_pt(point)
             if not segid_from_point == segid:
                 return (f"ERROR: The provided point `{point}` is inside"
                         f" segment {segid_from_point} which doesn't"

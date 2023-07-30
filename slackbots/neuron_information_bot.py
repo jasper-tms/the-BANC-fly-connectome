@@ -134,7 +134,10 @@ def direct_message(message, say):
                                    fake=fake)
     if verbosity >= 1:
         print('Posting response:', response)
-    say(response, thread_ts=message['ts'])
+    if len(response) > 1500:
+        say(response, thread_ts=message['ts'])
+    else:
+        say(response)
 
 
 def process_message(message: str, user: str, fake=False) -> str:

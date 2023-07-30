@@ -22,7 +22,7 @@ default_svid_lookup_url = 'https://services.itanna.io/app/transform-service/quer
 
 
 # --- START CAVE TABLES / ANNOTATIONS SECTION --- #
-def proofreading_status(segid: int or list[int],
+def proofreading_status(segids: int or list[int],
                         source_tables: str or list[str] = default_proofreading_tables,
                         timestamp='now') -> None or str or tuple(str, list):
     """
@@ -30,13 +30,13 @@ def proofreading_status(segid: int or list[int],
 
     Arguments
     ---------
-    segid: int
-      The ID of the segment to query
+    segids: int, or iterable of ints
+      The segment ID or IDs to look up proofreading status for.
 
     source_tables: str, or list of str
       The name(s) of the CAVE proofreading table(s) to query
 
-    timestamp : 'now' (default) OR datetime OR None
+    timestamp: 'now' (default) OR datetime OR None
       The timestamp at which to query the segment's proofreading status.
       If 'now', use the current time.
       If datetime, use the time specified by the user.
@@ -52,8 +52,8 @@ def proofreading_status(segid: int or list[int],
       version of this the segment was marked as proofread, and a list
       containing the previous segment ID(s) that were marked as proofread.
     """
-    if isinstance(segid, (int, np.integer)):
-        return proofreading_status([segid], source_tables=source_tables, timestamp=timestamp)[0]
+    if isinstance(segids, (int, np.integer)):
+        return proofreading_status([segids], source_tables=source_tables, timestamp=timestamp)[0]
 
     client = auth.get_caveclient()
     if timestamp in ['now', 'live']:
@@ -61,7 +61,7 @@ def proofreading_status(segid: int or list[int],
     elif timestamp is None:
         timestamp = client.materialize.get_timestamp()
 
-    if not all(client.chunkedgraph.is_latest_roots(segid, timestamp=timestamp)):
+    if not all(client.chunkedgraph.is_latest_roots(segids, timestamp=timestamp)):
         raise KeyError('A given ID(s) is not valid at the given timestamp.'
                        ' Use updated IDs or provide the timestamp where'
                        ' the ID(s) is valid.')
@@ -69,18 +69,18 @@ def proofreading_status(segid: int or list[int],
     if isinstance(source_tables, str):
         source_tables = [source_tables]
 
-    results = pd.Series(index=segid, data=None, dtype=object)
+    results = pd.Series(index=segids, data=None, dtype=object)
     for table_name in source_tables[::-1]:
         table = client.materialize.live_live_query(table_name, timestamp)
         results.loc[results.isna() & results.index.isin(table.valid_id)] = table_name
         if results.notna().all():
-            return results.loc[segid].to_list()
+            return results.loc[segids].to_list()
         results.loc[results.isna()] = table.groupby('pt_root_id')['valid_id'].apply(lambda x: (table_name, list(x)))
         if results.notna().all():
-            return results.loc[segid].to_list()
+            return results.loc[segids].to_list()
 
     results.loc[results.isna()] = None
-    return results.loc[segid].to_list()
+    return results.loc[segids].to_list()
 
 
 def num_proofread_neurons(source_tables: str or list[str] = default_proofreading_tables,
@@ -130,7 +130,7 @@ def cells_annotated_with(tags: str or list[str],
         Each tuple specifies the name of a CAVE table to query for annotations,
         then the name of the column to use from that table.
 
-    timestamp : 'now' (default) OR datetime OR None
+    timestamp: 'now' (default) OR datetime OR None
       The timestamp at which to query the segment's proofreading status.
       If 'now', use the current time.
       If datetime, use the time specified by the user.
@@ -185,12 +185,12 @@ def cells_annotated_with(tags: str or list[str],
     if return_as == 'list':
         return matching_segids
     # else, return_as == 'url'
-    pts = annos.loc[annos.pt_root_id.isin(matching_segids) &
-                    annos.tag.isin(tags)].groupby('pt_root_id')['pt_position'].apply(lambda x: list(x)[0])
+    points = annos.loc[annos.pt_root_id.isin(matching_segids) &
+                       annos.tag.isin(tags)].groupby('pt_root_id')['pt_position'].apply(lambda x: list(x)[0])
     return statebuilder.render_scene(neurons=matching_segids,
                                      annotations={'name': 'annotation points',
                                                   'type': 'points',
-                                                  'data': pts})
+                                                  'data': points})
 
 
 def all_annotations(source_tables=default_annotation_sources,
@@ -210,13 +210,13 @@ def all_annotations(source_tables=default_annotation_sources,
         Each tuple specifies the name of a CAVE table to query for annotations,
         then the name of the column to pull annotations from for that table.
 
-    timestamp : 'now' (default) OR datetime OR None
+    timestamp: 'now' (default) OR datetime OR None
       The timestamp at which to query the segment's proofreading status.
       If 'now', use the current time.
       If datetime, use the time specified by the user.
       If None, use the timestamp of the latest materialization.
 
-    group_by_segid : bool (default: True)
+    group_by_segid: bool (default: True)
       Controls output format, see Returns section below
 
     Returns
@@ -257,7 +257,7 @@ def all_annotations(source_tables=default_annotation_sources,
     return annos
 
 
-def annotations(segid: int or list[int],
+def annotations(segids: int or list[int],
                 source_tables=default_annotation_sources,
                 timestamp='now',
                 return_details=False,
@@ -267,8 +267,8 @@ def annotations(segid: int or list[int],
 
     Arguments
     ---------
-    segid: int
-      The segment ID to query
+    segids: int, or iterable of ints
+      The segment ID or IDs to look up annotations for.
 
     source_tables: str OR list of str OR list of 2-tuple of str
       str OR list of str:
@@ -279,7 +279,7 @@ def annotations(segid: int or list[int],
         Each tuple specifies the name of a CAVE table to query for annotations,
         then the name of the column to pull annotations from for that table.
 
-    timestamp : 'now' (default) OR datetime OR None
+    timestamp: 'now' (default) OR datetime OR None
       The timestamp at which to query the segment's proofreading status.
       If 'now', use the current time.
       If datetime, use the time specified by the user.
@@ -298,11 +298,11 @@ def annotations(segid: int or list[int],
     -------
     list of strings OR pd.DataFrame, depending on `return_details`
     """
-    if isinstance(segid, (int, np.integer)) and not return_details:
-        return annotations([segid], source_tables=source_tables, timestamp=timestamp,
+    if isinstance(segids, (int, np.integer)) and not return_details:
+        return annotations([segids], source_tables=source_tables, timestamp=timestamp,
                            return_details=False, slow_mode=slow_mode)[0]
-    elif isinstance(segid, (int, np.integer)):
-        segid = [segid]
+    elif isinstance(segids, (int, np.integer)):
+        segids = [segids]
 
     source_tables = _format_annotation_sources(source_tables)
 
@@ -317,17 +317,17 @@ def annotations(segid: int or list[int],
         if return_details:
             table = all_annotations(source_tables, timestamp=timestamp,
                                     group_by_segid=False)
-            return table.loc[table.pt_root_id.isin(segid)].reset_index(drop=True)
+            return table.loc[table.pt_root_id.isin(segids)].reset_index(drop=True)
         else:
             table = all_annotations(source_tables, timestamp=timestamp,
                                     group_by_segid=True)
-            return [table.loc[s] for s in segid]
+            return [table.loc[s] for s in segids]
 
     # Fast mode: use filter_in_dict to request only the annotations we want from the server
     tables = []
     for table_name, column_name in source_tables:
         table = client.materialize.live_live_query(
-            table_name, timestamp, filter_in_dict={table_name: {'pt_root_id': segid}})
+            table_name, timestamp, filter_in_dict={table_name: {'pt_root_id': segids}})
         table['source_table'] = table_name
         if 'user_id' not in table.columns:
             table['user_id'] = None
@@ -343,7 +343,7 @@ def annotations(segid: int or list[int],
 
     if return_details:
         return table
-    return [[anno for anno in table.loc[table.pt_root_id == s, 'tag']] for s in segid]
+    return [[anno for anno in table.loc[table.pt_root_id == s, 'tag']] for s in segids]
 
 
 def _format_annotation_sources(source_tables):
@@ -369,66 +369,70 @@ def _format_annotation_sources(source_tables):
 
 
 # --- START SEGMENTATION/CHUNKEDGRAPH SECTION --- #
-def svids_from_pts(pts, service_url=default_svid_lookup_url):
+def svid_from_pt(points: 'Nx3 iterable', service_url=default_svid_lookup_url):
     """
     Return the supervoxel IDs for a set of points.
 
     This function relies on an external service hosted on services.itanna.io,
     created and maintained by Eric Perlman, which provides very fast svid
     lookups. If this service is down, you can try the slower version
-    instead, `fanc.lookup.segids_from_pts_cv()`.
+    instead, `fanc.lookup.segid_from_pt_cv()`.
 
     Arguments
     ---------
-    pts: Nx3 iterable (list / tuple / np.ndarray / pd.Series)
-      Points to query. Provide these in xyz order and in mip0 voxel coordinates.
+    points: Nx3 iterable (list / tuple / np.ndarray / pd.Series)
+      Point or points to query. Provide these in xyz order and in mip0 voxel coordinates.
 
-    --- Returns ---
+    Returns
+    -------
     The requested supervoxel IDs as a list of ints.
     Order is preserved - the svid corresponding to the Nth point in the
     argument will be the Nth value in the returned list.
     """
-    if isinstance(pts, pd.Series):
-        pts = np.vstack(pts)
+    if isinstance(points, pd.Series):
+        points = np.vstack(points)
 
-    if len(pts) == 3:
-        try: iter(pts[0])
-        except: return svids_from_pts([pts], service_url=service_url)[0]
+    if len(points) == 3:
+        try: iter(points[0])
+        except: return svid_from_pt([points], service_url=service_url)[0]
 
-    pts = np.array(pts, dtype=np.uint32)
-    if pts.ndim == 1:
-        pts = pts.reshape(-1, 3)
+    points = np.array(points, dtype=np.uint32)
+    if points.ndim == 1:
+        points = points.reshape(-1, 3)
     r = requests.post(service_url, json={
-        'x': list(pts[:, 0].astype(str)),
-        'y': list(pts[:, 1].astype(str)),
-        'z': list(pts[:, 2].astype(str))
+        'x': list(points[:, 0].astype(str)),
+        'y': list(points[:, 1].astype(str)),
+        'z': list(points[:, 2].astype(str))
     })
     r = r.json()['values'][0]
     return [int(i) for i in r]
 
 
-def segids_from_pts(pts,
-                    timestamp='now',
-                    service_url=default_svid_lookup_url,
-                    **kwargs):
+def segid_from_pt(points: 'Nx3 iterable',
+                  timestamp='now',
+                  service_url=default_svid_lookup_url,
+                  **kwargs):
     """
     Return the segment IDs (also called root IDs) for a set of points
     at a specified timestamp.
 
-    --- Arguments ---
-    pts: Nx3 iterable (list / tuple / np.ndarray / pd.Series)
-      Points to query. Provide these in xyz order and in mip0 voxel coordinates.
+    Arguments
+    ---------
+    points: Nx3 iterable (list / tuple / np.ndarray / pd.Series)
+      Point or points to query. Provide these in xyz order and in mip0 voxel coordinates.
+
     timestamp: 'now' or None or datetime
       If 'now' or None, look up the current rootID corresponding to the point
       location. Otherwise, look up the rootID for the point location at the
       specified time in the past.
 
-    --- Additional kwargs ---
-    cv: cloudvolume.CloudVolume
-      If provided, lookup rootIDs using the given cloudvolume instead of the
-      default one. Not common to need this.
+    Additional kwargs:
+      cv: cloudvolume.CloudVolume
+        If provided, lookup rootIDs using the given cloudvolume instead of the
+        default one. Not common to need this.
 
-    --- Returns ---
+    Returns
+    -------
     The requested segIDs as a numpy array of int64 values
     Order is preserved - the segID corresponding to the Nth point in
     the argument will be the Nth value in the returned array.
@@ -437,7 +441,7 @@ def segids_from_pts(pts,
         # cv.get_roots interprets timestamp=None as requesting the latest root
         timestamp = None
 
-    svids = svids_from_pts(pts, service_url=service_url)
+    svids = svid_from_pt(points, service_url=service_url)
 
     if 'cv' in kwargs:
         cv = kwargs['cv']
@@ -451,7 +455,7 @@ def segids_from_pts(pts,
         return cv.get_roots(svids, timestamp=timestamp).astype(np.int64)[0]
 
 
-def segid_from_cellid(cellid,
+def segid_from_cellid(cellids: int or list[int],
                       timestamp='now',
                       table_name=default_cellid_table):
     """
@@ -459,25 +463,25 @@ def segid_from_cellid(cellid,
 
     Arguments
     ---------
-    cellid: int or list of int
-      The cell ID(s) to query
+    cellids: int, or list of ints
+      The cell ID(s) to look up segment IDs for.
 
-    timestamp : 'now' (default) OR datetime OR None
+    timestamp: 'now' (default) OR datetime OR None
       The timestamp at which to query the segment's proofreading status.
       If 'now', use the current time.
       If datetime, use the time specified by the user.
       If None, use the timestamp of the latest materialization.
 
-    table_name : str
+    table_name: str
       The name of the CAVE table to query for cell IDs.
 
     Returns
     -------
-    If cellid is an int, the requested segID as an int.
-    If cellid is a list, the requested segIDs as a list of ints.
+    If cellids is an int, the requested segID as an int.
+    If cellids is a list, the requested segIDs as a list of ints.
     """
-    try: iter(cellid)
-    except: return segid_from_cellid([cellid], timestamp=timestamp, table_name=table_name)[0]
+    try: iter(cellids)
+    except: return segid_from_cellid([cellids], timestamp=timestamp, table_name=table_name)[0]
 
     client = auth.get_caveclient()
     if timestamp in ['now', 'live']:
@@ -488,15 +492,15 @@ def segid_from_cellid(cellid,
     cell_ids = client.materialize.live_live_query(
         table_name,
         timestamp=timestamp,
-        filter_in_dict={table_name: {'id': cellid}})
+        filter_in_dict={table_name: {'id': cellids}})
     cell_ids.set_index('id', inplace=True)
-    if any([i not in cell_ids.index for i in cellid]):
+    if any([i not in cell_ids.index for i in cellids]):
         raise ValueError('There is no cell with these cell IDs: {}'.format(
-            [i for i in cellid if i not in cell_ids.index]))
-    return cell_ids.loc[cellid, 'pt_root_id'].to_list()
+            [i for i in cellids if i not in cell_ids.index]))
+    return cell_ids.loc[cellids, 'pt_root_id'].to_list()
 
 
-def cellid_from_segid(segid,
+def cellid_from_segid(segids: int or list[int],
                       timestamp='now',
                       table_name=default_cellid_table):
     """
@@ -504,25 +508,25 @@ def cellid_from_segid(segid,
 
     Arguments
     ---------
-    segid : int or list of int
-      The segment ID(s) to query
+    segids: int, or list of int
+      The segment ID(s) to look up cell IDs for.
 
-    timestamp : 'now' (default) OR datetime OR None
+    timestamp: 'now' (default) OR datetime OR None
       The timestamp at which to query the segment's proofreading status.
       If 'now', use the current time.
       If datetime, use the time specified by the user.
       If None, use the timestamp of the latest materialization.
 
-    table_name : str (default 'cell_ids')
+    table_name: str (default 'cell_ids')
       The name of the CAVE table containing cell IDs.
 
     Returns
     -------
-    If segid is an int, the requested cell ID as an int.
-    If segid is a list, the requested cell IDs as a list of ints.
+    If segids is an int, the requested cell ID as an int.
+    If segids is a list, the requested cell IDs as a list of ints.
     """
-    try: iter(segid)
-    except: return cellid_from_segid([segid], timestamp=timestamp, table_name=table_name)[0]
+    try: iter(segids)
+    except: return cellid_from_segid([segids], timestamp=timestamp, table_name=table_name)[0]
 
     client = auth.get_caveclient()
     if timestamp in ['now', 'live']:
@@ -533,17 +537,18 @@ def cellid_from_segid(segid,
     cell_ids = client.materialize.live_live_query(
         table_name,
         timestamp=timestamp,
-        filter_in_dict={table_name: {'pt_root_id': segid}})
+        filter_in_dict={table_name: {'pt_root_id': segids}})
     cell_ids.set_index('pt_root_id', inplace=True)
-    if any([i not in cell_ids.index for i in segid]):
+    if any([i not in cell_ids.index for i in segids]):
         raise ValueError("These segment IDs don't have a cell ID: {}".format(
-            [i for i in segid if i not in cell_ids.index]))
-    return cell_ids.loc[segid, 'id'].to_list()
+            [i for i in segids if i not in cell_ids.index]))
+    return cell_ids.loc[segids, 'id'].to_list()
 # --- END SEGMENTATION/CHUNKEDGRAPH SECTION --- #
 
 
 # --- START KEY ATTRIBUTES SECTION --- #
-def anchor_point(segid, source_tables=default_anchor_point_sources,
+def anchor_point(segids: int or list[int],
+                 source_tables=default_anchor_point_sources,
                  timestamp='now', resolve_duplicates=False,
                  select_nth_duplicate: int = 0, slow_mode=False) -> np.ndarray:
     """
@@ -556,8 +561,8 @@ def anchor_point(segid, source_tables=default_anchor_point_sources,
 
     Arguments
     ---------
-    segid: int, or iterable of ints
-      The ID(s) of the segment(s) to look up anchor points for.
+    segids: int, or iterable of ints
+      The segment ID(s) to look up anchor points for.
 
     source_tables: iterable of str
       An list of names of CAVE tables to search for anchor points. This list
@@ -591,14 +596,14 @@ def anchor_point(segid, source_tables=default_anchor_point_sources,
     Returns
     -------
     points: np.ndarray (3-length vector or Nx3 array)
-      If segid is an int, returns a single xyz point coordinate with shape (3,).
-      If segid is iterable, returns an Nx3 array of xyz point coordinates.
-        Order is preserved (that is, points[n] is the  point for segid[n]).
+      If segids is an int, returns a single xyz point coordinate with shape (3,).
+      If segids is iterable, returns an Nx3 array of xyz point coordinates.
+        Order is preserved (that is, points[n] is the point for segids[n]).
     """
-    try: iter(segid)
+    try: iter(segids)
     except:
         return anchor_point(
-            [segid], source_tables=source_tables, timestamp=timestamp,
+            [segids], source_tables=source_tables, timestamp=timestamp,
             resolve_duplicates=resolve_duplicates
         )[0]
 
@@ -608,12 +613,12 @@ def anchor_point(segid, source_tables=default_anchor_point_sources,
     elif timestamp is None:
         timestamp = client.materialize.get_timestamp()
 
-    if not all(client.chunkedgraph.is_latest_roots(segid, timestamp=timestamp)):
+    if not all(client.chunkedgraph.is_latest_roots(segids, timestamp=timestamp)):
         raise KeyError('A given ID(s) is not valid at the given timestamp.'
                        ' Use updated IDs or provide the timestamp where'
                        ' the ID(s) is valid.')
 
-    anchor_points = pd.Series(index=set(segid), dtype=object)
+    anchor_points = pd.Series(index=set(segids), dtype=object)
 
     for table in source_tables:
         unanchored_ids = anchor_points[anchor_points.isna()].index.values
@@ -653,16 +658,16 @@ def anchor_point(segid, source_tables=default_anchor_point_sources,
         raise ValueError(f'No anchor point found for segid(s)'
                          f' {anchor_points[anchor_points.isna()].index.values}'
                          f' in tables {source_tables}')
-    return np.vstack(anchor_points[segid])
+    return np.vstack(anchor_points[segids])
 
 
-def nucleusid_from_pt(pt, nucleus_segmentation_path=None):
+def nucleusid_from_pt(points, nucleus_segmentation_path=None):
     """
     Query the nucleus segmentation for the nucleus ID at the given point(s).
 
     Arguments
     ---------
-    pt: 3-length iterable, or Nx3 np.ndarray/pd.Series
+    points: 3-length iterable, or Nx3 np.ndarray/pd.Series
       The xyz point coordinate(s) to query the nucleus segmentation at.
     nucleus_segmentation_path: str (default None)
       If None, use FANC's nucleus segmentation layer. Or provide a path to a
@@ -670,17 +675,17 @@ def nucleusid_from_pt(pt, nucleus_segmentation_path=None):
 
     Returns
     -------
-    np.int64 (if pt is a single point) OR
-    N-length np.ndarray of np.int64 (if point is an Nx3 array)
+    np.int64 (if points is a single point) OR
+    N-length np.ndarray of np.int64 (if points is an Nx3 array)
     """
-    if isinstance(pt, pd.Series):
-        if pt.empty:
+    if isinstance(points, pd.Series):
+        if points.empty:
             return None
-        pt = np.vstack(pt)
-    elif not isinstance(pt, np.ndarray):
-        pt = np.array(pt)
-    if pt.ndim == 1:
-        return nucleusid_from_pt(pt[np.newaxis, :], nucleus_segmentation_path)[0]
+        points = np.vstack(points)
+    elif not isinstance(points, np.ndarray):
+        points = np.array(points)
+    if points.ndim == 1:
+        return nucleusid_from_pt(points[np.newaxis, :], nucleus_segmentation_path)[0]
 
 
     if nucleus_segmentation_path is None:
@@ -696,25 +701,24 @@ def nucleusid_from_pt(pt, nucleus_segmentation_path=None):
         autocrop=True, # crop exceeded volumes of request
         bounded=False
     )
-    return segids_from_pts_cv(pt, nucleus_cv, return_roots=False, progress=False)
+    return segid_from_pt_cv(points, nucleus_cv, return_roots=False, progress=False)
 
 
 # TODO implement the raise kwargs
-def somas_from_segids(segid,
-                      table='default_soma_table',
-                      select_columns=['id', 'volume', 'pt_root_id', 'pt_position'],
-                      timestamp='now',
-                      raise_not_found=True,
-                      raise_multiple=True):
+def soma_from_segid(segids,
+                    table='default_soma_table',
+                    select_columns=['id', 'volume', 'pt_root_id', 'pt_position'],
+                    timestamp='now',
+                    raise_not_found=True,
+                    raise_multiple=True):
     """
     Given a segID (ID of an object from the full dataset segmentation),
     return information about its soma listed in the soma table.
 
     Arguments
     ---------
-
-    segid: int or iterable of ints
-      The ID(s) of the segment(s) to look up soma information for.
+    segids: int, or iterable of ints
+      The segment ID(s) to look up soma information for.
 
     table: str (default 'default_soma_table')
       The name or nickname of the soma table to query. Available nicknames:
@@ -743,8 +747,8 @@ def somas_from_segids(segid,
     -------
     pd.DataFrame containing the soma table entries for the given segID(s).
     """
-    try: iter(segid)
-    except: segid = [segid]
+    try: iter(segids)
+    except: segids = [segids]
 
     client = auth.get_caveclient()
     if timestamp in ['now', 'live']:
@@ -752,7 +756,7 @@ def somas_from_segids(segid,
     elif timestamp is None:
         timestamp = client.materialize.get_timestamp()
 
-    if not all(client.chunkedgraph.is_latest_roots(segid, timestamp=timestamp)):
+    if not all(client.chunkedgraph.is_latest_roots(segids, timestamp=timestamp)):
         raise KeyError('A given ID(s) is not valid at the given timestamp.'
                        ' Use updated IDs or provide the timestamp where'
                        ' the ID(s) is valid.')
@@ -771,13 +775,13 @@ def somas_from_segids(segid,
     somas = client.materialize.query_table(table,
                                            select_columns=select_columns,
                                            timestamp=timestamp)
-    return somas.loc[somas.pt_root_id.isin(segid)]
+    return somas.loc[somas.pt_root_id.isin(segids)]
 # --- END KEY ATTRIBUTES SECTION --- #
 
 
-# The code below implements a slower version of segIDs_from_pts_service that
+# The code below implements a slower version of segid_from_pt that
 # you should never need to run as long as the service is operational. If the
-# service goes down, try using segIDs_from_pts_cv instead
+# service goes down, try using segid_from_pt_cv instead
 class GSPointLoader(object):
     """Build up a list of points, then load them batched by chunk.
     This code is based on an implementation by
@@ -789,7 +793,7 @@ class GSPointLoader(object):
         See add_points to queue some.
         Parameters
         ----------
-        cloud_volume :  cloudvolume.CloudVolume (SET AGGLOMERATE = FALSE for the cloudvolume object.)
+        cloud_volume:  cloudvolume.CloudVolume (SET AGGLOMERATE = FALSE for the cloudvolume object.)
         """
 
         CVtype = cloudvolume.frontends.precomputed.CloudVolumePrecomputed
@@ -809,11 +813,11 @@ class GSPointLoader(object):
                     E.g. Nx3 ndarray.  Assumed to be in absolute units relative
                     to volume.scale['resolution'].
         """
-        pts_array = np.zeros([len(points), 3])
-        for i in range(len(pts_array)):
-            pts_array[i, :] = points[i]
+        points_array = np.zeros([len(points), 3])
+        for i in range(len(points_array)):
+            points_array[i, :] = points[i]
 
-        points = pts_array
+        points = points_array
 
         if isinstance(self._points, type(None)):
             self._points = points
@@ -855,17 +859,17 @@ class GSPointLoader(object):
         """Load all points in current list, batching by storage chunk.
         Parameters
         ----------
-        max_workers :   int, optional
+        max_workers:    int, optional
                         The max number of workers for parallel chunk requests.
-        return_sorted : bool, optional
+        return_sorted:  bool, optional
                         If True, will order the returned data to match the order
                         of the points as they were added.
-        progress :      bool, optional
+        progress:       bool, optional
                         Whether to show progress bar.
         Returns
         -------
-        points :        np.ndarray
-        data :          np.ndarray
+        points:         np.ndarray
+        data:           np.ndarray
                         Parallel Numpy arrays of the requested points from all
                         cumulative calls to add_points, and the corresponding
                         data loaded from volume.
@@ -897,26 +901,26 @@ class GSPointLoader(object):
         return points, data
 
 
-def segids_from_pts_cv(pts,
-                       cv=None,
-                       n=100000,
-                       max_tries=3,
-                       return_roots=True,
-                       max_workers=4,
-                       progress=True,
-                       timestamp=None):
+def segid_from_pt_cv(points: 'Nx3 iterable',
+                     cv=None,
+                     n=100000,
+                     max_tries=3,
+                     return_roots=True,
+                     max_workers=4,
+                     progress=True,
+                     timestamp=None):
     """
     Query a cloudvolume for root or supervoxel IDs.
 
-    This method is slower than segIDs_from_pts, but does not depend on
+    This method is slower than segid_from_pt, but does not depend on
     the supervoxel ID lookup service created by Eric Perlman and hosted on
     services.itanna.io. As such, this function might be useful if that service
     is not available for some reason.
 
     Arguments
     ---------
-    pts: Nx3 numpy array or pd.Series
-      Points to query, in xyz order and in mip0 coordinates.
+    points: Nx3 numpy array or pd.Series
+      Point or points to query, in xyz order and in mip0 coordinates.
     cv: cloudvolume.CloudVolume or None
       The cloudvolume object to query. If None, will query from the
       latest proofread FANC segmentation.
@@ -930,7 +934,8 @@ def segids_from_pts_cv(pts,
       If True, will look up root ids from supervoxel ids. Otherwise, supervoxel
       ids will be returned.
 
-    --- Returns ---
+    Returns
+    -------
     root IDs or supervoxel IDs for queried coordinates as int64
     """
     if cv is None:
@@ -940,26 +945,26 @@ def segids_from_pts_cv(pts,
         cv.agglomerate = False
 
     # Reshape from list entries if dataframe column is passed
-    if isinstance(pts, pd.Series):
-        pts = pts.reset_index(drop=True)
-        pts = np.concatenate(pts).reshape(-1, 3)
+    if isinstance(points, pd.Series):
+        points = points.reset_index(drop=True)
+        points = np.concatenate(points).reshape(-1, 3)
 
     sv_ids = []
     failed = []
-    bins = np.array_split(np.arange(0, len(pts)), np.ceil(len(pts) / 10000))
+    bins = np.array_split(np.arange(0, len(points)), np.ceil(len(points) / 10000))
 
     for i in bins:
         pt_loader = GSPointLoader(cv)
-        pt_loader.add_points(pts[i])
+        pt_loader.add_points(points[i])
         try:
-            chunk_ids = pt_loader.load_all(max_workers=max_workers, progress=progress)[1].reshape(len(pts[i]), )
+            chunk_ids = pt_loader.load_all(max_workers=max_workers, progress=progress)[1].reshape(len(points[i]), )
             sv_ids.append(chunk_ids)
         except:
             print('Failed, retrying')
             fail_check = 1
             while fail_check < max_tries:
                 try:
-                    chunk_ids = pt_loader.load_all(max_workers=max_workers, progress=progress)[1].reshape(len(pts[i]), )
+                    chunk_ids = pt_loader.load_all(max_workers=max_workers, progress=progress)[1].reshape(len(points[i]), )
                     sv_ids.append(chunk_ids)
                     fail_check = max_tries + 1
                 except:
