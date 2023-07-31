@@ -77,7 +77,7 @@ def _dict_to_anytree(dict):
             nodes[annotation] = nodes.get(annotation, []) + [node]
             _build_tree(annotations[annotation], parent=node, nodes=nodes)
         return nodes
-    
+
     return _build_tree(dict)
 
 annotation_tree = _dict_to_anytree(annotation_hierarchy)
@@ -126,7 +126,7 @@ def is_valid_pair(annotation_class: str, annotation: str, raise_errors=True) -> 
                                  f' not an identity. {help_msg}')
             return False
         return True
-    
+
     try:
         class_nodes = annotation_tree[annotation_class]
     except:
@@ -164,7 +164,7 @@ def is_valid_pair(annotation_class: str, annotation: str, raise_errors=True) -> 
 
     else:
         return False
-    
+
     return True
 
 def is_allowed_to_post(segid, annotation_class, annotation,

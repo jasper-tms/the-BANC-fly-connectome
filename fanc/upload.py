@@ -176,8 +176,8 @@ class SomaTableOrganizer(object):
         self,
         client=None
     ):
-        self._client = client      
-        
+        self._client = client
+
     def initialize(self,
                    soma_table_name="",
                    subset_table_name=""):
@@ -243,7 +243,7 @@ class SomaTableOrganizer(object):
         return self._subset_table
 
     @property
-    def subset_table_dict(self):    
+    def subset_table_dict(self):
         return self._subset_table_dict
 
     @subset_table_dict.setter
@@ -256,7 +256,7 @@ class SomaTableOrganizer(object):
     def add_radius_column(self, soma_table):
         if ('bb_start_position' not in soma_table.columns) or ('bb_end_position' not in soma_table.columns):
             raise ValueError("Need 'bb_start_position' and 'bb_end_position' columns.")
-        
+
         soma_table['radius_nm'] = 0
         for i, r in soma_table.iterrows():
             if soma_table['bb_start_position'][i] is not np.nan and soma_table['bb_end_position'][i] is not np.nan:
@@ -287,7 +287,7 @@ class SomaTableOrganizer(object):
         else:
             MaxExistingID =initial_digit*10**(digit-1)
         return [MaxExistingID + i for i in range(1, 1+length)]
-    
+
     def _check_change(self, table_name, timestamp=datetime.utcnow()):
         try:
             return self._client.materialize.live_live_query(table_name, timestamp, allow_missing_lookups=False).reset_index(level=0)
@@ -296,7 +296,7 @@ class SomaTableOrganizer(object):
 
     def update_tables(self, timestamp=datetime.utcnow()):
         """
-        Update both soma table and subset table to the most recent version. Will give 
+        Update both soma table and subset table to the most recent version. Will give
         an error if newly added points are not ingested yet.
         """
         self._soma_table = self._check_change(self._soma_table_name, timestamp)
@@ -318,7 +318,7 @@ class SomaTableOrganizer(object):
 
     def join_table(self):
         return self._subset_table.join(self._soma_table.set_index('id'), on='target_id', lsuffix='_subset', rsuffix='_soma')
-    
+
     def preview(self, asPoint=True, asSphere=False):
         """
         Generate Neuroglancer link to inspect somata on the subset table.
@@ -562,14 +562,14 @@ def add_soma_df(points: pd.DataFrame, is_neuron=True, pt_position_column='pt_pos
         True, if it is neuron
 
     pt_position_column: str
-        If points has a column of point coordinates and use a non-standarized name (i.e., not 'pt_position'), 
+        If points has a column of point coordinates and use a non-standarized name (i.e., not 'pt_position'),
         you need to tell the name of the column to this code.
 
     id_column: str
-        If points has a column of IDs and use a non-standarized name (i.e., not 'id'),  you need to tell the 
-        name of the column to this code. If you don't have preference, you can use np.nan (by default). 
-        The code then will check the nucleus IDs by looking up the same coordinates on the nucleus segmentation, 
-        and use the nucleus IDs that it finds. If it cannot find anything, then the code will generate 
+        If points has a column of IDs and use a non-standarized name (i.e., not 'id'),  you need to tell the
+        name of the column to this code. If you don't have preference, you can use np.nan (by default).
+        The code then will check the nucleus IDs by looking up the same coordinates on the nucleus segmentation,
+        and use the nucleus IDs that it finds. If it cannot find anything, then the code will generate
         "meaningless" artificial annotation IDs for this soma.
     """
     sto = SomaTableOrganizer(client=auth.get_caveclient())
@@ -577,7 +577,7 @@ def add_soma_df(points: pd.DataFrame, is_neuron=True, pt_position_column='pt_pos
         sto.initialize(subset_table_name='neuron')
     else:
         sto.initialize(subset_table_name='glia')
-    
+
     if len(points.columns)<2:
         points['id'] = np.nan
 
@@ -587,10 +587,10 @@ def add_soma_df(points: pd.DataFrame, is_neuron=True, pt_position_column='pt_pos
 
 
 class UploadUnsuccessful(Exception):
-    def __init__(self, message):      
+    def __init__(self, message):
         super().__init__(red("Uploading failed. ") + message)
 
 
 class UpdateUnsuccessful(Exception):
-    def __init__(self, message):      
+    def __init__(self, message):
         super().__init__(red("Updating failed. ") + message)

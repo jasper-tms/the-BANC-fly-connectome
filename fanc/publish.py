@@ -94,7 +94,6 @@ def publish_mesh_to_gcloud(segids,
                                                     gcloud_path=gcloud_path)
     already_published_ids = set(already_published_ids)
 
-    
     fancneurons_cloudvolume = cloudvolume.CloudVolume(gcloud_path.format(template_space))
 
     mm = auth.get_meshmanager()

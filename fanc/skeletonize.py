@@ -2,7 +2,8 @@
 """
 Generate skeletons from FANC segmentation objects (meshes).
 
-See examples of how to run skeletonization functions at https://github.com/htem/FANC_auto_recon/blob/main/example_notebooks/skeletonization.ipynb
+See examples of running these skeletonization functions at:
+https://github.com/htem/FANC_auto_recon/blob/main/example_notebooks/skeletonization.ipynb
 """
 
 import numpy as np
@@ -25,7 +26,7 @@ def get_pcg_skeleton(segid, **kwargs):
     generate a skeleton from a FANC neuron.
 
     Examples
-    ---
+    --------
     >>> skel = fanc.skeletonize.get_pcg_skeleton(648518346481082458)
     >>> fanc.statebuilder.render_scene(annotations=skel.vertices, annotation_units='nm')
 
@@ -56,9 +57,33 @@ diameter_smoothing_defaults = {'smooth_method': 'smooth',
 
 def skeletonize_neuron(seg_id,
                        soma_pt,
-                       cloudvolume,
                        output='meshwork',
+                       cloudvolume=auth.get_cloudvolume(),
                        voxel_resolution=skeletonization_defaults['voxel_resolution']):
+    """
+    Skeletonize a neuron from a FANC segmentation object (mesh).
+
+    This function is more flexible than get_pcg_skeleton (there are a
+    ton of parameters that you could tweak if you're really motivated to
+    get a skeleton that's optimized for your purposes) and produces
+    higher-resolution skeletons, but it takes much longer to run. For
+    most purposes, get_pcg_skeleton is recommended.
+
+    Arguments
+    ---------
+    seg_id: int
+      The segment ID to skeletonize
+
+    soma_pt: 3-element iterable (xyz)
+      The coordinates of the soma, in voxels
+
+    output: 'meshwork' or 'navis'
+      A string specifying the type of object to return.
+
+    cv: cloudvolume.CloudVolume
+      The cloudvolume to use for fetching meshes. Defaults to the FANC
+      segmentation cloudvolume.
+    """
     mesh = cloudvolume.mesh.get(seg_id, use_byte_offsets=True)[seg_id]
 
     mp_mesh = trimesh_io.Mesh(mesh.vertices, mesh.faces)
@@ -85,14 +110,15 @@ def skeletonize_neuron(seg_id,
 
 
 def mp_to_navis(meshparty_skel, node_labels=None, xyz_scaling=1):
-    '''
+    """
     Convert a meshparty skeleton into a dataframe for navis/catmaid import.
-    Args
+
+    Arguments
     ----
-    skel:        meshparty skeleton
+    skel: meshparty skeleton
     node_labels: list , list of node labels, default is None and will generate new ones.
     xyz_scaling: int, scale factor for coordinates
-    '''
+    """
     ds = meshparty_skel.distance_to_root
     order_old = np.argsort(ds)
     new_ids = np.arange(len(ds))

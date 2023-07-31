@@ -98,7 +98,7 @@ def render_scene(neurons=None,
         Set the background color. Must be 'w'/'white' or a hex color code
     nuclei: int or list or DataFrame or np.array
         Nucleus IDs to visualize specific nuclei. Set nuclei_layer=True when using.
-    
+
     ---Returns---
     Neuroglancer state (as a json or a url depending on 'return_as')
     """

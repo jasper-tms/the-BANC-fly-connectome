@@ -86,7 +86,7 @@ def load(fn, convention='xyz', units='voxels', voxel_size=None, verbose=False, t
     voxel_size: None (default) or 3-tuple (e.g. (4, 4, 40))
         Determines voxel size to use for conversions. If left as None, the code
         knows what default voxel size to use for different file formats.
-    
+
     threshold: int, threshold to apply based on "sum"
     """
     assert convention in ['xyz', 'zyx']
@@ -142,7 +142,7 @@ def load(fn, convention='xyz', units='voxels', voxel_size=None, verbose=False, t
         # For opening binary files saved by ../detection/worker.py
         # post coord(x,y,z), pre coord(x,y,z), mean, max, area, 4x4x4 moments
         data = np.fromfile(fn, dtype=np.dtype("6f8,3f8,(4,4,4)f8"))
-        
+
         # Apply threshold based on "sum" and return links that pass.
         try:
             links = np.stack([x[0].astype("int32") for x in data if x[2][0][0][0] > threshold])

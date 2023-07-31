@@ -84,7 +84,7 @@ def plot_neurons(segment_ids,
     vtk.vtkRenderer
         renderer when code was finished
     png
-        output png image 
+        output png image
         (generate two images with/without scale bar if you specify to plot it)
     """
 
@@ -221,25 +221,25 @@ def plot_neurons(segment_ids,
             raise Exception('Need camera to set up scale bar')
 
     if (scale_bar_origin_3D is None) and (scale_bar_origin_2D is None):
-        trimesh_vtk.render_actors(all_actors, camera=camera, do_save=save, 
-                                  filename=save_path, 
+        trimesh_vtk.render_actors(all_actors, camera=camera, do_save=save,
+                                  filename=save_path,
                                   scale=4, video_width=width, video_height=height)
     elif save_path is None:
-        trimesh_vtk.render_actors((all_actors + [scale_bar_actor]), camera=camera, do_save=save, 
-                                  filename=save_path, 
+        trimesh_vtk.render_actors((all_actors + [scale_bar_actor]), camera=camera, do_save=save,
+                                  filename=save_path,
                                   scale=4, video_width=width, video_height=height)
     else:
-        trimesh_vtk.render_actors(all_actors, camera=camera, do_save=save, 
-                                  filename=save_path, 
+        trimesh_vtk.render_actors(all_actors, camera=camera, do_save=save,
+                                  filename=save_path,
                                   scale=1, video_width=width, video_height=height)
-        trimesh_vtk.render_actors((all_actors + [scale_bar_actor]), camera=camera, do_save=save, 
-                                    filename=(save_path.rsplit('.', 1)[0] + '_scalebar.' + save_path.rsplit('.', 1)[1]), 
+        trimesh_vtk.render_actors((all_actors + [scale_bar_actor]), camera=camera, do_save=save,
+                                    filename=(save_path.rsplit('.', 1)[0] + '_scalebar.' + save_path.rsplit('.', 1)[1]),
                                     scale=1, video_width=width, video_height=height)
 
 
 def scale_bar_actor_2D(center, camera, view='X', length=10000, color=(0, 0, 0), linewidth=5, font_size=20):
     """
-    Creates a scale bar actor very similar to trimesh_vtk.scale_bar_actor(), but on a specific plane with 
+    Creates a scale bar actor very similar to trimesh_vtk.scale_bar_actor(), but on a specific plane with
     a given size.
     """
     axes_actor = vtk.vtkCubeAxesActor2D()
