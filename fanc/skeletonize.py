@@ -58,7 +58,7 @@ diameter_smoothing_defaults = {'smooth_method': 'smooth',
 def skeletonize_neuron(seg_id,
                        soma_pt,
                        output='meshwork',
-                       cloudvolume=auth.get_cloudvolume(),
+                       cloudvolume=None,
                        voxel_resolution=skeletonization_defaults['voxel_resolution']):
     """
     Skeletonize a neuron from a FANC segmentation object (mesh).
@@ -80,12 +80,14 @@ def skeletonize_neuron(seg_id,
     output: 'meshwork' or 'navis'
       A string specifying the type of object to return.
 
-    cv: cloudvolume.CloudVolume
-      The cloudvolume to use for fetching meshes. Defaults to the FANC
-      segmentation cloudvolume.
+    cv: None or cloudvolume.CloudVolume
+      The cloudvolume to use for fetching meshes. If None, will use the
+      one returned by auth.get_cloudvolume() by default.
     """
-    mesh = cloudvolume.mesh.get(seg_id, use_byte_offsets=True)[seg_id]
+    if cloudvolume is None:
+        cloudvolume = auth.get_cloudvolume()
 
+    mesh = cloudvolume.mesh.get(seg_id, use_byte_offsets=True)[seg_id]
     mp_mesh = trimesh_io.Mesh(mesh.vertices, mesh.faces)
 
     mp_mesh.merge_large_components(size_threshold=skeletonization_defaults['merge_size_threshold'],
