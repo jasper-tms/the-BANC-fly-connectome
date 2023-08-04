@@ -73,8 +73,8 @@ def show_help():
     return (
 """
 Hello! Before using me for the first time, you may want to read through:
-- the list of available annotations at https://github.com/htem/FANC_auto_recon/wiki/Neuron-annotations
-- the description of the "neuron_information" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/fanc_v4/table/neuron_information AND
+- the list of available annotations at https://github.com/htem/FANC_auto_recon/wiki/Neuron-annotations AND
+- the description of the "neuron_information" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/fanc_v4/table/neuron_information
 
 You can send me a message that looks like one of the `example messages below` to find certain types of neurons, or get or upload information about specific neurons.
 
