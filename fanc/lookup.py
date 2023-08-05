@@ -791,12 +791,14 @@ class GSPointLoader(object):
     `Peter Li<https://gist.github.com/chinasaur/5429ef3e0a60aa7a1c38801b0cbfe9bb>_.
     """
 
-    def __init__(self, cloud_volume):
+    def __init__(self, cloud_volume, point_resolution):
         """Initialize with zero points.
         See add_points to queue some.
         Parameters
         ----------
         cloud_volume:  cloudvolume.CloudVolume (SET AGGLOMERATE = FALSE for the cloudvolume object.)
+        point_resolution:  iterable of 3 floats specifying the units in nm that
+        the points are in.
         """
 
         CVtype = cloudvolume.frontends.precomputed.CloudVolumePrecomputed
@@ -804,7 +806,9 @@ class GSPointLoader(object):
             raise TypeError('Expected CloudVolume, got "{}"'.format(type(cloud_volume)))
 
         self._volume = cloud_volume
-        self._image_res = np.array([4.3, 4.3, 45])
+        self._image_res = np.array(point_resolution)
+        if not self._image_res.shape == (3,):
+            raise TypeError('Expected point_resolution to be iterable of 3 floats')
         self._chunk_map = collections.defaultdict(set)
         self._points = None
 
@@ -956,8 +960,13 @@ def segid_from_pt_cv(points: 'Nx3 iterable',
     failed = []
     bins = np.array_split(np.arange(0, len(points)), np.ceil(len(points) / 10000))
 
+    # This import is delayed because it triggers creation of a CAVEclient
+    # and a somewhat slow API call, which I don't want to do until this
+    # function is called
+    from . import ngl_info
+
     for i in bins:
-        pt_loader = GSPointLoader(cv)
+        pt_loader = GSPointLoader(cv, ngl_info.voxel_size)
         pt_loader.add_points(points[i])
         try:
             chunk_ids = pt_loader.load_all(max_workers=max_workers, progress=progress)[1].reshape(len(points[i]), )
