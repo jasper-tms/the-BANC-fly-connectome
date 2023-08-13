@@ -112,6 +112,16 @@ def guess_class(annotation: 'str') -> 'str':
     return annotation_nodes[0].parent.name
 
 
+def is_valid_annotation(annotation: str) -> bool:
+    """
+    Determine whether `annotation` is a recognized annotation.
+    """
+    try:
+        annotation_nodes = annotation_tree[annotation]
+    except:
+        return False
+    return True
+
 
 def is_valid_pair(annotation_class: str, annotation: str, raise_errors=True) -> bool:
     """
@@ -166,6 +176,7 @@ def is_valid_pair(annotation_class: str, annotation: str, raise_errors=True) -> 
         return False
 
     return True
+
 
 def is_allowed_to_post(segid, annotation_class, annotation,
                        table_name='neuron_information',

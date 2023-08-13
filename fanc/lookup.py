@@ -98,6 +98,7 @@ def num_proofread_neurons(source_tables: str or list[str] = default_proofreading
 
 
 def cells_annotated_with(tags: str or list[str],
+                         *,
                          exclude_tags: str or list[str] = None,
                          source_tables=default_annotation_sources,
                          timestamp='now',
