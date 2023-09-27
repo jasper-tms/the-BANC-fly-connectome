@@ -59,14 +59,16 @@ import banc
 
 
 # Setup/defaults
-#verbosity = 2
+verbosity = 2
+fake = False
 valid_users = ['U348GFY5N']
 db_filename = 'the-banc-annotations.parquet'
 allowed_annotations = [
-    'proofread level 0', 'proofread level 1'
+    'proofread level 0', 'proofread level 1',
+    'spans neck', 'DN soma'
 ]
 
-#caveclient = banc.get_caveclient()
+caveclient = banc.get_caveclient()
 
 app = App(token=os.environ['SLACK_TOKEN_BANC_BOT'],
           signing_secret=os.environ['SLACK_SIGNING_SECRET_BANC_BOT'])
@@ -104,6 +106,8 @@ def direct_message(message, say):
     response = None
     if 'help' in message['text'].lower():
         response = show_help()
+    if message['text'].lower() == 'show':
+        response = '```' + str(load()[['tag', 'pt_root_id']]) + '```'
 
     if verbosity >= 2:
         print('Processing message:', message)
@@ -112,8 +116,7 @@ def direct_message(message, say):
 
     if response is None:
         response = process_message(message['text'],
-                                   message['user'],
-                                   fake=fake)
+                                   message['user'])
     if verbosity >= 1:
         print('Posting response:', response)
     if len(response) > 1500:
@@ -122,7 +125,7 @@ def direct_message(message, say):
         say(response)
 
 
-def process_message(message: str, user: str, fake=False) -> str:
+def process_message(message: str, user: str) -> str:
     """
     Process a slack message posted by a user, and return a text response.
 
@@ -166,13 +169,57 @@ def process_message(message: str, user: str, fake=False) -> str:
     return f'Annotation #{annotation_id}: Labeled segment `{segid}` with `{tag}`'
 
 
+def initialize() -> pd.DataFrame:
+    df = pd.DataFrame({'pt_position': [[137091, 65209, 2873]],
+                       'tag': ['neck motor neuron'],
+                       'user': 'U348GFY5N'})
+    df['pt_position'] = df['pt_position'].astype(object)
+    df['tag'] = df['tag'].astype(str)
+    df['user'] = df['user'].astype(str)
+    lookup_supervoxels(df)
+    materialize(df)
+    return df
+
+
+def load(update=True) -> pd.DataFrame:
+    if not os.path.exists(db_filename):
+        return initialize()
+    df = pd.read_parquet(db_filename)
+    if update:
+        lookup_supervoxels(df)
+        materialize(df)
+    return df
+
+
+def lookup_supervoxels(df):
+    if 'supervoxel_id' not in df.columns:
+        # Add a supervoxel_id column with dtype uint64
+        df['supervoxel_id'] = 0
+        df['supervoxel_id'] = df['supervoxel_id'].astype(np.uint64)
+    needs_lookups = df['supervoxel_id'] == 0
+    if needs_lookups.sum() == 0:
+        return
+    df.loc[needs_lookups, 'supervoxel_id'] = (
+        banc.lookup.segid_from_pt_cv(
+            np.vstack(df.loc[needs_lookups, 'pt_position']),
+            return_roots=False)
+    )
+    if (df['supervoxel_id'] == 0).any():
+        print('WARNING: Some points have supervoxel_id == 0')
+
+
 def materialize(df):
-    df['pt_root_id'] = banc.lookup.segid_from_pt_cv(np.vstack(df['pt_position']), return_roots=True)
+    df['pt_root_id'] = caveclient.chunkedgraph.get_roots(df['supervoxel_id'])
 
 
 def add_annotation(pt_position: 'xyz coordinate',
                    annotation: str,
                    user: str) -> None:
+    """
+    Returns
+    -------
+    2-tuple of (annotation_id, segid of annotated neuron)
+    """
     if user not in valid_users:
         raise ValueError(f'User {user} is not a valid user.')
     assert isinstance(pt_position, list)
@@ -180,17 +227,10 @@ def add_annotation(pt_position: 'xyz coordinate',
     assert isinstance(annotation, str)
     assert isinstance(user, str)
 
-    if os.path.isfile(db_filename):
-        df = pd.read_parquet(db_filename)
-    else:
-        df = pd.DataFrame({'pt_position': [[137091, 65209, 2873]],
-                           'tag': ['neck motor neuron'],
-                           'user': 'U348GFY5N'})
-        df['pt_position'] = df['pt_position'].astype(object)
-        df['tag'] = df['tag'].astype(str)
-        df['user'] = df['user'].astype(str)
+    df = load()
 
-    df.loc[len(df)] = [pt_position, annotation, user]
+    df.loc[len(df)] = [pt_position, annotation, user, np.uint64(0), np.uint64(0)]
+    lookup_supervoxels(df)
     materialize(df)
     print(df)
     # Check that pt_position is in the segmentation
@@ -210,7 +250,7 @@ def add_annotation(pt_position: 'xyz coordinate',
     if fake:
         print('FAKE mode: not writing to database')
     else:
-        df[['pt_position', 'tag', 'user']].to_parquet(db_filename)
+        df[['pt_position', 'tag', 'user', 'supervoxel_id']].to_parquet(db_filename)
     return (df.loc[len(df)-1].name, df.at[len(df)-1, 'pt_root_id'])
 
 
@@ -218,6 +258,4 @@ if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == 'fake':
         fake = True
         print('Running in FAKE mode')
-    else:
-        fake = False
     handler.start()
