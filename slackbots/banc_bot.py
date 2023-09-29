@@ -65,7 +65,7 @@ valid_users = ['U348GFY5N']
 db_filename = 'the-banc-annotations.parquet'
 allowed_annotations = [
     'proofread level 0', 'proofread level 1',
-    'spans neck', 'DN soma'
+    'spans neck', 'DN soma', 'AN soma'
 ]
 
 caveclient = banc.get_caveclient()
