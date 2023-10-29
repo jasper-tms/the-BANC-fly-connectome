@@ -119,6 +119,18 @@ def publish_skeleton_to_catmaid(segids,
     """
     raise NotImplementedError
 
+def publish_to_bcio(cave_token):
+    """
+    Rerun the export procedure on BrainCircuits.io to export published root_ids to
+    the the `fruitfly_fanc_public` project. The function may take several minutes
+    to complete. It should return `Export successful` message.
+    
+    Exported files are accessible at:
+    https://api.braincircuits.io/data/fruitfly_fanc_public/
+    """
+    import requests
+    requests.get(f'https://api.braincircuits.io/publish/dataset?project=fruitfly_fanc_public&cave_token={cave_token}')
+    
 
 def _configure_template_cloudvolumes(template_space='JRC2018_VNC_FEMALE'):
     """

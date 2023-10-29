@@ -17,7 +17,10 @@ help_msg = 'See the annotation scheme described at ' + help_url
 annotation_hierarchy = {
     'primary class': {
         'sensory neuron': {
-            'chordotonal neuron': {},
+            'chordotonal neuron': {
+                'club chordotonal neuron': {},
+                'claw chordotonal neuron': {},
+                'hook chordotonal neuron': {}},
             'bristle neuron': {},
             'hair plate neuron': {},
             'campaniform sensillum neuron': {}},
@@ -91,16 +94,19 @@ annotation_hierarchy = {
                 'neck UM neuron': {},
                 'wing UM neuron': {},
                 'haltere UM neuron': {},
-                'abdominal UM neuron': {}}}},
+                'abdominal UM neuron': {}}},
+        'glia': {
+            'trachea': {}}},
     'soma side': {
         'left soma': {},
         'right soma': {},
-        'middle soma': {}},
+        'midline soma': {}},
     'soma segment': {
-        'T1 soma': {},
-        'T2 soma': {},
-        'T3 soma': {},
-        'abdominal soma': {}},
+        'soma in brain': {},
+        'soma in T1': {},
+        'soma in T2': {},
+        'soma in T3': {},
+        'soma in abdominal ganglion': {}},
     'anterior-posterior projection pattern': {
         'descending': {},
         'ascending': {},
@@ -115,7 +121,9 @@ annotation_hierarchy = {
         'Azevedo Lesser Mark Phelps et al. 2022': {},
         'Lesser Azevedo et al. 2023': {},
         'Cheong Boone Bennett et al. 2023': {},
-        'Sapkal et al. 2023': {}},
+        'Sapkal et al. 2023': {},
+        'Yang et al. 2023': {},
+        'Dallmann et al. 2023': {}},
 }
 
 

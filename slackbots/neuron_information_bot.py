@@ -79,14 +79,14 @@ Hello! Before using me for the first time, you may want to read through:
 You can send me a message that looks like one of the `example messages below` to find certain types of neurons, or get or upload information about specific neurons.
 
 Find neurons with some annotations:
-- `get DNx01` -> Get a neuroglancer state showing all neurons currently annotated with "DNx01" (which should be exactly two neurons)
-- `get chordotonal neuron and ascending` -> Get a neuroglancer state showing all neurons currently annotated with "chordotonal neuron" and "ascending"
-- `get left T1 ventral nerve and motor neuron` -> Get a neuroglancer link that shows all neurons currently annotated with "left T1 ventral nerve" and "motor neuron"
-- You can use as many search terms if you want, e.g. `get W and X and Y and Z`
+- `find DNx01` -> Get a neuroglancer state showing all neurons currently annotated with "DNx01" (which should be exactly two neurons)
+- `find chordotonal neuron and ascending` -> Get a neuroglancer state showing all neurons currently annotated with "chordotonal neuron" and "ascending"
+- `find left T1 ventral nerve and motor neuron` -> Get a neuroglancer link that shows all neurons currently annotated with "left T1 ventral nerve" and "motor neuron"
+- You can use as many search terms if you want, e.g. `find W and X and Y and Z`
 
 Get information about a specific neuron:
 - `648518346486614449?` -> get annotations for segment 648518346486614449
-- `648518346486614449? all` -> get extended annotation details for segment 648518346486614449
+- `648518346486614449??` or `648518346486614449? all` -> get extended annotation details for segment 648518346486614449
 
 Upload annotations to a CAVE table that the whole community can benefit from:
 - `648518346486614449! primary class > central neuron` -> annotate that the indicated segment's "primary class" is "central neuron" (as opposed to "sensory neuron" or "motor neuron").
@@ -175,6 +175,7 @@ def process_message(message: str, user: str, fake=False) -> str:
         except Exception as e:
             return f"`{type(e)}`\n```{e}```"
 
+    return_details = False
     # For some reason the '>' character typed into slack
     # is reaching this code as '&gt;', so revert it for readability.
     message = message.replace('&gt;', '>')
@@ -182,6 +183,9 @@ def process_message(message: str, user: str, fake=False) -> str:
     if len(tokens) == 0:
         return ("NO ACTION: Your message is empty or I couldn't understand"
                 " it. Make a post containing the word 'help' if needed.")
+    if tokens[0].endswith('??'):
+        tokens[0] = tokens[0][:-1]
+        return_details = True
     try:
         segid = int(tokens[0][:-1])
     except ValueError:
@@ -191,7 +195,6 @@ def process_message(message: str, user: str, fake=False) -> str:
     caveclient.materialize.version = caveclient.materialize.most_recent_version()
 
     if tokens[0].endswith('?'):  # Query
-        return_details = False
         if len(tokens) > 1 and tokens[1].lower() in ['all', 'everything', 'verbose', 'details']:
             return_details = True
         try:

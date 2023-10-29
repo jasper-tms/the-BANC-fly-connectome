@@ -204,7 +204,10 @@ def process_message(message: str, user: str, fake=False) -> str:
         return (f"ERROR: Could not convert the first word"
                 f" `{tokens[0][:-1]}` to int. Is it a segID?")
 
-    caveclient.materialize.version = caveclient.materialize.most_recent_version()
+    try:
+        caveclient.materialize.version = caveclient.materialize.most_recent_version()
+    except Exception as e:
+        return f"The CAVE server did not respond: `{type(e)}`\n```{e}```"
 
     if tokens[0].endswith('?'):  # Query
         try:

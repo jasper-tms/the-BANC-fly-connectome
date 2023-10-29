@@ -20,11 +20,11 @@ from . import annotations, auth, lookup, statebuilder
 
 
 def new_cell(pt_position,
-             pt_type: "'soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan'",
-             cell_type: "'motor', 'efferent', 'sensory', 'descending', 'ascending', 'central', 'glia'",
+             pt_type: ['soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan'],
+             cell_type: ['motor', 'efferent', 'sensory', 'descending', 'ascending', 'central', 'glia'],
              user_id: int,
              cell_ids_table='cell_ids',
-             add_to_soma_table=False,  # TODO implement
+             add_to_soma_table=False,
              fake=True):
     """
     Add a new cell to the cell_ids table, annotate its type, and optionally add
@@ -53,7 +53,7 @@ def new_cell(pt_position,
     start_id = start_ids[cell_type]
     # Annotations that were deleted aren't materialized so they won't be in the
     # cell_ids dataframe, but new annotations can't re-use their IDs.
-    deleted_cell_ids = [1815, 10552, 10766, 13325]
+    deleted_cell_ids = [1815, 10552, 10766, 13325, 25983, 100000]
     while start_id in cell_ids['id'].values or start_id in deleted_cell_ids:
         start_id += 1
     stage = client.annotation.stage_annotations(cell_ids_table, id_field=True)
@@ -61,6 +61,19 @@ def new_cell(pt_position,
               pt_position=np.array(pt_position),
               tag=pt_type,
               valid=True)
+
+    if add_to_soma_table:
+        if pt_type not in ['soma', 'cut-off soma']:
+            raise ValueError(f'pt_type {pt_type} is not valid for adding to soma table')
+        if not fake:
+            try:
+                if cell_type == 'glia':
+                    add_soma(pt_position, is_neuron=False)
+                else:
+                    add_soma(pt_position, is_neuron=True)
+            except ValueError as e:
+                print(type(e))
+                print(e)
 
     def try_annotate_neuron(*args, **kwargs):
         try:
@@ -70,7 +83,10 @@ def new_cell(pt_position,
             print(e)
 
     if fake:
-        print(f'FAKE – would upload new {cell_type} neuron:')
+        if add_to_soma_table:
+            print(f'FAKE – would add new soma table entry and cell_id for {cell_type} neuron:')
+        else:
+            print(f'FAKE – would new cell_id for {cell_type} neuron:')
         print(stage.annotation_dataframe)
     else:
         response = client.annotation.upload_staged_annotations(stage)
