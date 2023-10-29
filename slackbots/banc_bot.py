@@ -148,11 +148,20 @@ def process_message(message: str, user: str) -> str:
         triggered, or to describe an error that was encountered when
         processing their message.
     """
-    message = message.replace(',', ' ').replace('[', ' ').replace(']', ' ')
+    for char in ',[]`\n':
+        while char in message:
+            message = message.replace(char, ' ')
     while '  ' in message:
         message = message.replace('  ', ' ')
-    words = message.split(' ')
+    words = message.strip().split(' ')
+
     # Convert first 3 arguments to xyz point coordinate
+    if len(words[0]) == 18:
+        # The first word is a segment ID
+        segid = np.uint64(words[0])
+        annos = load()
+        return str(annos.loc[annos['pt_root_id'] == segid, 'tag'].values)
+
     try:
         point = [int(float(w)) for w in words[:3]]
     except:
