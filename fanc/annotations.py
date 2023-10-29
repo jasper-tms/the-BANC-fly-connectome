@@ -14,7 +14,7 @@ from . import lookup
 help_url = 'https://fanc.community/Neuron-annotations#neuron_information'
 help_msg = 'See the annotation scheme described at ' + help_url
 
-default_table = 'neuron_information'
+default_table = 'cell_info'
 
 
 cell_info = {
