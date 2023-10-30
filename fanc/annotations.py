@@ -468,7 +468,8 @@ def is_allowed_to_post(segid: int,
         return False
 
     # Rule 2
-    root_classes = list(annotations.keys())
+    root_classes = [anno for anno, nodes in annotations.items()
+                    if len(nodes) == 1 and nodes[0].is_root]
     if (annotation_class not in root_classes and
             existing_annos.loc[existing_annos.tag == annotation_class].empty):
         if raise_errors:
