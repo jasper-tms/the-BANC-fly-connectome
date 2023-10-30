@@ -247,7 +247,7 @@ def process_message(message: str, user: str, fake=False) -> str:
 
         if fake:
             try:
-                fanc.annotations.is_allowed_to_post(segid, annotation_class, annotation)
+                fanc.annotations.is_allowed_to_post(segid, (annotation_class, annotation))
                 point = list(fanc.lookup.anchor_point(segid))
             except Exception as e:
                 return f"`{type(e)}`\n```{e}```"
@@ -255,8 +255,12 @@ def process_message(message: str, user: str, fake=False) -> str:
                     f", annotations `{annotation_class} > {annotation}`.")
 
         try:
-            response = fanc.upload.annotate_neuron(segid, annotation_class,
-                                                   annotation, cave_user_id)
+            response = fanc.upload.annotate_neuron(
+                segid,
+                (annotation_class, annotation),
+                cave_user_id,
+                table_name=table_name
+            )
             record_upload(segid, annotation, annotation_class,
                           cave_user_id, table_name)
             uploaded_data = caveclient.annotation.get_annotation(table_name,

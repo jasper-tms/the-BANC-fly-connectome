@@ -110,8 +110,7 @@ def new_cell(pt_position,
 
 
 def annotate_neuron(neuron: 'segID (int) or point (xyz)',
-                    annotation_class: str,
-                    annotation: str,
+                    annotation: str or tuple[str],
                     user_id: int,
                     table_name='neuron_information',
                     resolve_duplicate_anchor_points=False) -> dict:
@@ -129,11 +128,12 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
     neuron: int OR 3-length iterable of ints/floats
         Segment ID or point coordinate of a neuron to upload information about
 
-    annotation_class: str
-        Class of the annotation
-
-    annotation: str
-        Term to annotate the neuron with
+    annotation: str OR 2-tuple of (str, str)
+        Annotation to upload, or a pair of annotations if trying to upload to a
+        table with two tag columns. These should be provided in the order
+        (tag2, tag), which is (key, value) order because two-tag-column tables
+        typically use the 'tag' column as the actual annotation and the 'tag2'
+        column as the class/category/key for that annotation.
 
     user_id: int
         The CAVE user ID number to associate with this annotation
@@ -168,17 +168,29 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         except TypeError:
             raise TypeError('First argument must be a segID or a point coordinate')
 
-    assert annotations.is_allowed_to_post(segid, annotation_class, annotation, raise_errors=True)
-
     stage = client.annotation.stage_annotations(table_name)
-    stage.add(
-        pt_position=point,
-        tag=annotation,
-        tag2=annotation_class,
-        user_id=user_id
-    )
-    response = client.annotation.upload_staged_annotations(stage)
+    assert annotations.is_allowed_to_post(segid, annotation,
+                                          table_name=table_name,
+                                          raise_errors=True)
+    if 'tag2' in stage.fields and isinstance(annotation, str):
+        # If the table uses paired annotations but the user only specified
+        # a single annotation, see if we can guess the annotation_class.
+        annotation = (annotations.guess_class(annotation), annotation)
 
+    if isinstance(annotation, tuple):
+        assert len(annotation) == 2
+        stage.add(pt_position=point,
+                  tag=annotation[1],
+                  tag2=annotation[0],
+                  user_id=user_id)
+    elif isinstance(annotation, str):
+        stage.add(pt_position=point,
+                  tag=annotation,
+                  user_id=user_id)
+    else:
+        raise TypeError('annotation must be a string or a tuple of 2 strings')
+
+    response = client.annotation.upload_staged_annotations(stage)
     return response
 
 

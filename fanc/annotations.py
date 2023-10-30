@@ -239,7 +239,7 @@ def guess_class(annotation: str, table_name: str = default_table) -> str:
     try:
         annotation_nodes = annotations[annotation]
     except:
-        raise ValueError(f'Class of "{annotation}" could not be guessed. {help_msg}')
+        raise ValueError(f'Annotation "{annotation}" not recognized. {help_msg}')
 
     if len(annotation_nodes) > 1:
         raise ValueError(f'Class of "{annotation}" could not be guessed'
@@ -352,16 +352,22 @@ def is_valid_pair(annotation_class: str,
 
 
 def is_allowed_to_post(segid: int,
-                       annotation_class: str,
-                       annotation: str,
+                       annotation: str or tuple[str],
                        table_name: str = default_table,
                        raise_errors: bool = True) -> bool:
     """
     Determine whether a particular segment is allowed to be annotated
-    with the given annotation+annotation_class pair.
+    with the given annotation (or annotation+annotation_class pair, if the
+    table uses paired annotations).
 
-    In addition to checking `is_valid_pair(annotation_class, annotation)`,
-    this function checks the following rules:
+    For simple tables that use only a single annotation, this function checks
+    `is_valid_annotation(annotation, table_name)` and checks whether the
+    segment already has this same annotation.
+
+    For tables with two tag columns, `annotation` should be a tuple of
+    (annotation_class, annotation) aka (key, value) aka (tag2, tag).
+    This function checks `is_valid_pair(annotation_class, annotation)`,
+    as well as the following rules:
     1. The given annotation pair may not be posted if the segment already has
     any annotation pair with the same annotation_class. This prevents exact
     duplicates, and also prevents a class from having multiple subclasses. This
@@ -378,23 +384,48 @@ def is_allowed_to_post(segid: int,
     Returns
     -------
     bool
-    - True: This segment MAY be annotated with the
+    - True: This segment MAY be annotated with the annotation or
       annotation+annotation_class pair in the given CAVE table without
       violating any rules about redundancy or mutual exclusivity.
-    - False: The proposed annotation+annotation_class MAY NOT be
-      applied to the segment without violating a rule. If `raise_errors`
-      is True, an exception with an informative error message will be
-      raised instead of returning False.
+    - False: The proposed annotation or annotation+annotation_class pair
+      MAY NOT be applied to the segment without violating a rule.
+      If `raise_errors` is True, an exception with an informative error
+      message will be raised instead of returning False.
     """
     try:
         annotations = rules_governing_tables[table_name]
     except:
         raise ValueError(f'Table name "{table_name}" not recognized.')
-    if not is_valid_pair(annotation_class, annotation, raise_errors=raise_errors):
-        return False
+
+    if isinstance(annotation, str) and isinstance(annotations, dict):
+        # If the table uses paired annotations but the user only specified
+        # a single annotation, see if we can guess the annotation_class.
+        annotation = (guess_class(annotation, table_name=table_name),
+                      annotation)
 
     existing_annos = lookup.annotations(segid, source_tables=table_name,
                                         return_details=True)
+
+    if isinstance(annotation, str):
+        if not is_valid_annotation(annotation, table_name=table_name):
+            return False
+        if annotation in existing_annos.tag.values:
+            if raise_errors:
+                raise ValueError(f'Segment {segid} already has the'
+                                 f' annotation "{annotation}".')
+            return False
+        return True
+
+    if not isinstance(annotation, tuple) or not len(annotation) == 2:
+        raise TypeError(f'`annotation` arugment must be a str OR a tuple of 2'
+                        ' strs but was "{type(annotation)}"')
+
+    annotation_class, annotation = annotation
+    if not is_valid_pair(annotation_class, annotation,
+                         table_name=table_name,
+                         raise_errors=raise_errors):
+        return False
+
     # Rule 1
     multiple_subclasses_allowed = [
         'neuron identity',
