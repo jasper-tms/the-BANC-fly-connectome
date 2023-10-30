@@ -13,12 +13,12 @@ import cloudvolume
 from . import auth, statebuilder
 
 default_cellid_table = 'cell_ids'
-default_proofreading_tables = ['proofread_first_pass', 'proofread_second_pass']
-default_annotation_sources = [('neuron_information', 'tag'),
-                              ('neck_connective', 'tag'),
+default_proofreading_tables = []
+default_annotation_sources = [('cell_info', 'tag'),
+                              ('neck_connective_y92500', 'tag'),
                               ('peripheral_nerves', 'tag')]
-default_anchor_point_sources = ['cell_ids', 'somas_dec2022', 'peripheral_nerves', 'neck_connective']
-default_svid_lookup_url = 'https://services.itanna.io/app/transform-service/query/dataset/fanc_v4/s/2/values_array_string_response/'
+default_anchor_point_sources = ['neck_connective_y92500', 'peripheral_nerves']
+default_svid_lookup_url = '<not implemented>'
 
 
 # --- START CAVE TABLES / ANNOTATIONS SECTION --- #
