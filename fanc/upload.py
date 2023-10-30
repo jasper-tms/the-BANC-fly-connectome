@@ -112,7 +112,7 @@ def new_cell(pt_position,
 def annotate_neuron(neuron: 'segID (int) or point (xyz)',
                     annotation: str or tuple[str],
                     user_id: int,
-                    table_name='neuron_information',
+                    table_name='cell_info',
                     resolve_duplicate_anchor_points=False) -> dict:
     """
     Upload information about a neuron to a CAVE table.
