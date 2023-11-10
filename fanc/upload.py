@@ -113,6 +113,7 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
                     annotation: str or tuple[str],
                     user_id: int,
                     table_name='cell_info',
+                    convert_given_point_to_anchor_point=True,
                     resolve_duplicate_anchor_points=False) -> dict:
     """
     Upload information about a neuron to a CAVE table.
@@ -142,6 +143,13 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         Name of the CAVE table to upload information to. Only works
         with tables of schema "bound_double_tag_user".
 
+    convert_given_point_to_anchor_point: bool
+        Only matters if `neuron` is a point (not a segment ID).
+        If False, the given point will just be used directly as the
+        annotation's point. If True, the point used for the annotation will
+        instead be the anchor point (see `lookup.anchor_point()`) of the
+        segment corresponding to the given point.
+
     resolve_duplicate_anchor_points: bool or int
         This argument is passed to `lookup.anchor_point`, see its
         docstring for details.
@@ -154,7 +162,7 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
     client = auth.get_caveclient()
     if isinstance(neuron, (int, np.integer)):
         if not client.chunkedgraph.is_latest_roots(int(neuron)):
-            raise ValueError(f'{neuron} is not a current segment ID')
+            raise ValueError(f'{neuron} is not a current segment ID.')
         segid = neuron
         point = lookup.anchor_point(neuron, resolve_duplicates=resolve_duplicate_anchor_points)
     else:
@@ -162,11 +170,16 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
             iter(neuron)
             segid = lookup.segid_from_pt(neuron)
             if segid == 0:
-                raise ValueError(f'Point {neuron} is a location with no segmentation')
-            point = lookup.anchor_point(segid, resolve_duplicates=resolve_duplicate_anchor_points)
-            print(f'Found segID {segid} with anchor point {point}.')
+                raise ValueError(f'Point {neuron} is a location with no segmentation.')
+            if convert_given_point_to_anchor_point:
+                point = lookup.anchor_point(segid, resolve_duplicates=resolve_duplicate_anchor_points)
+                print(f'Found segID {segid} with anchor point {point}.')
+            else:
+                point = np.array(neuron)
         except TypeError:
-            raise TypeError('First argument must be a segID or a point coordinate')
+            raise TypeError('First argument must be a segID or a point coordinate.')
+    if not isinstance(user_id, (int, np.integer)):
+        raise TypeError(f'user_id must be an integer but got "{user_id}".')
 
     stage = client.annotation.stage_annotations(table_name)
     assert annotations.is_allowed_to_post(segid, annotation,
