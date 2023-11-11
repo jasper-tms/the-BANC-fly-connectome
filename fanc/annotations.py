@@ -178,10 +178,10 @@ def print_recognized_annotations(table_name: str = default_table):
     table_name : str
         The name of the table to print the recognized annotations for.
         OR
-        This is not standard usage, but you can also pass in a list or dict
-        specifying annotations directly and it will be printed. A dictionary
-        must map annotation names (str) to anytree.Node objects, as output by
-        running _dict_to_anytree() on a hierarchy of annotations.
+        Users will not typically do this, but you can also pass in a list or
+        dict specifying the valid annotations directly and it will be used. If
+        a dictionary, must map annotation names (str) to anytree.Node objects,
+        as output by running _dict_to_anytree() on a hierarchy of annotations.
     """
     if isinstance(table_name, str):
         try:
@@ -208,20 +208,21 @@ def print_recognized_annotations(table_name: str = default_table):
 
 def guess_class(annotation: str, table_name: str = default_table) -> str:
     """
-    Look up the parent (or "class") of an annotation based on the rules governing
-    the given table. If the annotation is not found, raise a ValueError.
+    Look up the parent (or "class") of an annotation based on the rules
+    governing the given table. If the annotation is not found or the
+    class can't be determined, raise a ValueError.
 
     Parameters
     ----------
     annotation : str
         The annotation to look up the class of.
     table_name : str
-        The name of the table whose rules should be used to look up the class of
-        the annotation.
+        The name of the table whose rules should be used to look up the
+        class of the annotation.
         OR
-        This is not standard usage, but you can also pass in a dict specifying
-        the annotation hierarchy directly and it will be used. The dictionary
-        must map annotation names (str) to anytree.Node objects, as output by
+        Users will not typically do this, but you can also pass in a dict
+        specifying the annotation hierarchy/rules directly. The dict must
+        map annotation names (str) to anytree.Node objects, as output by
         running _dict_to_anytree() on a hierarchy of annotations.
     """
     if isinstance(table_name, str):
@@ -250,23 +251,25 @@ def guess_class(annotation: str, table_name: str = default_table) -> str:
     return annotation_nodes[0].parent.name
 
 
-def is_valid_annotation(annotation: str, table_name: str = default_table) -> bool:
+def is_valid_annotation(annotation: str or tuple[str, str],
+                        table_name: str = default_table,
+                        raise_errors: bool = True) -> bool:
     """
     Determine whether an annotation is a recognized/valid annotation
     for the given table.
 
     Parameters
     ----------
-    annotation : str
-        The annotation to check the validity of.
+    annotation : str or list/tuple of 2 strs
+        The annotation or annotation pair to check the validity of.
     table_name : str
         The name of the table whose rules should be used to determine the
         validity of the annotation.
         OR
-        This is not standard usage, but you can also pass in a list or dict
-        specifying the valid annotations directly and it will be used. If a
-        dictionary, must map annotation names (str) to anytree.Node objects, as
-        output by running _dict_to_anytree() on a hierarchy of annotations.
+        Users will not typically do this, but you can also pass in a list or
+        dict specifying the valid annotations directly and it will be used. If
+        a dictionary, must map annotation names (str) to anytree.Node objects,
+        as output by running _dict_to_anytree() on a hierarchy of annotations.
     """
     if isinstance(table_name, str):
         try:
@@ -278,17 +281,87 @@ def is_valid_annotation(annotation: str, table_name: str = default_table) -> boo
     else:
         raise TypeError(f'Unrecognized type for table_name: {type(table_name)}')
 
-    return annotation in annotations
+    if isinstance(annotations, list):
+        if not isinstance(annotation, str):
+            raise TypeError('annotation should be a str for this table, but'
+                            f' was {type(annotation)}')
+        return annotation in annotations
+
+    if raise_errors:
+        annotation_class, annotation = parse_annotation_pair(annotation)
+    else:
+        try:
+            annotation_class, annotation = parse_annotation_pair(annotation)
+        except:
+            return False
+    return is_valid_pair(annotation_class, annotation,
+                         annotations, raise_errors=raise_errors)
+
+
+def parse_annotation_pair(annotation: str or tuple[str, str],
+                          table_name: str = default_table) -> tuple[str, str]:
+    """
+    Convert any of the following into a proper (annotation_class, annotation) tuple:
+    - A single annotation (str). In this case the annotation_class will be
+      guessed based on the rules governing the given table.
+    - An annotation_class-annotation pair given as one string with a separator
+      (colon, comma, or >) between the annotation_class and annotation.
+    - An (annotation_class, annotation) pair given as a 2-length iterable.
+
+    Parameters
+    ----------
+    annotation : str or list/tuple of 2 strs
+        The annotation or annotation pair to parse.
+
+    Returns
+    -------
+    tuple of 2 strs
+        The annotation_class and annotation.
+    """
+    # If not a str, should be a 2-length iterable
+    if not isinstance(annotation, str):
+        try:
+            annotation_class, annotation = annotation
+        except:
+            raise TypeError('annotation must be a str or a list/tuple of 2 strs.')
+        return annotation_class, annotation
+
+    # If str
+    separators = ':>,'
+    if not any(separator in annotation for separator in separators):
+        annotation_class = guess_class(annotation, table_name)
+    else:
+        for separator in separators:
+            if separator in annotation:
+                annotation_class, annotation = annotation.split(separator)
+                break
+        annotation_class = annotation_class.strip(' ')
+        annotation = annotation.strip(' ')
+
+    return annotation_class, annotation
 
 
 def is_valid_pair(annotation_class: str,
                   annotation: str,
                   table_name: str = default_table,
-                  raise_errors=True) -> bool:
+                  raise_errors: bool = True) -> bool:
     """
     Determine whether `annotation` is a valid annotation for the given
     `annotation_class`, according to the rules for the given table.
     (See https://fanc.community/Neuron-annotations#neuron_information)
+
+    Parameters
+    ----------
+    annotation_class, annotation : str
+        The pair of annotations to check the validity of.
+    table_name : str
+        The name of the table whose rules should be used to determine the
+        validity of the annotation.
+        OR
+        Users will not typically do this, but you can also pass in a dict
+        specifying the valid annotations directly and it will be used. The
+        dict must map annotation names (str) to anytree.Node objects, as
+        output by running _dict_to_anytree() on a hierarchy of annotations.
     """
     if isinstance(table_name, str):
         try:
@@ -316,16 +389,14 @@ def is_valid_pair(annotation_class: str,
         if raise_errors:
             raise ValueError(f'Annotation class "{annotation_class}" not'
                              f' recognized. {help_msg}')
-        else:
-            return False
+        return False
     try:
         annotation_nodes = annotations[annotation]
     except:
         if raise_errors:
             raise ValueError(f'Annotation "{annotation}" not recognized.'
                              f' {help_msg}')
-        else:
-            return False
+        return False
 
     for class_node in class_nodes:
         for annotation_node in annotation_nodes:
@@ -344,51 +415,53 @@ def is_valid_pair(annotation_class: str,
             raise ValueError(f'Annotation "{annotation}" belongs to classes'
                              f' {parent_names} but you specified class'
                              f' "{annotation_class}". {help_msg}')
-
-    else:
-        return False
-
-    return True
+    return False
 
 
 def is_allowed_to_post(segid: int,
-                       annotation: str or tuple[str],
+                       annotation: str or tuple[str, str],
                        table_name: str = default_table,
                        raise_errors: bool = True) -> bool:
     """
     Determine whether a particular segment is allowed to be annotated
-    with the given annotation (or annotation+annotation_class pair, if the
+    with the given annotation (or annotation_class+annotation pair, if the
     table uses paired annotations).
 
-    For simple tables that use only a single annotation, this function checks
-    `is_valid_annotation(annotation, table_name)` and checks whether the
-    segment already has this same annotation.
+    For posting to be allowed:
+    - `is_valid_annotation(annotation, table_name)` must return True.
+    - The segment must not already have this exact annotation in this table.
+    - For tables that use paired annotations (two tag columns), two
+      additional constraints apply:
+      1. The given annotation pair may not be posted if the segment
+      already has any annotation pair with the same annotation_class.
+      This and also prevents a class from having multiple subclasses.
+      This rule is NOT enforced for a few special annotation_classes
+      that are allowed to have many subannotations:
+        - 'neuron identity'
+        - 'publication'
+      2. The given annotation pair may only be posted if its
+      annotation_class is at the root of the annotation tree (e.g.
+      'primary class'), or if its annotation_class is already an
+      annotation on the segment. In other words, allow posts will start
+      from the root of the annotation tree, or add detail/subclass
+      information to an annotation already on the segment.
 
-    For tables with two tag columns, `annotation` should be a tuple of
-    (annotation_class, annotation) aka (key, value) aka (tag2, tag).
-    This function checks `is_valid_pair(annotation_class, annotation)`,
-    as well as the following rules:
-    1. The given annotation pair may not be posted if the segment already has
-    any annotation pair with the same annotation_class. This prevents exact
-    duplicates, and also prevents a class from having multiple subclasses. This
-    rule is not enforced for a few classes that are allowed to have multiple
-    subannotations:
-      - 'neuron identity'
-      - 'publication'
-    2. The given annotation pair may only be posted if its annotation_class
-    is at the root of the annotation tree (e.g. 'primary class'), or if its
-    annotation_class is already an annotation on the segment. This ensures
-    that each post either starts from the root of the annotation tree, or adds
-    detail/subclass information to an annotation already on the segment.
+    For tables with two tag columns, `annotation` should be in a format
+    that `parse_annotation_pair()` can handle, which is:
+    - A single annotation (str). In this case the annotation_class will
+      be guessed based on the rules governing the given table.
+    - An annotation_class-annotation pair given as one string with a separator
+      (colon, comma, or >) between the annotation_class and annotation.
+    - An (annotation_class, annotation) pair given as a 2-length iterable.
 
     Returns
     -------
     bool
     - True: This segment MAY be annotated with the annotation or
-      annotation+annotation_class pair in the given CAVE table without
+      annotation_class+annotation pair in the given CAVE table without
       violating any rules about redundancy or mutual exclusivity.
-    - False: The proposed annotation or annotation+annotation_class pair
-      MAY NOT be applied to the segment without violating a rule.
+    - False: The proposed annotation or annotation_class+annotation pair
+      MAY NOT be posted for this segment without violating a rule.
       If `raise_errors` is True, an exception with an informative error
       message will be raised instead of returning False.
     """
@@ -397,18 +470,14 @@ def is_allowed_to_post(segid: int,
     except:
         raise ValueError(f'Table name "{table_name}" not recognized.')
 
-    if isinstance(annotation, str) and isinstance(annotations, dict):
-        # If the table uses paired annotations but the user only specified
-        # a single annotation, see if we can guess the annotation_class.
-        annotation = (guess_class(annotation, table_name=table_name),
-                      annotation)
+    if not is_valid_annotation(annotation, table_name=table_name,
+                               raise_errors=raise_errors):
+        return False
 
     existing_annos = lookup.annotations(segid, source_tables=table_name,
                                         return_details=True)
 
-    if isinstance(annotation, str):
-        if not is_valid_annotation(annotation, table_name=table_name):
-            return False
+    if isinstance(annotations, list):
         if annotation in existing_annos.tag.values:
             if raise_errors:
                 raise ValueError(f'Segment {segid} already has the'
@@ -416,15 +485,14 @@ def is_allowed_to_post(segid: int,
             return False
         return True
 
-    if not isinstance(annotation, tuple) or not len(annotation) == 2:
-        raise TypeError(f'`annotation` arugment must be a str OR a tuple of 2'
-                        ' strs but was "{type(annotation)}"')
-
-    annotation_class, annotation = annotation
-    if not is_valid_pair(annotation_class, annotation,
-                         table_name=table_name,
-                         raise_errors=raise_errors):
-        return False
+    # If we get here, the table uses paired annotations
+    if raise_errors:
+        annotation_class, annotation = parse_annotation_pair(annotation)
+    else:
+        try:
+            annotation_class, annotation = parse_annotation_pair(annotation)
+        except:
+            return False
 
     # Rule 1
     multiple_subclasses_allowed = [
@@ -433,9 +501,8 @@ def is_allowed_to_post(segid: int,
     ]
     if annotation_class in multiple_subclasses_allowed:
         # Check if any tag,tag2 pair is the same as annotation,annotation_class
-        if not existing_annos.loc[
-                (existing_annos.tag == annotation) &
-                (existing_annos.tag2 == annotation_class)].empty:
+        if ((existing_annos.tag == annotation) &
+            (existing_annos.tag2 == annotation_class)).any():
             if raise_errors:
                 raise ValueError(f'Segment {segid} already has this exact'
                                  ' annotation pair.')
@@ -461,7 +528,7 @@ def is_allowed_to_post(segid: int,
         #                                 f' annotation in the group'
         #                                 f' {group}. {help_msg}')
         #            return False
-    elif not existing_annos.loc[existing_annos.tag2 == annotation_class].empty:
+    elif (existing_annos.tag2 == annotation_class).any():
         if raise_errors:
             raise ValueError(f'Segment {segid} already has an annotation with'
                              f' class "{annotation_class}". {help_msg}')
@@ -471,7 +538,7 @@ def is_allowed_to_post(segid: int,
     root_classes = [anno for anno, nodes in annotations.items()
                     if len(nodes) == 1 and nodes[0].is_root]
     if (annotation_class not in root_classes and
-            existing_annos.loc[existing_annos.tag == annotation_class].empty):
+            not (existing_annos.tag == annotation_class).any()):
         if raise_errors:
             raise ValueError(f'Segment {segid} must be annotated with'
                              f' "{annotation_class}" before this term can be'

@@ -110,7 +110,7 @@ def new_cell(pt_position,
 
 
 def annotate_neuron(neuron: 'segID (int) or point (xyz)',
-                    annotation: str or tuple[str],
+                    annotation: str or tuple[str, str],
                     user_id: int,
                     table_name='cell_info',
                     convert_given_point_to_anchor_point=True,
@@ -118,11 +118,17 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
     """
     Upload information about a neuron to a CAVE table.
 
-    This function will validate that `annotation` is a valid annotation for the
-    given `annotation_class`, according to the rules described at
+    This function will first check that `annotation` is a valid
+    annotation for the given table, according to the rules described at
     https://github.com/htem/FANC_auto_recon/wiki/Neuron-annotations#neuron_information
-    and then post the `annotation_class, annotation` pair to the specified CAVE
-    table.
+    If it is, the annotation will be posted to the table.
+
+    This function is designed for use with tables with one of these schemas:
+    - "bound_tag_user", in which case `annotation` should be a single annotation
+    - "bound_double_tag_user", in which case `annotation` should be a pair of
+      annotations, either as a colon-separated string formatted like
+      "annotation_class: annotation", or as a 2-tuple of strings in the order
+      (annotation_class, annotation).
 
     Arguments
     ---------
@@ -131,17 +137,16 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
 
     annotation: str OR 2-tuple of (str, str)
         Annotation to upload, or a pair of annotations if trying to upload to a
-        table with two tag columns. These should be provided in the order
-        (tag2, tag), which is (key, value) order because two-tag-column tables
-        typically use the 'tag' column as the actual annotation and the 'tag2'
-        column as the class/category/key for that annotation.
+        table with two tag columns. See the docstring of
+        `fanc.annotations.parse_annotation_pair()` for options on how to format
+        an annotation pair.
 
     user_id: int
         The CAVE user ID number to associate with this annotation
 
     table_name: str
         Name of the CAVE table to upload information to. Only works
-        with tables of schema "bound_double_tag_user".
+        with tables of schema "bound_tag_user" or "bound_double_tag_user".
 
     convert_given_point_to_anchor_point: bool
         Only matters if `neuron` is a point (not a segment ID).
@@ -156,8 +161,9 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
 
     Returns
     -------
-    dict: Response from server containing information about the
-          success or failure of the upload
+    list: Response from server containing information about the
+          success or failure of the upload. If successful, the list
+          contains the ID of the new annotation.
     """
     client = auth.get_caveclient()
     if isinstance(neuron, (int, np.integer)):
@@ -185,10 +191,8 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
     assert annotations.is_allowed_to_post(segid, annotation,
                                           table_name=table_name,
                                           raise_errors=True)
-    if 'tag2' in stage.fields and isinstance(annotation, str):
-        # If the table uses paired annotations but the user only specified
-        # a single annotation, see if we can guess the annotation_class.
-        annotation = (annotations.guess_class(annotation), annotation)
+    if 'tag2' in stage.fields:
+        annotation = annotations.parse_annotation_pair(annotation)
 
     if isinstance(annotation, tuple):
         assert len(annotation) == 2
