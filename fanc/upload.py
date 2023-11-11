@@ -208,7 +208,10 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         raise TypeError('annotation must be a string or a tuple of 2 strings')
 
     response = client.annotation.upload_staged_annotations(stage)
-    return response
+    if isinstance(response, list) and len(response) == 1:
+        return response[0]
+    else:
+        return response
 
 
 def xyz_StringSeries2List(StringSeries: pd.Series):
