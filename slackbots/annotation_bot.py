@@ -54,27 +54,28 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 from caveclient import CAVEclient
-import fanc
+import banc
 
 # Setup
 verbosity = 2
 
-caveclient = CAVEclient('fanc_production_mar2021')
-tables = ['neuron_information']
+caveclient = CAVEclient('brain_and_nerve_cord')
+tables = ['cell_info', 'proofreading_notes']
 
 with open('slack_user_permissions.json', 'r') as f:
     permissions = json.load(f)
 
-app = App(token=os.environ['SLACK_TOKEN_FANC_NEURONINFORMATIONBOT'],
-          signing_secret=os.environ['SLACK_SIGNING_SECRET_FANC_NEURONINFORMATIONBOT'])
-handler = SocketModeHandler(app, os.environ['SLACK_TOKEN_FANC_NEURONINFORMATIONBOT_WEBSOCKETS'])
+app = App(token=os.environ['SLACK_TOKEN_BANC_BOT'],
+          signing_secret=os.environ['SLACK_SIGNING_SECRET_BANC_BOT'])
+handler = SocketModeHandler(app, os.environ['SLACK_TOKEN_BANC_BOT_WEBSOCKETS'])
 
 def show_help():
     return (
 """
-Hello! Before using me for the first time, you may want to read through:
-- the list of available annotations at https://github.com/htem/FANC_auto_recon/wiki/Neuron-annotations AND
-- the description of the "neuron_information" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/fanc_v4/table/neuron_information
+Hello! Before using me for the first time, you may want to read through these three:
+- the list of available annotations at https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Neuron-annotations
+- the description of the "cell_info" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/cell_info
+- the description of the "proofreading_notes" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/proofreading_notes
 
 You can send me a message that looks like one of the `example messages below` to find certain types of neurons, or get or upload information about specific neurons.
 
@@ -171,7 +172,7 @@ def process_message(message: str, user: str, fake=False) -> str:
 
         try:
             return ("Search successful. View your results: " +
-                    fanc.lookup.cells_annotated_with(search_terms, return_as='url'))
+                    banc.lookup.cells_annotated_with(search_terms, return_as='url'))
         except Exception as e:
             return f"`{type(e)}`\n```{e}```"
 
@@ -197,7 +198,7 @@ def process_message(message: str, user: str, fake=False) -> str:
                 point = [int(coordinate.strip(',')) for coordinate in neuron.split(' ')]
             except ValueError:
                 return f"ERROR: Could not parse `{neuron}` as a segment ID or a point."
-            segid = fanc.lookup.segid_from_pt(point)
+            segid = banc.lookup.segid_from_pt(point)
         if not caveclient.chunkedgraph.is_latest_roots(segid):
             return (f"ERROR: {segid} is not a current segment ID."
                     " It may have been edited recently, or perhaps"
@@ -207,7 +208,7 @@ def process_message(message: str, user: str, fake=False) -> str:
             return_details = True
 
         try:
-            info = fanc.lookup.annotations(segid, return_details=return_details)
+            info = banc.lookup.annotations(segid, return_details=return_details)
         except Exception as e:
             return f"`{type(e)}`\n```{e}```"
         if len(info) == 0:
@@ -231,9 +232,9 @@ def process_message(message: str, user: str, fake=False) -> str:
             segid = int(neuron)
         except:
             point = [int(coordinate.strip(',')) for coordinate in neuron.split(' ')]
-            segid = fanc.lookup.segid_from_pt(point)
+            segid = banc.lookup.segid_from_pt(point)
         try:
-            point = fanc.lookup.anchor_point(segid)
+            point = banc.lookup.anchor_point(segid)
         except:
             return f"`{type(e)}`\n```{e}```"
 
@@ -245,7 +246,7 @@ def process_message(message: str, user: str, fake=False) -> str:
         invalidity_errors = []
         for table in tables:
             try:
-                fanc.annotations.is_valid_annotation(annotation, table_name=table,
+                banc.annotations.is_valid_annotation(annotation, table_name=table,
                                                      raise_errors=True)
             except Exception as e:
                 invalidity_errors.append(e)
@@ -263,14 +264,14 @@ def process_message(message: str, user: str, fake=False) -> str:
 
             if fake:
                 try:
-                    fanc.annotations.is_allowed_to_post(segid, annotation,
+                    banc.annotations.is_allowed_to_post(segid, annotation,
                                                         table_name=table)
                 except Exception as e:
                     return f"`{type(e)}`\n```{e}```"
                 return (f"FAKE: Would upload segment {segid}, point"
                         f" `{list(point)}`, annotation `{annotation}`.")
             try:
-                annotation_id = fanc.upload.annotate_neuron(
+                annotation_id = banc.upload.annotate_neuron(
                     segid, annotation, cave_user_id, table_name=table
                 )
                 uploaded_data = caveclient.annotation.get_annotation(table,
