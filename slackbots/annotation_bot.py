@@ -60,7 +60,7 @@ import fanc
 verbosity = 2
 
 caveclient = CAVEclient('fanc_production_mar2021')
-table_name = 'neuron_information'
+tables = ['neuron_information']
 
 with open('slack_user_permissions.json', 'r') as f:
     permissions = json.load(f)
@@ -175,32 +175,37 @@ def process_message(message: str, user: str, fake=False) -> str:
         except Exception as e:
             return f"`{type(e)}`\n```{e}```"
 
-    return_details = False
-    # For some reason the '>' character typed into slack
-    # is reaching this code as '&gt;', so revert it for readability.
-    message = message.replace('&gt;', '>')
-    tokens = message.strip(' ').split(' ')
-    if len(tokens) == 0:
-        return ("NO ACTION: Your message is empty or I couldn't understand"
-                " it. Make a post containing the word 'help' if needed.")
-    if tokens[0].endswith('??'):
-        tokens[0] = tokens[0][:-1]
-        return_details = True
-    try:
-        segid = int(tokens[0][:-1])
-    except ValueError:
-        return (f"ERROR: Could not convert the first word"
-                f" `{tokens[0][:-1]}` to int. Is it a segID?")
-
     try:
         caveclient.materialize.version = caveclient.materialize.most_recent_version()
     except Exception as e:
         return f"The CAVE server did not respond: `{type(e)}`\n```{e}```"
 
+    # Because HTML or something, the '>' character typed into slack
+    # is reaching this code as '&gt;', so revert it for readability.
+    message = message.replace('&gt;', '>')
 
-    if tokens[0].endswith('?'):  # Query
-        if len(tokens) > 1 and tokens[1].lower() in ['all', 'everything', 'verbose', 'details']:
+    return_details = False
+    if '??' in message:
+        return_details = True
+        message = message.replace('??', '?')
+    if '?' in message:  # Query
+        neuron = message[:message.find('?')]
+        try:
+            segid = int(neuron)
+        except ValueError:
+            try:
+                point = [int(coordinate.strip(',')) for coordinate in neuron.split(' ')]
+            except ValueError:
+                return f"ERROR: Could not parse `{neuron}` as a segment ID or a point."
+            segid = fanc.lookup.segid_from_pt(point)
+        if not caveclient.chunkedgraph.is_latest_roots(segid):
+            return (f"ERROR: {segid} is not a current segment ID."
+                    " It may have been edited recently, or perhaps"
+                    " you copy-pasted the wrong thing.")
+        modifiers = message[message.find('?')+1:].strip(' ')
+        if any([x in modifiers.lower() for x in ['all', 'details', 'verbose', 'everything']]):
             return_details = True
+
         try:
             info = fanc.lookup.annotations(segid, return_details=return_details)
         except Exception as e:
@@ -220,74 +225,89 @@ def process_message(message: str, user: str, fake=False) -> str:
         else:
             return ('```' + '\n'.join(info) + '```')
 
-    elif tokens[0].endswith('!'):  # Upload
-        # Permissions
-        table_permissions = permissions.get(table_name, None)
-        if table_permissions is None:
-            return f"ERROR: `{table_name}` not listed in permissions file."
-        cave_user_id = table_permissions.get(user, None)
-        if cave_user_id is None:
-            return ("You have not yet been given permissions to post to"
-                    f" `{table_name}`. Please send Jasper a DM on slack"
-                    " to request permissions.")
+    if '!' in message:  # Upload
+        neuron = message[:message.find('!')]
+        try:
+            segid = int(neuron)
+        except:
+            point = [int(coordinate.strip(',')) for coordinate in neuron.split(' ')]
+            segid = fanc.lookup.segid_from_pt(point)
+        try:
+            point = fanc.lookup.anchor_point(segid)
+        except:
+            return f"`{type(e)}`\n```{e}```"
 
-        # Sanity checks
         if not caveclient.chunkedgraph.is_latest_roots(segid):
             return (f"ERROR: {segid} is not a current segment ID."
-                    " Was the segment edited recently? Or did you"
-                    " copy-paste the wrong thing?")
-
-        # Parse and validate annotations
-        if len(tokens) < 4 or '>' not in tokens:
-            return ("ERROR: To upload neuron information, your message"
-                    " must have the format `{segid}! {annotation} >"
-                    " {annotation_class}`. Run 'help' for examples.")
-        annotation_tokens = ' '.join(tokens[1:]).split('>')
-        if len(annotation_tokens) != 2:
-            return (f"ERROR: Could not parse `{' '.join(tokens[1:])}`"
-                    " into an annotation and annotation_class.")
-        annotation_class = annotation_tokens[0].strip()
-        annotation = annotation_tokens[1].strip()
-
-        if fake:
+                    " It may have been edited recently, or perhaps"
+                    " you copy-pasted the wrong thing.")
+        annotation = message[message.find('!')+1:].strip(' ')
+        invalidity_errors = []
+        for table in tables:
             try:
-                fanc.annotations.is_allowed_to_post(segid, (annotation_class, annotation))
-                point = list(fanc.lookup.anchor_point(segid))
+                fanc.annotations.is_valid_annotation(annotation, table_name=table,
+                                                     raise_errors=True)
             except Exception as e:
-                return f"`{type(e)}`\n```{e}```"
-            return (f"FAKE: Would upload segment {segid}, point {point}"
-                    f", annotations `{annotation_class} > {annotation}`.")
+                invalidity_errors.append(e)
+                continue
 
-        try:
-            response = fanc.upload.annotate_neuron(
-                segid,
-                (annotation_class, annotation),
-                cave_user_id,
-                table_name=table_name
-            )
-            record_upload(segid, annotation, annotation_class,
-                          cave_user_id, table_name)
-            uploaded_data = caveclient.annotation.get_annotation(table_name,
-                                                                 response)[0]
-            return (f"Upload to `{table_name}` succeeded:\n"
-                    f"- Segment {segid}\n"
-                    f"- Point coordinate `{uploaded_data['pt_position']}`\n"
-                    f"- Annotation: `{annotation}`\n"
-                    f"- Annotation class: `{annotation_class}`\n"
-                    f"- Annotation ID: {response[0]}")
-        except Exception as e:
-            return f"ERROR: Annotation failed due to\n`{type(e)}`\n```{e}```"
+            # Permissions
+            table_permissions = permissions.get(table, None)
+            if table_permissions is None:
+                return f"ERROR: `{table}` not listed in permissions file."
+            cave_user_id = table_permissions.get(user, None)
+            if cave_user_id is None:
+                return ("You have not yet been given permissions to post to"
+                        f" `{table}`. Please send Jasper a DM on slack"
+                        " to request permissions.")
 
-    else:
-        return ("ERROR: The first word in your message isn't a segment"
-                " ID terminated by a ! or a ?. Make a post containing"
-                " the word 'help' if you need instructions.")
-    
+            if fake:
+                try:
+                    fanc.annotations.is_allowed_to_post(segid, annotation,
+                                                        table_name=table)
+                except Exception as e:
+                    return f"`{type(e)}`\n```{e}```"
+                return (f"FAKE: Would upload segment {segid}, point"
+                        f" `{list(point)}`, annotation `{annotation}`.")
+            try:
+                annotation_id = fanc.upload.annotate_neuron(
+                    segid, annotation, cave_user_id, table_name=table
+                )
+                uploaded_data = caveclient.annotation.get_annotation(table,
+                                                                     annotation_id)[0]
+                msg = (f"Upload to `{table}` succeeded:\n"
+                       f"- Segment {segid}\n"
+                       f"- Point coordinate `{uploaded_data['pt_position']}`\n"
+                       f"- Annotation ID: {annotation_id}\n"
+                       f"- Annotation: `{uploaded_data['tag']}`")
+                if 'tag2' in uploaded_data:
+                    msg += f"\n- Annotation class: `{uploaded_data['tag2']}`"
+                    record_upload(annotation_id, segid,
+                                  uploaded_data['tag2'] + ': ' + uploaded_data['tag'],
+                                  cave_user_id, table)
+                else:
+                    record_upload(annotation_id, segid,
+                                  uploaded_data['tag'],
+                                  cave_user_id, table)
+                return msg
+            except Exception as e:
+                return f"ERROR: Annotation failed due to\n`{type(e)}`\n```{e}```"
 
-def record_upload(segid, tag, tag2, user_id, table_name) -> None:
-    uploads_fn = f'neuron_information_bot_uploads_to_{table_name}.txt'
+        msg = (f"ERROR: Annotation `{annotation}` is not valid for any of the"
+               " CAVE tables I know how to post to:")
+        for table, e in zip(tables, invalidity_errors):
+            msg += f"\n\nTable `{table}` gave `{type(e)}`:\n```{e}```"
+        return msg
+
+    return ("ERROR: Your message does not contain a '?' or '!'"
+            " character, so I don't know what you want me to do."
+            " Make a post containing the word 'help' for instructions.")
+
+
+def record_upload(annotation_id, segid, annotation, user_id, table_name) -> None:
+    uploads_fn = f'annotation_bot_uploads_to_{table_name}.txt'
     with open(uploads_fn, 'a') as f:
-        f.write(f'{segid},{tag},{tag2},{user_id}\n')
+        f.write(f'{annotation_id},{segid},{annotation},{user_id}\n')
 
 
 if __name__ == '__main__':
