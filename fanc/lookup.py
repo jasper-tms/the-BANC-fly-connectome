@@ -443,6 +443,10 @@ def segid_from_pt(points: 'Nx3 iterable',
         # cv.get_roots interprets timestamp=None as requesting the latest root
         timestamp = None
 
+    print('WARNING: The supervoxel ID lookup service is not set up yet,'
+          ' so the slower cloudvolume lookup will be used.')
+    return segid_from_pt_cv(points, timestamp=timestamp, **kwargs)
+
     svids = svid_from_pt(points, service_url=service_url)
 
     if 'cv' in kwargs:
