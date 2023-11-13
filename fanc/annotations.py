@@ -285,6 +285,8 @@ def is_valid_annotation(annotation: str or tuple[str, str],
         if not isinstance(annotation, str):
             raise TypeError('annotation should be a str for this table, but'
                             f' was {type(annotation)}')
+        if (annotation not in annotations) and raise_errors:
+            raise ValueError(f'Annotation "{annotation}" not recognized. {help_msg}')
         return annotation in annotations
 
     if raise_errors:

@@ -188,9 +188,12 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         raise TypeError(f'user_id must be an integer but got "{user_id}".')
 
     stage = client.annotation.stage_annotations(table_name)
-    assert annotations.is_allowed_to_post(segid, annotation,
+    if not annotations.is_allowed_to_post(segid, annotation,
                                           table_name=table_name,
-                                          raise_errors=True)
+                                          raise_errors=True):
+        raise ValueError(f'"{annotation}" is not allowed to be posted to'
+                         f' segment {segid} in table "{table_name}".')
+
     if 'tag2' in stage.fields:
         annotation = annotations.parse_annotation_pair(annotation)
 
