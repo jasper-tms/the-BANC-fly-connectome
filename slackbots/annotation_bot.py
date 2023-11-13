@@ -235,7 +235,7 @@ def process_message(message: str, user: str, fake=False) -> str:
             segid = banc.lookup.segid_from_pt(point)
         try:
             point = banc.lookup.anchor_point(segid)
-        except:
+        except Exception as e:
             return f"`{type(e)}`\n```{e}```"
 
         if not caveclient.chunkedgraph.is_latest_roots(segid):
