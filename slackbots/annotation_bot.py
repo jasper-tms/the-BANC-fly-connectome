@@ -246,8 +246,11 @@ def process_message(message: str, user: str, fake=False) -> str:
         invalidity_errors = []
         for table in tables:
             try:
-                banc.annotations.is_valid_annotation(annotation, table_name=table,
-                                                     raise_errors=True)
+                if not banc.annotations.is_valid_annotation(annotation,
+                                                            table_name=table,
+                                                            raise_errors=True):
+                    raise ValueError(f'Invalid annotation "{annotation}"'
+                                     f' for table "{table}".')
             except Exception as e:
                 invalidity_errors.append(e)
                 continue
