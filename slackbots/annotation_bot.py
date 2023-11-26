@@ -73,7 +73,7 @@ def show_help():
     return (
 """
 Hello! Before using me for the first time, you may want to read through these three:
-- the list of available annotations at https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Neuron-annotations
+- the list of available annotations at https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Annotations-(cell-types,-etc.)
 - the description of the "cell_info" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/cell_info
 - the description of the "proofreading_notes" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/proofreading_notes
 
