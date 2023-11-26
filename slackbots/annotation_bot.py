@@ -72,10 +72,10 @@ handler = SocketModeHandler(app, os.environ['SLACK_TOKEN_BANC_BOT_WEBSOCKETS'])
 def show_help():
     return (
 """
-Hello! Before using me for the first time, you may want to read through these three:
-- the list of available annotations at https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Annotations-(cell-types,-etc.)
-- the description of the "cell_info" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/cell_info
-- the description of the "proofreading_notes" table at https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/proofreading_notes
+Hello! Before using me for the first time, you may want to read through:
+- <https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Annotations-(cell-types,-etc.)|the list of available annotations>
+- <https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/cell_info|the description of the "cell_info" CAVE table>
+- <https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/proofreading_notes|the description of the "proofreading_notes" CAVE table>
 
 You can send me a message that looks like one of the `example messages below` to find certain types of neurons, or get or upload information about specific neurons.
 
@@ -95,7 +95,7 @@ Upload annotations to a CAVE table that the whole community can benefit from:
 (To upload annotations, Jasper needs to first give you permissions, so send him a message to ask if you're interested.)
 
 This bot is a work in progress - notably, you can't yet annotate most sensory neurons because the `peripheral_nerves` table is not complete yet. This will be addressed at some point.
-Feel free to send Jasper any questions or bug reports.
+Feel free to send <@U348GFY5N> any questions or bug reports.
 """)
 
 @app.event("message")
