@@ -164,6 +164,9 @@ def process_message(message: str, user: str, fake=False) -> str:
         triggered, or to describe an error that was encountered when
         processing their message.
     """
+    while '  ' in message:
+        message = message.replace('  ', ' ')
+
     if message.startswith(('get ', 'find ')):
         try:
             search_terms = [x.strip('"\'') for x in message[message.find(' ')+1:].split(' and ')]

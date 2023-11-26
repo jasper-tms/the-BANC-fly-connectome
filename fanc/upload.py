@@ -94,19 +94,19 @@ def new_cell(pt_position,
         if cell_type == 'glia':
             return
         if cell_type == 'motor':
-            try_annotate_neuron(segid, 'primary class', 'motor neuron', user_id)
+            try_annotate_neuron(segid, ('primary class', 'motor neuron'), user_id)
         if cell_type == 'efferent':
-            try_annotate_neuron(segid, 'primary class', 'efferent non-motor neuron', user_id)
+            try_annotate_neuron(segid, ('primary class', 'efferent non-motor neuron'), user_id)
         elif cell_type == 'sensory':
-            try_annotate_neuron(segid, 'primary class', 'sensory neuron', user_id)
+            try_annotate_neuron(segid, ('primary class', 'sensory neuron'), user_id)
         elif cell_type == 'descending':
-            try_annotate_neuron(segid, 'primary class', 'central neuron', user_id)
-            try_annotate_neuron(segid, 'anterior-posterior projection pattern', 'descending', user_id)
+            try_annotate_neuron(segid, ('primary class', 'central neuron'), user_id)
+            try_annotate_neuron(segid, ('anterior-posterior projection pattern', 'descending'), user_id)
         elif cell_type == 'ascending':
-            try_annotate_neuron(segid, 'primary class', 'central neuron', user_id)
-            try_annotate_neuron(segid, 'anterior-posterior projection pattern', 'ascending', user_id)
+            try_annotate_neuron(segid, ('primary class', 'central neuron'), user_id)
+            try_annotate_neuron(segid, ('anterior-posterior projection pattern', 'ascending'), user_id)
         elif cell_type == 'central':
-            try_annotate_neuron(segid, 'primary class', 'central neuron', user_id)
+            try_annotate_neuron(segid, ('primary class', 'central neuron'), user_id)
 
 
 def annotate_neuron(neuron: 'segID (int) or point (xyz)',
