@@ -134,6 +134,7 @@ FANC_cell_info['publication'] = {
 proofreading_notes = [
     'spans neck',
     'no major merge errors',
+    'backbone proofread',
     'publication quality',
 ]
 
