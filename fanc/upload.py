@@ -23,20 +23,21 @@ def new_cell(pt_position,
              pt_type: ['soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan'],
              cell_type: ['motor', 'efferent', 'sensory', 'descending', 'ascending', 'central', 'glia'],
              user_id: int,
-             cell_ids_table='cell_ids',
+             cell_ids_table=lookup.default_cellid_source,
              add_to_soma_table=False,
              fake=True):
     """
     Add a new cell to the cell_ids table, annotate its type, and optionally add
     it to the soma table.
     """
+    table_name, column_name = cell_ids_table
     client = auth.get_caveclient()
-    cell_ids = client.materialize.live_live_query(cell_ids_table, timestamp=datetime.utcnow())
+    cell_ids = client.materialize.live_live_query(table_name, timestamp=datetime.utcnow())
     segid = lookup.segid_from_pt(pt_position)
     if segid == 0:
         raise ValueError(f'Point {pt_position} is a location with no segmentation')
     if segid in cell_ids.pt_root_id.values:
-        raise ValueError(f"Segment {segid} already has a cell ID, {cell_ids.loc[cell_ids.pt_root_id == segid, 'id'].values[0]}")
+        raise ValueError(f"Segment {segid} already has a cell ID, {cell_ids.loc[cell_ids.pt_root_id == segid, column_name].values[0]}")
     if pt_type not in ['soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan']:
         raise ValueError(f'pt_type {pt_type} is not valid')
     start_ids = {
@@ -56,8 +57,9 @@ def new_cell(pt_position,
     deleted_cell_ids = [1815, 10552, 10766, 13325, 25983, 100000]
     while start_id in cell_ids['id'].values or start_id in deleted_cell_ids:
         start_id += 1
-    stage = client.annotation.stage_annotations(cell_ids_table, id_field=True)
+    stage = client.annotation.stage_annotations(table_name, id_field=True)
     stage.add(id=start_id,
+              **{column_name: start_id},
               pt_position=np.array(pt_position),
               tag=pt_type,
               valid=True)

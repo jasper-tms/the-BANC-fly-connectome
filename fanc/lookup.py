@@ -12,13 +12,18 @@ import cloudvolume
 
 from . import auth, statebuilder
 
-default_cellid_table = 'cell_ids'
+#In this section where default tables are specified:
+# Tuples are always (table_name, column_name) to specify one column within one table
+# Lists are always [table_name1, table_name2, ...] to specify multiple tables,
+#   or [(table_name1, column_name1), (table_name2, column_name2), ...] to more
+#   explicitly specify multiple columns
+default_cellid_source = ('cell_ids', 'user_id')
 default_proofreading_tables = []
 default_annotation_sources = [('cell_info', 'tag'),
                               ('proofreading_notes', 'tag'),
                               ('neck_connective_y92500', 'tag'),
                               ('peripheral_nerves', 'tag')]
-default_anchor_point_sources = ['neck_connective_y92500', 'peripheral_nerves']
+default_anchor_point_sources = ['cell_ids', 'neck_connective_y92500', 'peripheral_nerves']
 default_svid_lookup_url = '<not implemented>'
 
 
@@ -463,7 +468,7 @@ def segid_from_pt(points: 'Nx3 iterable',
 
 def segid_from_cellid(cellids: int or list[int],
                       timestamp='now',
-                      table_name=default_cellid_table):
+                      cellid_source=default_cellid_source):
     """
     Return the segment ID for a given cell ID at the given timestamp.
 
@@ -478,8 +483,9 @@ def segid_from_cellid(cellids: int or list[int],
       If datetime, use the time specified by the user.
       If None, use the timestamp of the latest materialization.
 
-    table_name: str
-      The name of the CAVE table to query for cell IDs.
+    cellid_source: 2-tuple of str
+      A (table_name, column_name) tuple specifying the name of the CAVE table
+      containing cell IDs, and the column in that table containing cell IDs.
 
     Returns
     -------
@@ -487,7 +493,8 @@ def segid_from_cellid(cellids: int or list[int],
     If cellids is a list, the requested segIDs as a list of ints.
     """
     try: iter(cellids)
-    except: return segid_from_cellid([cellids], timestamp=timestamp, table_name=table_name)[0]
+    except: return segid_from_cellid([cellids], timestamp=timestamp,
+                                     cellid_source=cellid_source)[0]
 
     client = auth.get_caveclient()
     if timestamp in ['now', 'live']:
@@ -495,11 +502,13 @@ def segid_from_cellid(cellids: int or list[int],
     elif timestamp is None:
         timestamp = client.materialize.get_timestamp()
 
+    table_name, column_name = cellid_source
+
     cell_ids = client.materialize.live_live_query(
         table_name,
         timestamp=timestamp,
-        filter_in_dict={table_name: {'id': cellids}})
-    cell_ids.set_index('id', inplace=True)
+        filter_in_dict={table_name: {column_name: cellids}})
+    cell_ids.set_index(column_name, inplace=True)
     if any([i not in cell_ids.index for i in cellids]):
         raise ValueError('There is no cell with these cell IDs: {}'.format(
             [i for i in cellids if i not in cell_ids.index]))
@@ -508,7 +517,7 @@ def segid_from_cellid(cellids: int or list[int],
 
 def cellid_from_segid(segids: int or list[int],
                       timestamp='now',
-                      table_name=default_cellid_table):
+                      cellid_source=default_cellid_source):
     """
     Return the cell ID for a given segment ID.
 
@@ -523,8 +532,9 @@ def cellid_from_segid(segids: int or list[int],
       If datetime, use the time specified by the user.
       If None, use the timestamp of the latest materialization.
 
-    table_name: str (default 'cell_ids')
-      The name of the CAVE table containing cell IDs.
+    cellid_source: 2-tuple of str
+      A (table_name, column_name) tuple specifying the name of the CAVE table
+      containing cell IDs, and the column in that table containing cell IDs.
 
     Returns
     -------
@@ -532,13 +542,16 @@ def cellid_from_segid(segids: int or list[int],
     If segids is a list, the requested cell IDs as a list of ints.
     """
     try: iter(segids)
-    except: return cellid_from_segid([segids], timestamp=timestamp, table_name=table_name)[0]
+    except: return cellid_from_segid([segids], timestamp=timestamp,
+                                     cellid_source=cellid_source)[0]
 
     client = auth.get_caveclient()
     if timestamp in ['now', 'live']:
         timestamp = datetime.utcnow()
     elif timestamp is None:
         timestamp = client.materialize.get_timestamp()
+
+    table_name, column_name = cellid_source
 
     cell_ids = client.materialize.live_live_query(
         table_name,
@@ -551,7 +564,7 @@ def cellid_from_segid(segids: int or list[int],
     if any(cell_ids.index.value_counts() > 1):
         raise ValueError("These segment IDs have multiple cell IDs: {}".format(
             [segid for segid, count in cell_ids.index.value_counts().iteritems() if count > 1]))
-    return cell_ids.loc[segids, 'id'].to_list()
+    return cell_ids.loc[segids, column_name].to_list()
 # --- END SEGMENTATION/CHUNKEDGRAPH SECTION --- #
 
 
