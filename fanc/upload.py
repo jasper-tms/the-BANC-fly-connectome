@@ -20,8 +20,10 @@ from . import annotations, auth, lookup, statebuilder
 
 
 def new_cell(pt_position,
-             pt_type: ['soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan'],
-             cell_type: ['motor', 'efferent', 'sensory', 'descending', 'ascending', 'central', 'glia'],
+             pt_type: ['soma', 'peripheral nerve', 'neck connective', 'backbone'],
+             cell_type: ['descending', 'ascending', 'brain motor', 'VNC motor',
+                         'brain sensory', 'neck sensory', 'VNC sensory',
+                         'brain intrinsic', 'VNC intrinsic', 'brain glia', 'VNC glia'],
              user_id: int,
              cell_ids_table=lookup.default_cellid_source,
              add_to_soma_table=False,
@@ -39,23 +41,24 @@ def new_cell(pt_position,
     if segid in cell_ids.pt_root_id.values:
         raise ValueError(f"Segment {segid} already has a cell ID, {cell_ids.loc[cell_ids.pt_root_id == segid, column_name].values[0]}")
     if pt_type not in ['soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan']:
-        raise ValueError(f'pt_type {pt_type} is not valid')
+        raise ValueError(f'pt_type "{pt_type}" is not valid')
     start_ids = {
-        'motor': 100,
-        'efferent': 100,
-        'sensory': 1000,
-        'descending': 10_000,
-        'ascending': 12_000,
-        'central': 15_000,
-        'glia': 100_000
+        'descending': 1,
+        'ascending': 2_000,
+        'brain motor': 6_000,
+        'VNC motor': 8_000,
+        'brain sensory': 10_000,
+        'neck sensory': 30_000,
+        'VNC sensory': 50_000,
+        'brain intrinsic': 100_000,
+        'VNC intrinsic': 200_000,
+        'brain glia': 1_000_000,
+        'VNC glia': 2_000_000,
     }
     if cell_type not in start_ids.keys():
-        raise ValueError(f'cell_type {cell_type} is not valid')
+        raise ValueError(f'cell_type "{cell_type}" is not valid')
     start_id = start_ids[cell_type]
-    # Annotations that were deleted aren't materialized so they won't be in the
-    # cell_ids dataframe, but new annotations can't re-use their IDs.
-    deleted_cell_ids = [1815, 10552, 10766, 13325, 25983, 100000]
-    while start_id in cell_ids['id'].values or start_id in deleted_cell_ids:
+    while start_id in cell_ids['id'].values:
         start_id += 1
     stage = client.annotation.stage_annotations(table_name, id_field=True)
     stage.add(id=start_id,
@@ -65,8 +68,9 @@ def new_cell(pt_position,
               valid=True)
 
     if add_to_soma_table:
-        if pt_type not in ['soma', 'cut-off soma']:
-            raise ValueError(f'pt_type {pt_type} is not valid for adding to soma table')
+        raise NotImplementedError('The BANC does not yet have a soma table.')
+        if pt_type != 'soma':
+            raise ValueError(f'pt_type "{pt_type}" is not valid for adding to soma table')
         if not fake:
             try:
                 if cell_type == 'glia':
@@ -93,22 +97,28 @@ def new_cell(pt_position,
     else:
         response = client.annotation.upload_staged_annotations(stage)
         print('New cell ID posted:', response)
-        if cell_type == 'glia':
-            return
-        if cell_type == 'motor':
-            try_annotate_neuron(segid, ('primary class', 'motor neuron'), user_id)
-        if cell_type == 'efferent':
-            try_annotate_neuron(segid, ('primary class', 'efferent non-motor neuron'), user_id)
-        elif cell_type == 'sensory':
-            try_annotate_neuron(segid, ('primary class', 'sensory neuron'), user_id)
-        elif cell_type == 'descending':
-            try_annotate_neuron(segid, ('primary class', 'central neuron'), user_id)
+        if cell_type == 'descending':
             try_annotate_neuron(segid, ('anterior-posterior projection pattern', 'descending'), user_id)
-        elif cell_type == 'ascending':
-            try_annotate_neuron(segid, ('primary class', 'central neuron'), user_id)
+        if cell_type == 'ascending':
             try_annotate_neuron(segid, ('anterior-posterior projection pattern', 'ascending'), user_id)
-        elif cell_type == 'central':
+        if cell_type == 'brain motor':
+            try_annotate_neuron(segid, ('primary class', 'motor neuron'), user_id)
+        if cell_type == 'VNC motor':
+            try_annotate_neuron(segid, ('primary class', 'motor neuron'), user_id)
+        if cell_type == 'brain sensory':
+            try_annotate_neuron(segid, ('primary class', 'sensory neuron'), user_id)
+        if cell_type == 'neck sensory':
+            try_annotate_neuron(segid, ('primary class', 'sensory neuron'), user_id)
+        if cell_type == 'VNC sensory':
+            try_annotate_neuron(segid, ('primary class', 'sensory neuron'), user_id)
+        if cell_type == 'brain intrinsic':
             try_annotate_neuron(segid, ('primary class', 'central neuron'), user_id)
+        if cell_type == 'VNC intrinsic':
+            try_annotate_neuron(segid, ('primary class', 'central neuron'), user_id)
+        if cell_type == 'brain glia':
+            try_annotate_neuron(segid, ('primary class', 'glia'), user_id)
+        if cell_type == 'VNC glia':
+            try_annotate_neuron(segid, ('primary class', 'glia'), user_id)
 
 
 def annotate_neuron(neuron: 'segID (int) or point (xyz)',
