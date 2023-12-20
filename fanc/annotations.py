@@ -105,11 +105,14 @@ cell_info = {
         'right soma': {},
         'midline soma': {}},
     'soma segment': {
-        'soma in brain': {},
-        'soma in T1': {},
-        'soma in T2': {},
-        'soma in T3': {},
-        'soma in abdominal ganglion': {}},
+        'soma in brain': {
+            'soma in central brain': {},
+            'soma in optic lobe': {}},
+        'soma in VNC': {
+            'soma in T1': {},
+            'soma in T2': {},
+            'soma in T3': {},
+            'soma in abdominal ganglion': {}}},
     'anterior-posterior projection pattern': {
         'descending': {},
         'ascending': {},
