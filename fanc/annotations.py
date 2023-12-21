@@ -101,9 +101,9 @@ cell_info = {
         'glia': {
             'trachea': {}}},
     'soma side': {
-        'left soma': {},
-        'right soma': {},
-        'midline soma': {}},
+        'soma on left': {},
+        'soma on right': {},
+        'soma on midline': {}},
     'soma segment': {
         'soma in brain': {
             'soma in central brain': {},
