@@ -79,23 +79,22 @@ Hello! Before using me for the first time, you may want to read through:
 
 You can send me a message that looks like one of the `example messages below` to find certain types of neurons, or get or upload information about specific neurons.
 
-Find neurons with some annotations:
-- `find DNx01` -> Get a neuroglancer state showing all neurons currently annotated with "DNx01" (which should be exactly two neurons)
-- `find chordotonal neuron and ascending` -> Get a neuroglancer state showing all neurons currently annotated with "chordotonal neuron" and "ascending"
-- `find left T1 ventral nerve and motor neuron` -> Get a neuroglancer link that shows all neurons currently annotated with "left T1 ventral nerve" and "motor neuron"
-- You can use as many search terms if you want, e.g. `find W and X and Y and Z`
-
 Get information about a specific neuron:
 - `648518346486614449?` -> get annotations for segment 648518346486614449
-- `648518346486614449??` or `648518346486614449? all` -> get extended annotation details for segment 648518346486614449
+- `648518346486614449??` -> get detailed information about the annotations for segment 648518346486614449
 
 Upload annotations to a CAVE table that the whole community can benefit from:
-- `648518346486614449! primary class > central neuron` -> annotate that the indicated segment's "primary class" is "central neuron" (as opposed to "sensory neuron" or "motor neuron").
-- `648518346489818455! left-right projection pattern > bilateral` -> annotate that segment 648518346489818455 projects bilaterally, i.e. has synaptic connections on both sides of the VNC's midplane.
-(To upload annotations, Jasper needs to first give you permissions, so send him a message to ask if you're interested.)
+- `648518346486614449! central neuron` -> annotate that the indicated segment is a "central neuron" (as opposed to "sensory neuron" or "motor neuron").
+- `648518346489818455! bilateral` -> annotate that segment 648518346489818455 projects bilaterally, i.e. has synaptic connections on both sides of the VNC's midplane.
+(To upload annotations, <@U348GFY5N> needs to first give you permissions, so send him a message to ask if you're interested.)
 
-This bot is a work in progress - notably, you can't yet annotate most sensory neurons because the `peripheral_nerves` table is not complete yet. This will be addressed at some point.
-Feel free to send <@U348GFY5N> any questions or bug reports.
+Find neurons with some annotations:
+- `find DNx01` -> Get segment IDs of neurons currently annotated with "DNx01" (which should be exactly two neurons)
+- `find chordotonal neuron and ascending` -> Get segment IDs of neurons currently annotated with "chordotonal neuron" and "ascending"
+- `find left T1 ventral nerve and motor neuron` -> Get segment IDs of neurons currently annotated with "left T1 ventral nerve" and "motor neuron"
+- You can use as many search terms if you want, e.g. `find W and X and Y and Z`
+
+This bot is a work in progress. Feel free to send <@U348GFY5N> any questions, requests, or bug reports.
 """)
 
 @app.event("message")
@@ -174,8 +173,11 @@ def process_message(message: str, user: str, fake=False) -> str:
             return f"`{type(e)}`\n```{e}```"
 
         try:
-            return ("Search successful. View your results: " +
-                    banc.lookup.cells_annotated_with(search_terms, return_as='url'))
+            results = banc.lookup.cells_annotated_with(search_terms)
+            if len(results) > 300:
+                return ("Over 300 cells matched that search – try a more"
+                        " specific search (e.g. `find X and Y and Z`).")
+            return f"Search successful:```{', '.join(map(str, results))}```"
         except Exception as e:
             return f"`{type(e)}`\n```{e}```"
 
