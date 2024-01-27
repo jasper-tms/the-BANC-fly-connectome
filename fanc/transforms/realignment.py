@@ -27,7 +27,7 @@ def fanc4_to_3(*pts, subpixel_interpolation=False, scale=2, return_dict=False):
         Returned coordinates are floats (i.e. can have fractional values)
     """
              
-    base = 'https://spine.itanna.io/app/transform-service/dataset/fanc_v4_to_v3/s/{}/'.format(scale)
+    base = 'https://catmaid3.hms.harvard.edu/services/transform-service/dataset/fanc_v4_to_v3/s/{}/'.format(scale)
 
     if len(pts) == 1:
         pts = pts[0]
