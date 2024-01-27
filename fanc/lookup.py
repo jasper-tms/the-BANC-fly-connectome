@@ -23,7 +23,7 @@ default_annotation_sources = [('cell_info', 'tag'),
                               ('proofreading_notes', 'tag'),
                               ('neck_connective_y92500', 'tag'),
                               ('peripheral_nerves', 'tag')]
-default_anchor_point_sources = ['cell_ids', 'neck_connective_y92500', 'peripheral_nerves']
+default_anchor_point_sources = ['cell_ids', 'somas_v1', 'neck_connective_y92500', 'peripheral_nerves']
 default_svid_lookup_url = '<not implemented>'
 
 
