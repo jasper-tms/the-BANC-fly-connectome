@@ -317,7 +317,7 @@ def process_message(message: str, user: str, fake=False) -> str:
                 point = [int(coordinate.strip(',')) for coordinate in neuron.split(' ')]
             except ValueError:
                 return f"ERROR: Could not parse `{neuron}` as a segment ID or a point."
-            segid = fanc.lookup.segid_from_pt(point)
+            segid = banc.lookup.segid_from_pt(point)
         if not caveclient.chunkedgraph.is_latest_roots(segid):
             return (f"ERROR: {segid} is not a current segment ID."
                     " It may have been edited recently, or perhaps"
@@ -335,7 +335,7 @@ def process_message(message: str, user: str, fake=False) -> str:
                     " annotations. Please send Jasper a DM on slack"
                     " to request permissions.")
         try:
-            response = fanc.upload.delete_annotation(segid, annotation, user_id)
+            response = banc.upload.delete_annotation(segid, annotation, user_id)
             return (f'Successfully deleted annotation {response[1]} from'
                     f' table `{response[0]}`.')
         except Exception as e:
