@@ -20,6 +20,7 @@ default_table = 'cell_info'
 cell_info = {
     'primary class': {
         'sensory neuron': {
+            'unknown sensory subtype': {},
             'chordotonal neuron': {
                 'club chordotonal neuron': {},
                 'claw chordotonal neuron': {},

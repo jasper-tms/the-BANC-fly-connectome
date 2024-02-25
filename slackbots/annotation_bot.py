@@ -307,6 +307,39 @@ def process_message(message: str, user: str, fake=False) -> str:
         for table, e in zip(tables, invalidity_errors):
             msg += f"\n\nTable `{table}` gave `{type(e)}`:\n```{e}```"
         return msg
+    if message.split(' ')[0].endswith('-'):  # Deletion
+        print('Attempting deletion')
+        neuron = message[:message.find('-')]
+        try:
+            segid = int(neuron)
+        except ValueError:
+            try:
+                point = [int(coordinate.strip(',')) for coordinate in neuron.split(' ')]
+            except ValueError:
+                return f"ERROR: Could not parse `{neuron}` as a segment ID or a point."
+            segid = fanc.lookup.segid_from_pt(point)
+        if not caveclient.chunkedgraph.is_latest_roots(segid):
+            return (f"ERROR: {segid} is not a current segment ID."
+                    " It may have been edited recently, or perhaps"
+                    " you copy-pasted the wrong thing.")
+
+        annotation = message[message.find('-')+1:].strip(' ')
+
+        user_id = None
+        for table in permissions:
+            if user in permissions[table]:
+                user_id = permissions[table][user]
+                break
+        if user_id is None:
+            return ("You have not yet been given permissions to delete"
+                    " annotations. Please send Jasper a DM on slack"
+                    " to request permissions.")
+        try:
+            response = fanc.upload.delete_annotation(segid, annotation, user_id)
+            return (f'Successfully deleted annotation {response[1]} from'
+                    f' table `{response[0]}`.')
+        except Exception as e:
+            return f"ERROR: Deletion failed due to\n`{type(e)}`\n```{e}```"
 
     return ("ERROR: Your message does not contain a '?' or '!'"
             " character, so I don't know what you want me to do."

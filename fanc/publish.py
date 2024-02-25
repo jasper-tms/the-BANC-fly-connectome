@@ -7,7 +7,7 @@ import numpy as np
 import requests
 import cloudvolume
 
-from . import auth, transforms
+from . import auth, lookup, transforms
 
 PUBLISHED_MESHES_CLOUDPATH = ('gs://lee-lab_female-adult-nerve-cord/'
                               'meshes/{}/FANC_neurons')
@@ -108,7 +108,25 @@ def publish_mesh_to_gcloud(segids,
             mesh.vertices *= 1000  # TODO delete this after adding nm/um to align_mesh
         mesh = cloudvolume.mesh.Mesh(mesh.vertices, mesh.faces, segid=segid)
         fancneurons_cloudvolume.mesh.put(mesh)
+        del mesh
 
+
+def publish_all_meshes(published_tag='publication',
+                       tag_location=('neuron_information', 'tag2'),
+                       template_space='JRC2018_VNC_FEMALE',
+                       gcloud_path=PUBLISHED_MESHES_CLOUDPATH,
+                       n=None):
+    """
+    Copy to a public location the meshes of all neurons marked as
+    published.
+    """
+    segids_with_published_annotation = lookup.cells_annotated_with(
+        published_tag,
+        source_tables=[tag_location],
+    )
+    publish_mesh_to_gcloud(segids_with_published_annotation[:n],
+                           template_space=template_space,
+                           gcloud_path=gcloud_path)
 
 def publish_skeleton_to_catmaid(segids,
                                 catmaid_instance=None):
@@ -118,6 +136,7 @@ def publish_skeleton_to_catmaid(segids,
     template, and upload that to a different catmaid project
     """
     raise NotImplementedError
+
 
 def publish_to_bcio(cave_token):
     """
@@ -129,7 +148,7 @@ def publish_to_bcio(cave_token):
     https://api.braincircuits.io/data/fruitfly_fanc_public/
     """
     import requests
-    requests.get(f'https://api.braincircuits.io/publish/dataset?project=fruitfly_fanc_public&cave_token={cave_token}')
+    return requests.get(f'https://api.braincircuits.io/publish/dataset?project=fruitfly_fanc_public&cave_token={cave_token}')
     
 
 def _configure_template_cloudvolumes(template_space='JRC2018_VNC_FEMALE'):

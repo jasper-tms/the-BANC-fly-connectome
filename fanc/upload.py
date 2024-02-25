@@ -5,7 +5,7 @@ Upload data to CAVE tables
 See some examples at https://github.com/htem/FANC_auto_recon/blob/main/example_notebooks/update_cave_tables.ipynb
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from textwrap import dedent
 
 import numpy as np
@@ -227,6 +227,72 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         return response[0]
     else:
         return response
+
+
+def delete_annotation(segid: int,
+                      annotation: str,
+                      user_id: int,
+                      annotation_sources=lookup.default_annotation_sources) -> dict:
+    """
+    Delete an annotation from a CAVE table. The user requesting the
+    deletion must be the same user who made the annotation.
+
+    Arguments
+    ---------
+    segid: int
+        Segment ID of the neuron to delete the annotation from
+
+    annotation: str
+        Annotation to delete
+
+    user_id: int
+        The CAVE user ID who is requesting the deletion. Users
+        may only delete annotations that they themselves have made.
+
+    annotation_sources: list of 2-tuples of str
+        List of (table_name, tag_column) pairs to search for the annotation.
+    """
+    client = auth.get_caveclient()
+    if not client.chunkedgraph.is_latest_roots(segid):
+        raise ValueError(f'{segid} is not a current segment ID.')
+
+    if isinstance(annotation_sources, str):
+        annotation_sources = [(annotation_sources, 'tag')]
+    if not isinstance(annotation_sources, list):
+        raise TypeError('annotation_sources is an unexpected type. See docstring.')
+
+    for table_name, annotation_column in annotation_sources:
+        annos = client.materialize.live_live_query(
+            table_name,
+            datetime.now(timezone.utc),
+            filter_equal_dict={table_name: {annotation_column: annotation,
+                                            'pt_root_id': segid}}
+        )
+        if not 'user_id' in annos.columns:
+            annos['user_id'] = None
+        matches = annos.loc[annos['user_id'] == user_id]
+        for i, match in annos.loc[annos['user_id'] == user_id].iterrows():
+            anno_raw = client.annotation.get_annotation(table_name, match['id'])[0]
+            assert anno_raw['user_id'] == user_id
+            assert lookup.segid_from_pt(anno_raw['pt_position']) == segid
+            assert anno_raw['tag'] == annotation
+            client.annotation.delete_annotation(table_name, match['id'])
+            return (table_name,
+                    match['id'],
+                    client.annotation.get_annotation(table_name, match['id'])[0])
+
+        for i, nonmatch in annos.loc[annos['user_id'] != user_id].iterrows():
+            if nonmatch['user_id'] is None:
+                raise ValueError(f'Annotation "{annotation}" on segment {segid}'
+                                 f' is in table "{table_name}" which does not'
+                                 ' support this operation. Contact an admin if'
+                                 ' you think this annotation should be removed.')
+            contact = client.auth.get_user_information([nonmatch['user_id']])[0]['name']
+            raise ValueError(f'Annotation "{annotation}" on segment {segid}'
+                             ' can only be deleted by the user who made it,'
+                             f' {contact} (ID {nonmatch["user_id"]}).')
+    raise ValueError(f'Annotation "{annotation}" on segment {segid} not found'
+                     f' in these tables/columns: {annotation_sources}')
 
 
 def xyz_StringSeries2List(StringSeries: pd.Series):
