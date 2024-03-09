@@ -34,14 +34,12 @@ nuclei = {'name': 'nuclei (verified)',
 
 view_options = dict(
     position=[113200, 106900, 3100],
-    zoom_3d=6700,
+    zoom_3d=260000,
     layout='xy-3d'
 )
-zoom_2d = 12
+zoom_2d = 16
 
-
-outlines_layer = {'type': 'segmentation', 'source': {'url': 'precomputed://gs://zetta_lee_fly_cns_001_kisuk/final/v2/volume_meshes', 'transform': {'matrix': [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0.9462, 0]], 'outputDimensions': {'x': [4e-9, 'm'], 'y': [4e-9, 'm'], 'z': [4.5e-8, 'm']}}, 'subsources': {'mesh': True}, 'enableDefaultSubsources': False}, 'tab': 'segments', 'meshSilhouetteRendering': 2, 'segments': ['1'], 'segmentDefaultColor': '#2a7fff', 'name': 'region outlines'}
-
+outlines_layer = {'type': 'segmentation', 'source': {'url': 'precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/volume_meshes', 'subsources': {'mesh': True, 'bounds': True}, 'enableDefaultSubsources': False}, 'tab': 'segments', 'meshSilhouetteRendering': 2, 'segments': ['1'], 'segmentDefaultColor': '#2a7fff', 'name': 'region outlines'}
 
 
 def final_json_tweaks(state):
@@ -53,6 +51,12 @@ def final_json_tweaks(state):
     for layer in state['layers']:
         if layer['name'] == seg['name']:
             layer['selectedAlpha'] = 0.4
+            layer['tab'] = 'segments'
+            layer['toolBindings'] = {
+                "M": "grapheneMergeSegments",
+                "C": "grapheneMulticutSegments",
+                "F": "grapheneFindPath"
+            }
         if layer['name'] == nuclei['name']:
             #layer['visible'] = False
             layer['ignoreSegmentInteractions'] = True
@@ -63,7 +67,8 @@ def final_json_tweaks(state):
 
     state['crossSectionScale'] = zoom_2d
     state['crossSectionOrientation'] = [0, 1, 0, 0]
+    state['projectionOrientation'] = [0, 1, 0, 0]
     state.update({
-        'gpuMemoryLimit': 4_000_000_000,
-        'systemMemoryLimit': 4_000_000_000,
+        'gpuMemoryLimit': 6_000_000_000,
+        'systemMemoryLimit': 8_000_000_000,
     })
