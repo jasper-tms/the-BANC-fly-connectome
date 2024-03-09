@@ -150,7 +150,7 @@ def render_scene(neurons=None,
         if np.any(neurons < 10000000000000000):
             # If array contains point coordinates instead of rootIDs, lookup rootIDs
             neurons = lookup.segid_from_pt(neurons)
-        neurons = list(neurons)
+        neurons = list(neurons) if isinstance(neurons, np.ndarray) else [neurons]
     if isinstance(neurons, list):
         # list -> pd.DataFrame
         neurons = pd.DataFrame({'pt_root_id': neurons})
