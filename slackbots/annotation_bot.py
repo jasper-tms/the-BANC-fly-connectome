@@ -168,7 +168,8 @@ def process_message(message: str, user: str, fake=False) -> str:
 
     if message.startswith(('get ', 'find ')):
         try:
-            search_terms = [x.strip('"\'') for x in message[message.find(' ')+1:].split(' and ')]
+            search_terms = message[message.find(' ')+1:].strip('"\'')
+
         except Exception as e:
             return f"`{type(e)}`\n```{e}```"
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+import re
 import collections
 from concurrent import futures
 from datetime import datetime
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -108,7 +110,7 @@ def cells_annotated_with(tags: str or list[str],
                          exclude_tags: str or list[str] = None,
                          source_tables=default_annotation_sources,
                          timestamp='now',
-                         return_as: ['list', 'url'] = 'list',
+                         return_as: Literal['list', 'url'] = 'list',
                          raise_not_found=True):
     """
     Get all the cells annotated with a given text tag / all of the given text
@@ -117,16 +119,18 @@ def cells_annotated_with(tags: str or list[str],
     Arguments
     ---------
     tags: str or list of str
-      The tag(s) to query. If multiple are provided, only cells
-      with all the given tags will be returned.
+      The tag(s) to query. If multiple tags are provided,
+      only cells with ALL of the listed tags will be returned.
+      If a string contains ' and ' or ' AND ', it will be split into
+      a list of multiple tags.
       Any tag that starts with 'not ' or 'NOT ' will be moved
       to exclude_tags (see below).
 
     exclude_tags: str or list of str, default None
-      The tag(s) to exclude from the query. If multiple are provided, only
-      cells with none of the given tags will be returned.
-      You may also specify exclude_tags via the tags argument (above) by
-      prepending 'not ' or 'NOT ' to the tag name.
+      The tag(s) to exclude from the query. If multiple are provided,
+      only cells with NONE of the exclude_tags will be returned.
+      You may also specify exclude_tags by putting 'not {tag}' or
+      'NOT {tag}' in the `tags` argument above.
 
     source_tables: str OR list of str OR list of 2-tuple of str
       str OR list of str:
@@ -160,10 +164,17 @@ def cells_annotated_with(tags: str or list[str],
         exclude_tags = []
     if isinstance(exclude_tags, str):
         exclude_tags = [exclude_tags]
-    if not return_as in ['list', 'url']:
+    if return_as not in ['list', 'url']:
         raise ValueError('return_as must be either "list" or "url"')
+    # Parse 'and'
+    tags = [tag for string in tags for tag in
+            re.split(re.compile(' and ', re.IGNORECASE), string) if tag]
+    exclude_tags = [tag for string in exclude_tags for tag in
+                    re.split(re.compile(' and ', re.IGNORECASE), string) if tag]
+    # Parse 'not'
     exclude_tags = exclude_tags + [tag[4:] for tag in tags if tag.lower().startswith('not ')]
     tags = [tag for tag in tags if not tag.lower().startswith('not ')]
+
     annos = all_annotations(source_tables=source_tables,
                             timestamp=timestamp,
                             group_by_segid=False)

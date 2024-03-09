@@ -15,7 +15,9 @@ except ImportError:
 import pymaid
 from cloudvolume import CloudVolume
 from cloudvolume.frontends.precomputed import CloudVolumePrecomputed
-from nglui.statebuilder import *
+from nglui.statebuilder import (StateBuilder, ChainedStateBuilder,
+                                ImageLayerConfig, SegmentationLayerConfig,
+                                AnnotationLayerConfig, PointMapper, SphereMapper)
 
 from . import auth, lookup
 from .transforms import realignment
@@ -191,9 +193,12 @@ def render_scene(neurons=None,
         active=True
     )
 
-    StateBuilderDefaultSettings = lambda layers : StateBuilder(layers=layers,
-                                                               resolution=ngl_info.voxel_size,
-                                                               view_kws=ngl_info.view_options)
+    def StateBuilderDefaultSettings(layers):
+        return StateBuilder(
+            layers=layers,
+            resolution=ngl_info.voxel_size,
+            view_kws=ngl_info.view_options
+        )
 
     # Additional layer(s)
     additional_states = []
