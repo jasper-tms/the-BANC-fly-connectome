@@ -11,7 +11,7 @@ import anytree
 
 from . import lookup
 
-help_url = 'https://fanc.community/Neuron-annotations#neuron_information'
+help_url = 'https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Annotations-(cell-types,-etc.)'
 help_msg = 'See the annotation scheme described at ' + help_url
 
 default_table = 'cell_info'
