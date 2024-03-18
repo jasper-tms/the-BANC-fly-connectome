@@ -29,8 +29,8 @@ syn = {'name': 'postsynapses',
 #nuclei = {'name': 'nuclei_TODO-DATE',
 #          'path': client.annotation.get_table_metadata(info['soma_table'])['flat_segmentation_source']
 # so instead hardcode the _verified layer:
-nuclei = {'name': 'nuclei (verified)',
-          'path': '<not available>'}
+nuclei = {'name': 'nuclei_v1',
+          'path': 'precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/nuclei/seg_v1'}
 
 view_options = dict(
     position=[113200, 106900, 3100],
@@ -58,7 +58,7 @@ def final_json_tweaks(state):
                 "F": "grapheneFindPath"
             }
         if layer['name'] == nuclei['name']:
-            #layer['visible'] = False
+            layer['visible'] = False
             layer['ignoreSegmentInteractions'] = True
             layer['selectedAlpha'] = 0.8
         if layer['name'] == syn['name']:
