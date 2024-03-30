@@ -256,6 +256,7 @@ def all_annotations(source_tables=default_annotation_sources,
     annos = []
     for table_name, column_name in source_tables:
         table = client.materialize.live_live_query(table_name, timestamp)
+        table.sort_values(by='created', inplace=True)
         table['source_table'] = table_name
         table['created'] = table['created'].apply(datetime.date)
         if 'user_id' not in table.columns:
@@ -266,6 +267,15 @@ def all_annotations(source_tables=default_annotation_sources,
             table.rename(columns={column_name: 'tag'}, inplace=True)
         else:
             table['tag'] = table['tag2']
+        if (table['tag'] == 't').any():
+            if not (table['tag'] == 't').all():
+                raise ValueError(f'Column "{column_name}" in table "{table_name}"'
+                                 ' contains "t" and other values. This is unexpected.')
+            # For boolean columns, use the table name as the tag
+            table['tag'] = table_name.replace('_', ' ')
+            # Only include the table name as a tag once for each neuron
+            table.drop_duplicates(subset=['pt_root_id'], keep='last', inplace=True)
+
         annos.append(table[['pt_root_id', 'tag', 'tag2', 'pt_position',
                             'user_id', 'source_table', 'created']])
 
