@@ -72,29 +72,13 @@ handler = SocketModeHandler(app, os.environ['SLACK_TOKEN_BANC_BOT_WEBSOCKETS'])
 def show_help():
     return (
 """
-Hello! Before using me for the first time, you may want to read through:
-- <https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Annotations-(cell-types,-etc.)|the list of available annotations>
-- <https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/cell_info|the description of the "cell_info" CAVE table>
-- <https://cave.fanc-fly.com/annotation/views/aligned_volume/brain_and_nerve_cord/table/proofreading_notes|the description of the "proofreading_notes" CAVE table>
+:bank: Hello and welcome to the BANC-FlyWire community! :money_with_wings:
 
-You can send me a message that looks like one of the `example messages below` to find certain types of neurons, or get or upload information about specific neurons.
+I'll be happy to assist you today.
+- You can find the instructions for how to talk to me in <https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/banc‐bot-user-manual|my user manual>
+- You might also want to check out <https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Annotations-(cell-types,-etc.)|the list of available annotations>
 
-Get information about a specific neuron:
-- `648518346486614449?` -> get annotations for segment 648518346486614449
-- `648518346486614449??` -> get detailed information about the annotations for segment 648518346486614449
-
-Upload annotations to a CAVE table that the whole community can benefit from:
-- `648518346486614449! central neuron` -> annotate that the indicated segment is a "central neuron" (as opposed to "sensory neuron" or "motor neuron").
-- `648518346489818455! bilateral` -> annotate that segment 648518346489818455 projects bilaterally, i.e. has synaptic connections on both sides of the VNC's midplane.
-(To upload annotations, <@U348GFY5N> needs to first give you permissions, so send him a message to ask if you're interested.)
-
-Find neurons with some annotations:
-- `find DNx01` -> Get segment IDs of neurons currently annotated with "DNx01" (which should be exactly two neurons)
-- `find chordotonal neuron and ascending` -> Get segment IDs of neurons currently annotated with "chordotonal neuron" and "ascending"
-- `find left T1 ventral nerve and motor neuron` -> Get segment IDs of neurons currently annotated with "left T1 ventral nerve" and "motor neuron"
-- You can use as many search terms if you want, e.g. `find W and X and Y and Z`
-
-Feel free to send <@U348GFY5N> any questions, suggestions, or bug reports.
+I'm at your service, but I'm also a work in progress! Feel free to send <@U348GFY5N> any questions, requests, or bug reports if I seem to be misbehaving.
 """)
 
 @app.event("message")
