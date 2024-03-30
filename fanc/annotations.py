@@ -7,9 +7,11 @@ to which many users can post annotations, in order to maintain some consistency
 in which annotations are posted to the table.
 """
 
+from datetime import datetime, timezone
+
 import anytree
 
-from . import lookup
+from . import auth, lookup
 
 help_url = 'https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Annotations-(cell-types,-etc.)'
 help_msg = 'See the annotation scheme described at ' + help_url
@@ -126,7 +128,7 @@ cell_info = {
 }
 FANC_cell_info = cell_info.copy()
 FANC_cell_info['publication'] = {
-    'Azevedo Lesser Mark Phelps et al. 2022': {},
+    'Azevedo Lesser Phelps Mark et al. 2024': {},
     'Lesser Azevedo et al. 2023': {},
     'Cheong Boone Bennett et al. 2023': {},
     'Sapkal et al. 2023': {},
@@ -166,6 +168,7 @@ def _dict_to_anytree(dictionary):
         return nodes
 
     return _build_tree(dictionary)
+
 
 # Convert any hierarchical dictionaries to a tree format that is easier to use
 rules_governing_tables = {table_name: _dict_to_anytree(annotations)
@@ -232,7 +235,7 @@ def guess_class(annotation: str, table_name: str = default_table) -> str:
     if isinstance(table_name, str):
         try:
             annotations = rules_governing_tables[table_name]
-        except:
+        except KeyError:
             raise ValueError(f'Table name "{table_name}" not recognized.')
         if not isinstance(annotations, dict):
             raise ValueError(f'"{table_name}" does not use paired annotations.')
@@ -243,7 +246,7 @@ def guess_class(annotation: str, table_name: str = default_table) -> str:
 
     try:
         annotation_nodes = annotations[annotation]
-    except:
+    except KeyError:
         raise ValueError(f'Annotation "{annotation}" not recognized. {help_msg}')
 
     if len(annotation_nodes) > 1:
@@ -255,7 +258,7 @@ def guess_class(annotation: str, table_name: str = default_table) -> str:
     return annotation_nodes[0].parent.name
 
 
-def is_valid_annotation(annotation: str or tuple[str, str],
+def is_valid_annotation(annotation: str or tuple[str, str] or bool,
                         table_name: str = default_table,
                         raise_errors: bool = True) -> bool:
     """
@@ -264,7 +267,7 @@ def is_valid_annotation(annotation: str or tuple[str, str],
 
     Parameters
     ----------
-    annotation : str or list/tuple of 2 strs
+    annotation : str or list/tuple of 2 strs or bool
         The annotation or annotation pair to check the validity of.
     table_name : str
         The name of the table whose rules should be used to determine the
@@ -276,19 +279,19 @@ def is_valid_annotation(annotation: str or tuple[str, str],
         as output by running _dict_to_anytree() on a hierarchy of annotations.
     """
     if isinstance(table_name, str):
-        try:
-            annotations = rules_governing_tables[table_name]
-        except:
-            raise ValueError(f'Table name "{table_name}" not recognized.')
+        annotations = rules_governing_tables.get(table_name, None)
+        if annotations is None:
+            client = auth.get_caveclient()
+            if (client.annotation.get_table_metadata(table_name)['schema_type']
+                    != 'proofreading_boolstatus_user'):
+                raise ValueError(f'Table name "{table_name}" not recognized.')
+            annotations = [True, False]
     elif isinstance(table_name, (dict, list)):
         annotations = table_name
     else:
         raise TypeError(f'Unrecognized type for table_name: {type(table_name)}')
 
     if isinstance(annotations, list):
-        if not isinstance(annotation, str):
-            raise TypeError('annotation should be a str for this table, but'
-                            f' was {type(annotation)}')
         if (annotation not in annotations) and raise_errors:
             raise ValueError(f'Annotation "{annotation}" not recognized. {help_msg}')
         return annotation in annotations
@@ -372,7 +375,7 @@ def is_valid_pair(annotation_class: str,
     if isinstance(table_name, str):
         try:
             annotations = rules_governing_tables[table_name]
-        except:
+        except KeyError:
             raise ValueError(f'Table name "{table_name}" not recognized.')
         if not isinstance(annotations, dict):
             raise ValueError(f'"{table_name}" does not use paired annotations.')
@@ -391,14 +394,14 @@ def is_valid_pair(annotation_class: str,
 
     try:
         class_nodes = annotations[annotation_class]
-    except:
+    except KeyError:
         if raise_errors:
             raise ValueError(f'Annotation class "{annotation_class}" not'
                              f' recognized. {help_msg}')
         return False
     try:
         annotation_nodes = annotations[annotation]
-    except:
+    except KeyError:
         if raise_errors:
             raise ValueError(f'Annotation "{annotation}" not recognized.'
                              f' {help_msg}')
@@ -425,7 +428,7 @@ def is_valid_pair(annotation_class: str,
 
 
 def is_allowed_to_post(segid: int,
-                       annotation: str or tuple[str, str],
+                       annotation: str or tuple[str, str] or bool,
                        table_name: str = default_table,
                        raise_errors: bool = True) -> bool:
     """
@@ -471,10 +474,26 @@ def is_allowed_to_post(segid: int,
       If `raise_errors` is True, an exception with an informative error
       message will be raised instead of returning False.
     """
-    try:
-        annotations = rules_governing_tables[table_name]
-    except:
-        raise ValueError(f'Table name "{table_name}" not recognized.')
+    annotations = rules_governing_tables.get(table_name, None)
+    if annotations is None:
+        client = auth.get_caveclient()
+        if (client.annotation.get_table_metadata(table_name)['schema_type']
+                != 'proofreading_boolstatus_user'):
+            raise ValueError(f'No annotation rules found for table "{table_name}"')
+        if not isinstance(annotation, bool):
+            raise ValueError(f'Table "{table_name}" only uses True/False annotations.')
+        existing_annos = client.materialize.live_live_query(
+            table_name,
+            datetime.now(timezone.utc),
+            filter_equal_dict={table_name: {
+                'valid_id': segid,
+                'proofread': {True: 't', False: 'f'}[annotation]
+            }}
+        )
+        if raise_errors and not existing_annos.empty:
+            raise ValueError(f'Segment {segid} already has this annotation'
+                             f' in the table "{table_name}".')
+        return existing_annos.empty
 
     if not is_valid_annotation(annotation, table_name=table_name,
                                raise_errors=raise_errors):
@@ -508,7 +527,7 @@ def is_allowed_to_post(segid: int,
     if annotation_class in multiple_subclasses_allowed:
         # Check if any tag,tag2 pair is the same as annotation,annotation_class
         if ((existing_annos.tag == annotation) &
-            (existing_annos.tag2 == annotation_class)).any():
+                (existing_annos.tag2 == annotation_class)).any():
             if raise_errors:
                 raise ValueError(f'Segment {segid} already has this exact'
                                  ' annotation pair.')

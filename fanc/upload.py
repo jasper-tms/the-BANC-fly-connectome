@@ -122,7 +122,7 @@ def new_cell(pt_position,
 
 
 def annotate_neuron(neuron: 'segID (int) or point (xyz)',
-                    annotation: str or tuple[str, str],
+                    annotation: str or tuple[str, str] or bool,
                     user_id: int,
                     table_name='cell_info',
                     convert_given_point_to_anchor_point=True,
@@ -132,7 +132,7 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
 
     This function will first check that `annotation` is a valid
     annotation for the given table, according to the rules described at
-    https://github.com/htem/FANC_auto_recon/wiki/Neuron-annotations#neuron_information
+    https://github.com/htem/FANC_auto_recon/wiki/Neuron-annotations
     If it is, the annotation will be posted to the table.
 
     This function is designed for use with tables with one of these schemas:
@@ -141,13 +141,15 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
       annotations, either as a colon-separated string formatted like
       "annotation_class: annotation", or as a 2-tuple of strings in the order
       (annotation_class, annotation).
+    - "proofreading_boolstatus_user", in which case `annotation` should
+      be True or False.
 
     Arguments
     ---------
     neuron: int OR 3-length iterable of ints/floats
         Segment ID or point coordinate of a neuron to upload information about
 
-    annotation: str OR 2-tuple of (str, str)
+    annotation: str OR 2-tuple of (str, str) OR bool
         Annotation to upload, or a pair of annotations if trying to upload to a
         table with two tag columns. See the docstring of
         `fanc.annotations.parse_annotation_pair()` for options on how to format
@@ -158,7 +160,8 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
 
     table_name: str
         Name of the CAVE table to upload information to. Only works
-        with tables of schema "bound_tag_user" or "bound_double_tag_user".
+        with tables of schema "bound_tag_user", "bound_double_tag_user",
+        or "proofreading_boolstatus_user".
 
     convert_given_point_to_anchor_point: bool
         Only matters if `neuron` is a point (not a segment ID).
@@ -200,16 +203,30 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         raise TypeError(f'user_id must be an integer but got "{user_id}".')
 
     stage = client.annotation.stage_annotations(table_name)
-    if not annotations.is_allowed_to_post(segid, annotation,
-                                          table_name=table_name,
-                                          raise_errors=True):
+    try:
+        allowed_to_post = annotations.is_allowed_to_post(segid, annotation,
+                                                         table_name=table_name,
+                                                         raise_errors=True)
+    except ValueError as e:
+        if not e.args or not e.args[0].startswith('No annotation rules found for table'):
+            raise e
+        allowed_to_post = True
+    if not allowed_to_post:
         raise ValueError(f'"{annotation}" is not allowed to be posted to'
                          f' segment {segid} in table "{table_name}".')
 
     if 'tag2' in stage.fields:
         annotation = annotations.parse_annotation_pair(annotation)
 
-    if isinstance(annotation, tuple):
+    if 'tag' not in stage.fields:
+        if 'valid_id' in stage.fields and 'proofread' in stage.fields:
+            stage.add(pt_position=point,
+                      valid_id=segid,
+                      proofread=annotation,
+                      user_id=user_id)
+        else:
+            raise ValueError(f'Table "{table_name}" is not a supported schema.')
+    elif isinstance(annotation, tuple):
         assert len(annotation) == 2
         stage.add(pt_position=point,
                   tag=annotation[1],

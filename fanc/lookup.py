@@ -347,6 +347,7 @@ def annotations(segids: int or list[int],
         table = client.materialize.live_live_query(
             table_name, timestamp, filter_in_dict={table_name: {'pt_root_id': segids}})
         table['source_table'] = table_name
+        table.sort_values(by='created', inplace=True)
         if 'user_id' not in table.columns:
             table['user_id'] = None
         if column_name != 'tag2':
@@ -355,9 +356,17 @@ def annotations(segids: int or list[int],
             table.rename(columns={column_name: 'tag'}, inplace=True)
         else:
             table['tag'] = table['tag2']
+        if (table['tag'] == 't').any():
+            if not (table['tag'] == 't').all():
+                raise ValueError(f'Column "{column_name}" in table "{table_name}"'
+                                 ' contains "t" and other values. This is unexpected.')
+            # For boolean columns, use the table name as the tag
+            table['tag'] = table_name.replace('_', ' ')
+            # Only include the table name as a tag once
+            table = table[-1:]
         tables.append(table[['pt_root_id', 'tag', 'tag2', 'pt_position',
                             'user_id', 'source_table', 'created']])
-    table = pd.concat(tables).sort_values(by='created').reset_index(drop=True)
+    table = pd.concat(tables).reset_index(drop=True)
 
     if return_details:
         return table

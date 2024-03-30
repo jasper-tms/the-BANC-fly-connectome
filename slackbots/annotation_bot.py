@@ -94,7 +94,7 @@ Find neurons with some annotations:
 - `find left T1 ventral nerve and motor neuron` -> Get segment IDs of neurons currently annotated with "left T1 ventral nerve" and "motor neuron"
 - You can use as many search terms if you want, e.g. `find W and X and Y and Z`
 
-This bot is a work in progress. Feel free to send <@U348GFY5N> any questions, requests, or bug reports.
+Feel free to send <@U348GFY5N> any questions, suggestions, or bug reports.
 """)
 
 @app.event("message")
@@ -251,6 +251,8 @@ def process_message(message: str, user: str, fake=False) -> str:
         annotation = message[message.find('!')+1:].strip(' ')
         invalidity_errors = []
         for table in tables:
+            if annotation.replace(' ', '_').replace('-', '_') == table:
+                annotation = True
             try:
                 if not banc.annotations.is_valid_annotation(annotation,
                                                             table_name=table,
@@ -278,7 +280,8 @@ def process_message(message: str, user: str, fake=False) -> str:
                 except Exception as e:
                     return f"`{type(e)}`\n```{e}```"
                 return (f"FAKE: Would upload segment {segid}, point"
-                        f" `{list(point)}`, annotation `{annotation}`.")
+                        f" `{list(point)}`, annotation `{annotation}`"
+                        f" to table `{table}`.")
             try:
                 annotation_id = banc.upload.annotate_neuron(
                     segid, annotation, cave_user_id, table_name=table
@@ -288,17 +291,27 @@ def process_message(message: str, user: str, fake=False) -> str:
                 msg = (f"Upload to `{table}` succeeded:\n"
                        f"- Segment {segid}\n"
                        f"- Point coordinate `{uploaded_data['pt_position']}`\n"
-                       f"- Annotation ID: {annotation_id}\n"
-                       f"- Annotation: `{uploaded_data['tag']}`")
-                if 'tag2' in uploaded_data:
+                       f"- Annotation ID: {annotation_id}")
+                if 'proofread' in uploaded_data:
+                    msg += f"\n- Annotation: `{uploaded_data['proofread']}`"
+                    record_upload(annotation_id, segid,
+                                  uploaded_data['proofread'],
+                                  cave_user_id, table)
+                elif 'tag' in uploaded_data and 'tag2' in uploaded_data:
+                    msg += f"\n- Annotation: `{uploaded_data['tag']}`"
                     msg += f"\n- Annotation class: `{uploaded_data['tag2']}`"
                     record_upload(annotation_id, segid,
                                   uploaded_data['tag2'] + ': ' + uploaded_data['tag'],
                                   cave_user_id, table)
-                else:
+                elif 'tag' in uploaded_data:
+                    msg += f"\n- Annotation: `{uploaded_data['tag']}`"
                     record_upload(annotation_id, segid,
                                   uploaded_data['tag'],
                                   cave_user_id, table)
+                else:
+                    msg = (msg + "\n\nWARNING: Something went wrong with recording"
+                           " your upload on the slackbot server. Please send Jasper"
+                           " a screenshot of your message and this response.")
                 return msg
             except Exception as e:
                 return f"ERROR: Annotation failed due to\n`{type(e)}`\n```{e}```"
@@ -348,7 +361,7 @@ def process_message(message: str, user: str, fake=False) -> str:
 
 
 def record_upload(annotation_id, segid, annotation, user_id, table_name) -> None:
-    uploads_fn = f'annotation_bot_uploads_to_{table_name}.txt'
+    uploads_fn = f'annotation_bot_uploads_to_{table_name}.csv'
     with open(uploads_fn, 'a') as f:
         f.write(f'{annotation_id},{segid},{annotation},{user_id}\n')
 

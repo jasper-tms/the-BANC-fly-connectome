@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 """
+This bot's functionality has been entirely taken over by annotation_bot.py
+as of April 2024
+
+
 This Slack app uses the "socket mode" feature of Slack's Bolt framework.
 This allows the app to receive messages from Slack without needing to
 have your own public server. Some useful links that describe this:
@@ -133,6 +137,11 @@ def direct_message(message, say):
     if 'bot_id' in message:
         # Skip if this message was posted by another bot
         return
+
+    say('My duties have been taken over by <@U0529SNRAKY>. Use that bot instead!\n\n'
+        'For example, send it the message "648518346486614449! proofread first pass"'
+        ' or "648518346486614449! proofread second pass" to mark that neuron as proofread')
+    return
 
     response = None
     if 'help' in message['text'].lower():
@@ -315,13 +324,13 @@ def process_message(message: str, user: str, fake=False) -> str:
     
 
 def record_upload(segid, user, table_name) -> None:
-    uploads_fn = f'proofreading_status_bot_uploads_{table_name}.txt'
+    uploads_fn = f'proofreading_status_bot_uploads_{table_name}.csv'
     with open(uploads_fn, 'a') as f:
         f.write(f'{segid},{user}\n')
 
 
 def have_recently_uploaded(segid, table_name) -> bool:
-    uploads_fn = f'proofreading_status_bot_uploads_{table_name}.txt'
+    uploads_fn = f'proofreading_status_bot_uploads_{table_name}.csv'
     with open(uploads_fn, 'r') as f:
         recent_uploads = [int(line.strip().split(',')[0]) for line in f.readlines()]
     return segid in recent_uploads
