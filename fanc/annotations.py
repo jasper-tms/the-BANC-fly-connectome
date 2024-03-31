@@ -51,6 +51,16 @@ cell_info = {
                 'abdominal UM neuron': {}}},
         'glia': {
             'trachea': {}}},
+    'fast neurotransmitter': {
+        'cholinergic': {},
+        'GABAergic': {},
+        'glutamatergic': {}},
+    'other neurotransmitter': {
+        'dopaminergic': {},
+        'histaminergic': {},
+        'octopaminergic': {},
+        'serotonergic': {},
+        'tyraminergic': {}},
     'soma side': {
         'soma on left': {},
         'soma on right': {},
@@ -521,6 +531,7 @@ def is_allowed_to_post(segid: int,
 
     # Rule 1
     multiple_subclasses_allowed = [
+        'other neurotransmitter',
         'neuron identity',
         'publication'
     ]
