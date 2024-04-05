@@ -288,20 +288,27 @@ def delete_annotation(segid: int,
         raise TypeError('annotation_sources is an unexpected type. See docstring.')
 
     for table_name, annotation_column in annotation_sources:
+        if annotation.replace(' ', '_') == table_name:
+            anno_query = 't'
+            anno_returned = True
+        else:
+            anno_query = annotation
+            anno_returned = annotation
+
         annos = client.materialize.live_live_query(
             table_name,
             datetime.now(timezone.utc),
-            filter_equal_dict={table_name: {annotation_column: annotation,
+            filter_equal_dict={table_name: {annotation_column: anno_query,
                                             'pt_root_id': segid}}
         )
-        if not 'user_id' in annos.columns:
+        if 'user_id' not in annos.columns:
             annos['user_id'] = None
-        matches = annos.loc[annos['user_id'] == user_id]
         for i, match in annos.loc[annos['user_id'] == user_id].iterrows():
             anno_raw = client.annotation.get_annotation(table_name, match['id'])[0]
             assert anno_raw['user_id'] == user_id
             assert lookup.segid_from_pt(anno_raw['pt_position']) == segid
-            assert anno_raw['tag'] == annotation
+            assert anno_returned in [anno_raw.get('proofread', -1),
+                                     anno_raw.get('tag', -1)]
             client.annotation.delete_annotation(table_name, match['id'])
             return (table_name,
                     match['id'],
