@@ -52,13 +52,14 @@ from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
 import banc
+banc.use_auth_token_key('banc_service_account')
 
 # Setup
 verbosity = 2
 convert_given_point_to_anchor_point = False
 
 caveclient = banc.get_caveclient()
-tables = ['cell_info', 'proofreading_notes']
+tables = ['cell_info', 'backbone_proofread']
 
 with open('slack_user_permissions.json', 'r') as f:
     permissions = json.load(f)
