@@ -135,6 +135,7 @@ cell_info = {
         'T3 H2 bundle': {},
         'T3 H3 bundle': {}},
     'neuron identity': {},
+    'freeform': {},
 }
 FANC_cell_info = cell_info.copy()
 FANC_cell_info['publication'] = {
@@ -270,6 +271,7 @@ def guess_class(annotation: str, table_name: str = default_table) -> str:
 
 def is_valid_annotation(annotation: str or tuple[str, str] or bool,
                         table_name: str = default_table,
+                        response_on_unrecognized_table='raise',
                         raise_errors: bool = True) -> bool:
     """
     Determine whether an annotation is a recognized/valid annotation
@@ -294,7 +296,9 @@ def is_valid_annotation(annotation: str or tuple[str, str] or bool,
             client = auth.get_caveclient()
             if (client.annotation.get_table_metadata(table_name)['schema_type']
                     != 'proofreading_boolstatus_user'):
-                raise ValueError(f'Table name "{table_name}" not recognized.')
+                if response_on_unrecognized_table == 'raise':
+                    raise ValueError(f'No annotation rules found for table "{table_name}"')
+                return response_on_unrecognized_table
             annotations = [True, False]
     elif isinstance(table_name, (dict, list)):
         annotations = table_name
@@ -394,7 +398,7 @@ def is_valid_pair(annotation_class: str,
     else:
         raise TypeError(f'Unrecognized type for table_name: {type(table_name)}')
 
-    if annotation_class == 'neuron identity':
+    if annotation_class in ['neuron identity', 'freeform']:
         if annotation in annotations:
             if raise_errors:
                 raise ValueError(f'The term "{annotation}" is a class,'
@@ -440,6 +444,7 @@ def is_valid_pair(annotation_class: str,
 def is_allowed_to_post(segid: int,
                        annotation: str or tuple[str, str] or bool,
                        table_name: str = default_table,
+                       response_on_unrecognized_table='raise',
                        raise_errors: bool = True) -> bool:
     """
     Determine whether a particular segment is allowed to be annotated
@@ -457,6 +462,7 @@ def is_allowed_to_post(segid: int,
       This rule is NOT enforced for a few special annotation_classes
       that are allowed to have many subannotations:
         - 'neuron identity'
+        - 'freeform'
         - 'publication'
       2. The given annotation pair may only be posted if its
       annotation_class is at the root of the annotation tree (e.g.
@@ -489,7 +495,9 @@ def is_allowed_to_post(segid: int,
         client = auth.get_caveclient()
         if (client.annotation.get_table_metadata(table_name)['schema_type']
                 != 'proofreading_boolstatus_user'):
-            raise ValueError(f'No annotation rules found for table "{table_name}"')
+            if response_on_unrecognized_table == 'raise':
+                raise ValueError(f'No annotation rules found for table "{table_name}"')
+            return response_on_unrecognized_table
         if not isinstance(annotation, bool):
             raise ValueError(f'Table "{table_name}" only uses True/False annotations.')
         existing_annos = client.materialize.live_live_query(
@@ -506,6 +514,7 @@ def is_allowed_to_post(segid: int,
         return existing_annos.empty
 
     if not is_valid_annotation(annotation, table_name=table_name,
+                               response_on_unrecognized_table=response_on_unrecognized_table,
                                raise_errors=raise_errors):
         return False
 
@@ -533,6 +542,7 @@ def is_allowed_to_post(segid: int,
     multiple_subclasses_allowed = [
         'other neurotransmitter',
         'neuron identity',
+        'freeform',
         'publication'
     ]
     if annotation_class in multiple_subclasses_allowed:
