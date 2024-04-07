@@ -51,14 +51,13 @@ from typing import Union
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 
-from caveclient import CAVEclient
 import banc
 
 # Setup
 verbosity = 2
 convert_given_point_to_anchor_point = False
 
-caveclient = CAVEclient('brain_and_nerve_cord')
+caveclient = banc.get_caveclient()
 tables = ['cell_info', 'proofreading_notes']
 
 with open('slack_user_permissions.json', 'r') as f:
@@ -67,6 +66,7 @@ with open('slack_user_permissions.json', 'r') as f:
 app = App(token=os.environ['SLACK_TOKEN_BANC_BOT'],
           signing_secret=os.environ['SLACK_SIGNING_SECRET_BANC_BOT'])
 handler = SocketModeHandler(app, os.environ['SLACK_TOKEN_BANC_BOT_WEBSOCKETS'])
+
 
 def show_help():
     return (
@@ -80,8 +80,9 @@ I'll be happy to assist you today.
 I'm at your service, but I'm also a work in progress! Feel free to send <@U348GFY5N> any questions, requests, or bug reports if I seem to be misbehaving.
 """)
 
+
 @app.event("message")
-def direct_message(message, say):
+def direct_message(message, say, client):
     """
     Slack servers trigger this function when a user sends a direct message to the bot.
 
@@ -112,9 +113,13 @@ def direct_message(message, say):
         print('Processing message with timestamp', message['ts'])
 
     if response is None:
-        response = process_message(message['text'],
-                                   message['user'],
-                                   fake=fake)
+        try:
+            response = process_message(message['text'],
+                                       message['user'],
+                                       client=client,
+                                       fake=fake)
+        except Exception as e:
+            response = f"`{type(e)}`\n```{e}```"
     if verbosity >= 1:
         print('Posting response:', response)
     if len(response) > 1500:
@@ -123,7 +128,10 @@ def direct_message(message, say):
         say(response)
 
 
-def process_message(message: str, user: str, fake=False) -> str:
+def process_message(message: str,
+                    user: str,
+                    client=None,
+                    fake=False) -> str:
     """
     Process a slack message posted by a user, and return a text response.
 
@@ -150,20 +158,10 @@ def process_message(message: str, user: str, fake=False) -> str:
         message = message.replace('  ', ' ')
 
     if message.startswith(('get ', 'find ')):
-        try:
-            search_terms = message[message.find(' ')+1:].strip('"\'')
+        search_terms = message[message.find(' ')+1:].strip('"\'')
 
-        except Exception as e:
-            return f"`{type(e)}`\n```{e}```"
-
-        try:
-            results = banc.lookup.cells_annotated_with(search_terms)
-            if len(results) > 300:
-                return ("Over 300 cells matched that search – try a more"
-                        " specific search (e.g. `find X and Y and Z`).")
-            return f"Search successful:```{', '.join(map(str, results))}```"
-        except Exception as e:
-            return f"`{type(e)}`\n```{e}```"
+        return ("Search successful. View your results: " +
+                banc.lookup.cells_annotated_with(search_terms, return_as='url'))
 
     try:
         caveclient.materialize.version = caveclient.materialize.most_recent_version()
@@ -197,10 +195,7 @@ def process_message(message: str, user: str, fake=False) -> str:
         if any([x in modifiers.lower() for x in ['all', 'details', 'verbose', 'everything']]):
             return_details = True
 
-        try:
-            info = banc.lookup.annotations(segid, return_details=return_details)
-        except Exception as e:
-            return f"`{type(e)}`\n```{e}```"
+        info = banc.lookup.annotations(segid, return_details=return_details)
         if len(info) == 0:
             return "No annotations found."
         if return_details:
@@ -249,6 +244,7 @@ def process_message(message: str, user: str, fake=False) -> str:
             try:
                 if not banc.annotations.is_valid_annotation(annotation,
                                                             table_name=table,
+                                                            response_on_unrecognized_table=True,
                                                             raise_errors=True):
                     raise ValueError(f'Invalid annotation "{annotation}"'
                                      f' for table "{table}".')
@@ -267,11 +263,9 @@ def process_message(message: str, user: str, fake=False) -> str:
                         " to request permissions.")
 
             if fake:
-                try:
-                    banc.annotations.is_allowed_to_post(segid, annotation,
-                                                        table_name=table)
-                except Exception as e:
-                    return f"`{type(e)}`\n```{e}```"
+                banc.annotations.is_allowed_to_post(segid, annotation,
+                                                    response_on_unrecognized_table=True,
+                                                    table_name=table)
                 return (f"FAKE: Would upload segment {segid}, point"
                         f" `{list(point)}`, annotation `{annotation}`"
                         f" to table `{table}`.")
@@ -345,12 +339,12 @@ def process_message(message: str, user: str, fake=False) -> str:
                     " to request permissions.")
         try:
             response = banc.upload.delete_annotation(segid, annotation, user_id)
-            return (f'Successfully deleted annotation {response[1]} from'
-                    f' table `{response[0]}`.')
+            return (f'Successfully deleted annotation with ID {response[1]}'
+                    f' from table `{response[0]}`.')
         except Exception as e:
             return f"ERROR: Deletion failed due to\n`{type(e)}`\n```{e}```"
 
-    return ("ERROR: Your message does not contain a '?' or '!'"
+    return ("ERROR: Your message does not contain a `?`, `!`, or `-`"
             " character, so I don't know what you want me to do."
             " Make a post containing the word 'help' for instructions.")
 
