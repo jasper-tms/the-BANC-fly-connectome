@@ -158,8 +158,21 @@ def process_message(message: str,
     while '  ' in message:
         message = message.replace('  ', ' ')
 
-    if message.startswith(('get ', 'find ')):
+    if message.startswith(('get', 'find')):
         search_terms = message[message.find(' ')+1:].strip('"\'')
+
+        if message.startswith(('getids', 'findids')):
+            results = banc.lookup.cells_annotated_with(search_terms,
+                                                       return_as='list')
+            if len(results) > 300:
+                return (f"{len(results)} cells matched that search! Try a more"
+                        " specific search (like `findids X and Y and Z`) to see"
+                        " a list of IDs.")
+            return f"Search successful:```{', '.join(map(str, results))}```"
+        if message.startswith(('getnum', 'findnum')):
+            results = banc.lookup.cells_annotated_with(search_terms,
+                                                       return_as='list')
+            return f"Your search matched {len(results)} cells."
 
         return ("Search successful. View your results: " +
                 banc.lookup.cells_annotated_with(search_terms, return_as='url'))
@@ -167,7 +180,8 @@ def process_message(message: str,
     try:
         caveclient.materialize.version = caveclient.materialize.most_recent_version()
     except Exception as e:
-        return f"The CAVE server did not respond: `{type(e)}`\n```{e}```"
+        return ("CAVE appears to be offline. Please wait a few minutes"
+                f" and try again: `{type(e)}`\n```{e}```")
 
     # Because HTML or something, the '>' character typed into slack
     # is reaching this code as '&gt;', so revert it for readability.
@@ -221,7 +235,7 @@ def process_message(message: str,
                 point = banc.lookup.anchor_point(segid)
             except Exception as e:
                 return f"`{type(e)}`\n```{e}```"
-        except:
+        except ValueError:
             point = [int(coordinate.strip(','))
                      for coordinate in re.split(r'[ ,]+', neuron)]
             neuron = point
@@ -231,7 +245,6 @@ def process_message(message: str,
                     point = banc.lookup.anchor_point(segid)
                 except Exception as e:
                     return f"`{type(e)}`\n```{e}```"
-
 
         if not caveclient.chunkedgraph.is_latest_roots(segid):
             return (f"ERROR: {segid} is not a current segment ID."

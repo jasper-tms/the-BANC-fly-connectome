@@ -815,19 +815,26 @@ def soma_from_segid(segids,
 
     if table in [None, 'default_soma_table']:
         table = client.info.get_datastack_info()['soma_table']
-        select_columns = None  # Feature not currently supported on reference tables
+        joins = [[table, 'id', 'somas_dec2022', 'id']]
     elif table in ['all', 'somas']:
         table = 'somas_dec2022'
+        joins = None
     elif table in ['neurons', 'neuron']:
         table = 'neuron_somas_dec2022'
-        select_columns = None  # Feature not currently supported on reference tables
+        joins = [[table, 'id', 'somas_dec2022', 'id']]
     elif table == 'glia':
         table = 'glia_somas_dec2022'
-        select_columns = None  # Feature not currently supported on reference tables
-    somas = client.materialize.query_table(table,
-                                           select_columns=select_columns,
-                                           timestamp=timestamp)
-    return somas.loc[somas.pt_root_id.isin(segids)]
+        joins = [[table, 'id', 'somas_dec2022', 'id']]
+    else:
+        raise ValueError(f'Unknown table name {table}. See docstring for options.')
+    somas = client.materialize.live_live_query(
+        table,
+        joins=joins,
+        timestamp=timestamp,
+        filter_in_dict={'somas_dec2022': {'pt_root_id': segids}}
+    )
+    somas.rename(columns={'idx': 'id'}, inplace=True)
+    return somas[select_columns]
 # --- END KEY ATTRIBUTES SECTION --- #
 
 
