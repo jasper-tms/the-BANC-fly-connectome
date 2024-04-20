@@ -21,11 +21,18 @@ from . import auth, statebuilder
 #   explicitly specify multiple columns
 default_cellid_source = ('cell_ids', 'user_id')
 default_proofreading_tables = ['backbone_proofread']
-default_annotation_sources = [('cell_info', 'tag'),
-                              ('neck_connective_y92500', 'tag'),
-                              ('peripheral_nerves', 'tag'),
-                              ('backbone_proofread', 'proofread')]
-default_anchor_point_sources = ['cell_ids', 'neck_connective_y92500', 'peripheral_nerves']
+default_annotation_sources = [
+    ('cell_info', 'tag'),
+    ('neck_connective_y92500', 'tag'),
+    ('peripheral_nerves', 'tag'),
+    ('backbone_proofread', 'proofread'),
+]
+default_anchor_point_sources = [
+    #'cell_ids',  # TODO add me back in when this table is more complete
+    'neck_connective_y92500',
+    'peripheral_nerves',
+    'backbone_proofread',
+]
 default_svid_lookup_url = '<not implemented>'
 
 
