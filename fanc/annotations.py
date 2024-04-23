@@ -39,6 +39,7 @@ cell_info = {
             'neck motor neuron': {},
             'wing motor neuron': {},
             'haltere motor neuron': {},
+            'spiracle motor neuron': {},
             'abdominal motor neuron': {}},
         'efferent non-motor neuron': {
             'UM neuron': {

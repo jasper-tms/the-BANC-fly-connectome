@@ -379,8 +379,8 @@ def annotations(segids: int or list[int],
                                  ' contains "t" and other values. This is unexpected.')
             # For boolean columns, use the table name as the tag
             table['tag'] = table_name.replace('_', ' ')
-            # Only include the table name as a tag once
-            table = table[-1:]
+            # Only include the table name as a tag once for each neuron
+            table.drop_duplicates(subset=['pt_root_id'], keep='last', inplace=True)
         tables.append(table[['pt_root_id', 'tag', 'tag2', 'pt_position',
                             'user_id', 'source_table', 'created']])
     table = pd.concat(tables).reset_index(drop=True)
