@@ -283,6 +283,7 @@ def all_annotations(source_tables=default_annotation_sources,
             # Only include the table name as a tag once for each neuron
             table.drop_duplicates(subset=['pt_root_id'], keep='last', inplace=True)
 
+        table.attrs = {}
         annos.append(table[['pt_root_id', 'tag', 'tag2', 'pt_position',
                             'user_id', 'source_table', 'created']])
 
@@ -499,7 +500,7 @@ def segid_from_pt(points: 'Nx3 iterable',
     try:
         iter(svids)
         return cv.get_roots(svids, timestamp=timestamp).astype(np.int64)
-    except:
+    except TypeError:
         return cv.get_roots(svids, timestamp=timestamp).astype(np.int64)[0]
 
 
