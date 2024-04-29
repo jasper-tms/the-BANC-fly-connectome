@@ -187,12 +187,25 @@ def process_message(message: str,
     # is reaching this code as '&gt;', so revert it for readability.
     message = message.replace('&gt;', '>')
 
-    return_details = False
-    if '??' in message:
-        return_details = True
-        message = message.replace('??', '?')
-    if '?' in message:  # Query
-        neuron = message[:message.find('?')]
+    command_chars = ['?', '!', '-']
+    try:
+        command_index = min([message.find(char)
+                             for char in command_chars
+                             if char in message])
+    except ValueError:
+        return ("ERROR: Your message does not contain a `?`, `!`, or `-`"
+                " character, so I don't know what you want me to do."
+                " Make a post containing the word 'help' for instructions.")
+    command_char = message[command_index]
+
+    if command_char == '?':
+        if message.startswith('??', command_index):
+            return_details = True
+            message = message.replace('??', '?', 1)
+        else:
+            return_details = False
+
+        neuron = message[:command_index]
         try:
             segid = int(neuron)
         except ValueError:
@@ -206,9 +219,6 @@ def process_message(message: str,
             return (f"ERROR: {segid} is not a current segment ID."
                     " It may have been edited recently, or perhaps"
                     " you copy-pasted the wrong thing.")
-        modifiers = message[message.find('?')+1:].strip(' ')
-        if any([x in modifiers.lower() for x in ['all', 'details', 'verbose', 'everything']]):
-            return_details = True
 
         info = banc.lookup.annotations(segid, return_details=return_details)
         if len(info) == 0:
@@ -226,8 +236,8 @@ def process_message(message: str,
         else:
             return ('```' + '\n'.join(info) + '```')
 
-    if '!' in message:  # Upload
-        neuron = message[:message.find('!')]
+    if command_char == '!':  # Upload
+        neuron = message[:command_index]
         try:
             segid = int(neuron)
             neuron = segid
@@ -247,7 +257,7 @@ def process_message(message: str,
             return (f"ERROR: {segid} is not a current segment ID."
                     " It may have been edited recently, or perhaps"
                     " you copy-pasted the wrong thing.")
-        annotation = message[message.find('!')+1:].strip(' ')
+        annotation = message[command_index+1:].strip()
         invalidity_errors = []
         for table in tables:
             if annotation.replace(' ', '_').replace('-', '_') == table:
@@ -320,9 +330,8 @@ def process_message(message: str,
         for table, e in zip(tables, invalidity_errors):
             msg += f"\n\nTable `{table}` gave `{type(e)}`:\n```{e}```"
         return msg
-    if message.split(' ')[0].endswith('-'):  # Deletion
-        print('Attempting deletion')
-        neuron = message[:message.find('-')]
+    if command_char == '-':  # Delete annotation
+        neuron = message[:command_index]
         try:
             segid = int(neuron)
         except ValueError:
@@ -337,7 +346,7 @@ def process_message(message: str,
                     " It may have been edited recently, or perhaps"
                     " you copy-pasted the wrong thing.")
 
-        annotation = message[message.find('-')+1:].strip(' ')
+        annotation = message[command_index+1:].strip()
 
         user_id = None
         for table in permissions:
@@ -354,10 +363,6 @@ def process_message(message: str,
                     f' from table `{response[0]}`.')
         except Exception as e:
             return f"ERROR: Deletion failed due to\n`{type(e)}`\n```{e}```"
-
-    return ("ERROR: Your message does not contain a `?`, `!`, or `-`"
-            " character, so I don't know what you want me to do."
-            " Make a post containing the word 'help' for instructions.")
 
 
 def record_upload(annotation_id, segid, annotation, user_id, table_name) -> None:
