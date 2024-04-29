@@ -250,7 +250,7 @@ def process_message(message: str,
                      for coordinate in re.split(r'[ ,]+', neuron)]
             segid = banc.lookup.segid_from_pt(point)
             if convert_given_point_to_anchor_point:
-                point = fanc.lookup.anchor_point(segid)
+                point = banc.lookup.anchor_point(segid)
             neuron = point
 
         if not caveclient.chunkedgraph.is_latest_roots(segid):
