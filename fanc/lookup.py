@@ -26,6 +26,7 @@ default_annotation_sources = [
     ('neck_connective_y92500', 'tag'),
     ('peripheral_nerves', 'tag'),
     ('backbone_proofread', 'proofread'),
+    ('proofreading_notes', 'tag'),
 ]
 default_anchor_point_sources = [
     #'cell_ids',  # TODO add me back in when this table is more complete

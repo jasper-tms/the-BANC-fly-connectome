@@ -59,7 +59,7 @@ verbosity = 2
 convert_given_point_to_anchor_point = False
 
 caveclient = banc.get_caveclient()
-tables = ['cell_info', 'backbone_proofread']
+tables = ['cell_info', 'backbone_proofread', 'proofreading_notes']
 
 with open('slack_user_permissions.json', 'r') as f:
     permissions = json.load(f)
