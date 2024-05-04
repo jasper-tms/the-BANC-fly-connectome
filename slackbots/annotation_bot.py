@@ -162,15 +162,27 @@ def process_message(message: str,
     # - A list of annotations. Cells with any of these annotations
     #   will be _excluded_ from the search results.
     todos = {
+        'neck': (
+            'neck_connective_y92500',
+            None,
+            ['backbone proofread', 'glia']),
+        'neck annotations': (
+            'neck_connective_y92500',
+            None,
+            ['ascending', 'descending']),
+        'gng': (
+            'somas_v1a',
+            [[123271, 36446, 83], [144504, 64547, 2647]],
+            ['backbone proofread', 'merge monster', 'glia']),
         'left T1': (
-            'somas_dec2022',
-            [[2800, 75200, 600], [36000, 117000, 4250]],
-            ['glia', 'proofread first pass', 'proofread second pass']),
+            'somas_v1a',
+            [[130000, 122704, 1595], [174550, 153012, 4026]],
+            ['backbone proofread', 'merge monster', 'glia']),
     }
 
     if message.lower().startswith('todo'):
         if message.lower() == 'todo':
-            message = 'todo left T1'
+            message = 'todo neck'
         elif ' ' not in message:
             return ("I couldn't understand your request."
                     " Type 'help' or 'todo help' for instructions.")
