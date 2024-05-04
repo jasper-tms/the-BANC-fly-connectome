@@ -173,11 +173,11 @@ def process_message(message: str,
         'gng': (
             'somas_v1a',
             [[123271, 36446, 83], [144504, 64547, 2647]],
-            ['backbone proofread', 'merge monster', 'glia']),
+            ['backbone proofread', 'merge monster', 'glia', 'damaged']),
         'left T1': (
             'somas_v1a',
             [[130000, 122704, 1595], [174550, 153012, 4026]],
-            ['backbone proofread', 'merge monster', 'glia']),
+            ['backbone proofread', 'merge monster', 'glia', 'damaged']),
     }
 
     if message.lower().startswith('todo'):
