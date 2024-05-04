@@ -40,6 +40,7 @@ cell_info = {
             'wing motor neuron': {},
             'haltere motor neuron': {},
             'spiracle motor neuron': {},
+            'intestinal motor neuron': {},
             'abdominal motor neuron': {}},
         'efferent non-motor neuron': {
             'UM neuron': {
@@ -150,9 +151,8 @@ FANC_cell_info['publication'] = {
 
 proofreading_notes = [
     'spans neck',
-    'no major merge errors',
-    'backbone proofread',
-    'publication quality',
+    'damaged',
+    'thoroughly proofread',
 ]
 
 # A mapping that tells which CAVE tables are governed by which
@@ -372,7 +372,7 @@ def is_valid_pair(annotation_class: str,
     """
     Determine whether `annotation` is a valid annotation for the given
     `annotation_class`, according to the rules for the given table.
-    (See https://fanc.community/Neuron-annotations#neuron_information)
+    See https://banc.community/Annotations-(cell-types,-etc.)
 
     Parameters
     ----------

@@ -45,7 +45,7 @@ import os
 import sys
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Union
 
 from slack_bolt import App
@@ -104,23 +104,19 @@ def direct_message(message, say, client):
         # Skip if this message was posted by another bot
         return
 
-    response = None
-    if 'help' in message['text'].lower():
-        response = show_help()
-
     if verbosity >= 2:
         print('Processing message:', message)
     elif verbosity >= 1:
         print('Processing message with timestamp', message['ts'])
 
-    if response is None:
-        try:
-            response = process_message(message['text'],
-                                       message['user'],
-                                       client=client,
-                                       fake=fake)
-        except Exception as e:
-            response = f"`{type(e)}`\n```{e}```"
+    try:
+        response = process_message(message['text'],
+                                   message['user'],
+                                   client=client,
+                                   fake=fake)
+    except Exception as e:
+        response = f"`{type(e)}`\n```{e}```"
+
     if verbosity >= 1:
         print('Posting response:', response)
     if len(response) > 1500:
@@ -158,6 +154,59 @@ def process_message(message: str,
     while '  ' in message:
         message = message.replace('  ', ' ')
 
+    # This is a dict specifying how to do different types of searches.
+    # Each entry is a search name followed by a 3-tuple of:
+    # - CAVE table name to search for neurons in
+    # - A bounding box [[xmin, ymin, zmin], [xmax, ymax, zmax]] to
+    #   restrict the search to, or None to search the whole table
+    # - A list of annotations. Cells with any of these annotations
+    #   will be _excluded_ from the search results.
+    todos = {
+        'left T1': (
+            'somas_dec2022',
+            [[2800, 75200, 600], [36000, 117000, 4250]],
+            ['glia', 'proofread first pass', 'proofread second pass']),
+    }
+
+    if message.lower().startswith('todo'):
+        if message.lower() == 'todo':
+            message = 'todo left T1'
+        elif ' ' not in message:
+            return ("I couldn't understand your request."
+                    " Type 'help' or 'todo help' for instructions.")
+        roi = message[message.find(' ')+1:]
+        if roi not in todos:
+            msg = ("Here are the currently defined todos:\n```todo name: (CAVE table"
+                   " name, coordinates of search region, tags to exclude)\n\n"
+                   + "\n".join([f"{k}: {v}" for k, v in todos.items()]) +
+                   f"```\nSend me the message `todo {list(todos)[0]}` to use the"
+                   " first one, for example.")
+            if "help" not in message:
+                msg = (f"There is currently no todo defined for `{roi}`. If you'd"
+                       " like one to be created, send Jasper a DM with the"
+                       f" coordinates of the region you'd like to use for `{roi}`.\n"
+                       + msg)
+            return msg
+        table_name, bounding_box, exclude_tags = todos[roi]
+        if bounding_box is not None:
+            bounding_box = {table_name: {'pt_position': bounding_box}}
+
+        root_ids = caveclient.materialize.live_live_query(
+            table_name,
+            datetime.now(timezone.utc),
+            filter_spatial_dict=bounding_box,
+        ).pt_root_id
+        root_ids = root_ids.loc[root_ids != 0]
+        annos = banc.lookup.annotations(root_ids)
+        todos = [i for i, anno_list in zip(root_ids, annos) if
+                 all([anno not in anno_list for anno in exclude_tags])]
+        msg = (f"There are {len(todos)} `{roi}` cells that need"
+               " proofreading and/or annotations")
+        if len(todos) <= 5:
+            return msg + ":\n```" + str(todos[1:-1]) + "```"
+        import random
+        return msg + ". Here are 5:\n```" + str(random.sample(todos, 5))[1:-1] + "```"
+
     if message.startswith(('get', 'find')):
         search_terms = message[message.find(' ')+1:].strip('"\'')
 
@@ -193,9 +242,13 @@ def process_message(message: str,
                              for char in command_chars
                              if char in message])
     except ValueError:
+        if 'help' in message.lower():
+            return show_help()
         return ("ERROR: Your message does not contain a `?`, `!`, or `-`"
                 " character, so I don't know what you want me to do."
                 " Make a post containing the word 'help' for instructions.")
+    if 'help' in message[:command_index].lower():
+        return show_help()
     command_char = message[command_index]
 
     if command_char == '?':

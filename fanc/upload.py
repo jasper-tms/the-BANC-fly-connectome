@@ -153,7 +153,7 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
     annotation: str OR 2-tuple of (str, str) OR bool
         Annotation to upload, or a pair of annotations if trying to upload to a
         table with two tag columns. See the docstring of
-        `fanc.annotations.parse_annotation_pair()` for options on how to format
+        `banc.annotations.parse_annotation_pair()` for options on how to format
         an annotation pair.
 
     user_id: int
