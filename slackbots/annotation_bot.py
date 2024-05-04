@@ -215,7 +215,7 @@ def process_message(message: str,
         msg = (f"There are {len(todos)} `{roi}` cells that need"
                " proofreading and/or annotations")
         if len(todos) <= 5:
-            return msg + ":\n```" + str(todos[1:-1]) + "```"
+            return msg + ":\n```" + str(todos)[1:-1] + "```"
         import random
         return msg + ". Here are 5:\n```" + str(random.sample(todos, 5))[1:-1] + "```"
 

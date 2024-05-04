@@ -52,7 +52,12 @@ cell_info = {
                 'haltere UM neuron': {},
                 'abdominal UM neuron': {}}},
         'glia': {
-            'trachea': {}}},
+            'trachea': {},
+            'astrocyte': {},
+            'cortex glia': {},
+            'ensheathing glia': {},
+            'perineural glia': {},
+            'subperineural glia': {}}},
     'fast neurotransmitter': {
         'cholinergic': {},
         'GABAergic': {},
@@ -153,6 +158,7 @@ proofreading_notes = [
     'spans neck',
     'damaged',
     'thoroughly proofread',
+    'merge moster',
 ]
 
 # A mapping that tells which CAVE tables are governed by which
