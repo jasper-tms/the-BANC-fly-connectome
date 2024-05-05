@@ -36,26 +36,10 @@ cell_info = {
             'thermosensory neuron': {},
             'hygrosensory neuron': {}},
         'central neuron': {},
-        'motor neuron': {
-            'leg motor neuron': {
-                'T1 leg motor neuron': {},
-                'T2 leg motor neuron': {},
-                'T3 leg motor neuron': {}},
-            'neck motor neuron': {},
-            'wing motor neuron': {},
-            'haltere motor neuron': {},
-            'spiracle motor neuron': {},
-            'intestinal motor neuron': {},
-            'abdominal motor neuron': {}},
-        'efferent non-motor neuron': {
-            'UM neuron': {
-                'T1 leg UM neuron': {},
-                'T2 leg UM neuron': {},
-                'T3 leg UM neuron': {},
-                'neck UM neuron': {},
-                'wing UM neuron': {},
-                'haltere UM neuron': {},
-                'abdominal UM neuron': {}}},
+        'efferent': {
+            'motor neuron': {},
+            'efferent non-motor neuron': {
+                'UM neuron': {}}},
         'glia': {
             'trachea': {},
             'astrocyte': {},
@@ -95,6 +79,20 @@ cell_info = {
         'unilateral': {},
         'bilateral': {},
         'midplane': {}},
+    'body part innervated': {
+        'innervates antenna': {},
+        'innervates proboscis': {},
+        'innervates retina': {},
+        'innervates ocelli': {},
+        'innervates neck': {},
+        'innervates leg': {
+            'innervates T1 leg': {},
+            'innervates T2 leg': {},
+            'innervates T3 leg': {}},
+        'innervates wing': {},
+        'innervates haltere': {},
+        'innervates intestines': {},
+        'innervates spiracle': {}},
     'motor neuron primary neurite bundle': {
         'L1 bundle': {},
         'L2 bundle': {},
