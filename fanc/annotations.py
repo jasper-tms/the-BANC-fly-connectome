@@ -13,7 +13,7 @@ import anytree
 
 from . import auth, lookup
 
-help_url = 'https://github.com/jasper-tms/the-BANC-fly-connectome/wiki/Annotations-(cell-types,-etc.)'
+help_url = 'https://banc.community/Annotations-(cell-types,-etc.)'
 help_msg = 'See the annotation scheme described at ' + help_url
 
 default_table = 'cell_info'
