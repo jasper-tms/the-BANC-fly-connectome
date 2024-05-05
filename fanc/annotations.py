@@ -24,12 +24,17 @@ cell_info = {
         'sensory neuron': {
             'unknown sensory subtype': {},
             'chordotonal neuron': {
+                "Johnston's organ neuron": {},
                 'club chordotonal neuron': {},
                 'claw chordotonal neuron': {},
                 'hook chordotonal neuron': {}},
-            'bristle neuron': {},
+            'bristle mechanosensory neuron': {
+                'bristle mechanosensory neuron at gustatory sensillum': {}},
             'hair plate neuron': {},
-            'campaniform sensillum neuron': {}},
+            'campaniform sensillum neuron': {},
+            'gustatory neuron': {},
+            'thermosensory neuron': {},
+            'hygrosensory neuron': {}},
         'central neuron': {},
         'motor neuron': {
             'leg motor neuron': {
@@ -158,7 +163,7 @@ proofreading_notes = [
     'spans neck',
     'damaged',
     'thoroughly proofread',
-    'merge moster',
+    'merge monster',
 ]
 
 # A mapping that tells which CAVE tables are governed by which
