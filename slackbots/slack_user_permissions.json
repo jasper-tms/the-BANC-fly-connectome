@@ -94,7 +94,6 @@
         "U05RE9RDXBL": 4547,
         "U04H005CQM8": 3510,
         "ULMP2KPNE": 183,
-        "ULH2UM0H4": 2660,
         "U348GFY5N": 2660
     },
     "backbone_proofread": {
@@ -188,8 +187,14 @@
         "U05RE9RDXBL": 4547,
         "U04H005CQM8": 3510,
         "ULMP2KPNE": 183,
-        "ULH2UM0H4": 2660,
         "U348GFY5N": 2660
+    },
+    "proofreading_notes": {
+        "U0718C8KXQ8": 1012,
+        "U03FBCNQRT6": 392,
+        "U06UU64FDL2": 2455,
+        "U348GFY5N": 2660,
+        "UP981EMMF": 2660
     },
     "neuron_information": {
         "U05EWE31UCT": 4088,
