@@ -38,6 +38,7 @@ cell_info = {
         'central neuron': {},
         'efferent': {
             'motor neuron': {},
+            'endocrine': {},
             'efferent non-motor neuron': {
                 'UM neuron': {}}},
         'glia': {
@@ -85,6 +86,7 @@ cell_info = {
         'innervates retina': {},
         'innervates ocelli': {},
         'innervates neck': {},
+        'innervates corpus cardiacum': {},
         'innervates leg': {
             'innervates T1 leg': {},
             'innervates T2 leg': {},
