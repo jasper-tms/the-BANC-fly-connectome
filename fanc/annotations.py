@@ -38,9 +38,8 @@ cell_info = {
         'central neuron': {},
         'efferent': {
             'motor neuron': {},
-            'endocrine': {},
-            'efferent non-motor neuron': {
-                'UM neuron': {}}},
+            'UM neuron': {},
+            'endocrine': {}},
         'glia': {
             'trachea': {},
             'astrocyte': {},
