@@ -146,7 +146,17 @@
         "U070S5BRNBT": 5266,
         "U056KE19BGX": 2559,
         "U02HHQ3A8K1": 20,
-        "U0729R12ARX": 1482
+        "U0729R12ARX": 1482,
+        "UCSSJLX96": 386,
+        "U06KJJ3H1EF": 5104,
+        "U06KE4376LE": 5068,
+        "U06KWE9HTKJ": 4916,
+        "U06JT4UP6NB": 4995,
+        "U06K44YE7FH": 4974,
+        "U06KE431UDC": 5044,
+        "U06KLDB83J7": 5054,
+        "U06K12L8LK0": 5007,
+        "U06KM5532TE": 5055
     },
     "backbone_proofread": {
         "U06K7HVH1AP": 4906,
@@ -286,14 +296,23 @@
         "U01PMSEUEVB": 1152,
         "U0706K0AREU": 2630,
         "U019V023PN2": 700,
-        "U02HHQ3A8K1": 20
+        "U02HHQ3A8K1": 20,
+        "U06KJJ3H1EF": 5104,
+        "U06KE4376LE": 5068,
+        "U06KWE9HTKJ": 4916,
+        "U06JT4UP6NB": 4995,
+        "U06K44YE7FH": 4974,
+        "U06KE431UDC": 5044,
+        "U06KLDB83J7": 5054,
+        "U06K12L8LK0": 5007,
+        "U06KM5532TE": 5055
     },
     "proofreading_notes": {
         "U0718C8KXQ8": 1012,
         "U03FBCNQRT6": 392,
         "U06UU64FDL2": 2455,
-        "U348GFY5N": 2660,
         "UP981EMMF": 2660,
+        "U348GFY5N": 2660,
         "U0132TYLR1A": 183,
         "U06TL0ZCQ82": 3510,
         "ULMP2KPNE": 183,
@@ -426,7 +445,16 @@
         "U03QZ3LK4R2": 2815,
         "U019V023PN2": 700,
         "U0711EYT7PX": 700,
-        "U02HHQ3A8K1": 20
+        "U02HHQ3A8K1": 20,
+        "U06KJJ3H1EF": 5104,
+        "U06KE4376LE": 5068,
+        "U06KWE9HTKJ": 4916,
+        "U06JT4UP6NB": 4995,
+        "U06K44YE7FH": 4974,
+        "U06KE431UDC": 5044,
+        "U06KLDB83J7": 5054,
+        "U06K12L8LK0": 5007,
+        "U06KM5532TE": 5055
     },
     "neuron_information": {
         "U05EWE31UCT": 4088,
