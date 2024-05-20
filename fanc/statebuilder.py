@@ -300,6 +300,8 @@ def render_scene(neurons=None,
         return state
     elif return_as == 'url':
         json_id = client.state.upload_state_json(state)
-        return client.state.build_neuroglancer_url(json_id, ngl_info.ngl_app_url, 'cave-explorer')
+        return client.state.build_neuroglancer_url(json_id,
+                                                   ngl_info.ngl_app_url,
+                                                   'cave-explorer')
     else:
         raise ValueError('"return_as" must be "json" or "url" but was {}'.format(return_as))

@@ -151,11 +151,13 @@ cell_info = {
 FANC_cell_info = cell_info.copy()
 FANC_cell_info['publication'] = {
     'Azevedo Lesser Phelps Mark et al. 2024': {},
-    'Lesser Azevedo et al. 2023': {},
+    'Lesser Azevedo et al. 2024': {},
     'Cheong Boone Bennett et al. 2023': {},
     'Sapkal et al. 2023': {},
     'Yang et al. 2023': {},
-    'Dallmann et al. 2023': {}
+    'Dallmann et al. 2023': {},
+    'Lee et al. 2024': {},
+    'Stürner Brooks ... Eichler 2024': {},
 }
 
 proofreading_notes = [

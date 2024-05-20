@@ -41,7 +41,6 @@ zoom_2d = 16
 
 outlines_layer = {'type': 'segmentation', 'source': {'url': 'precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/volume_meshes', 'subsources': {'mesh': True, 'bounds': True}, 'enableDefaultSubsources': False}, 'tab': 'segments', 'meshSilhouetteRendering': 2, 'segments': ['1'], 'segmentDefaultColor': '#2a7fff', 'pick': False, 'name': 'region outlines'}
 
-
 def final_json_tweaks(state):
     """
     Apply some final changes to the neuroglancer state that I didn't take the
