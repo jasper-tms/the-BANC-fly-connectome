@@ -92,8 +92,8 @@ cell_info = {
             'innervates T3 leg': {}},
         'innervates wing': {},
         'innervates haltere': {},
-        'innervates intestines': {},
-        'innervates spiracle': {}},
+        'innervates spiracle': {},
+        'innervates abdomen': {}},
     'motor neuron primary neurite bundle': {
         'L1 bundle': {},
         'L2 bundle': {},
