@@ -124,6 +124,7 @@ cell_info = {
         'innervates ocelli': {},
         'innervates neck': {},
         'innervates corpus cardiacum': {},
+        'innervates corpus allatum': {},
         'innervates leg': {
             'innervates T1 leg': {},
             'innervates T2 leg': {},
