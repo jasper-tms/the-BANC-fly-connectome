@@ -156,7 +156,12 @@
         "U06KE431UDC": 5044,
         "U06KLDB83J7": 5054,
         "U06K12L8LK0": 5007,
-        "U06KM5532TE": 5055
+        "U06KM5532TE": 5055,
+        "U06JT4825E3": 5082,
+        "U073DG96LCS": 2569,
+        "U073P3A7YMU": 3514,
+        "U0741D50QCX": 4604,
+        "U05305HT8SZ": 432
     },
     "backbone_proofread": {
         "U06K7HVH1AP": 4906,
@@ -305,7 +310,10 @@
         "U06KE431UDC": 5044,
         "U06KLDB83J7": 5054,
         "U06K12L8LK0": 5007,
-        "U06KM5532TE": 5055
+        "U06KM5532TE": 5055,
+        "U06JT4825E3": 5082,
+        "U073P3A7YMU": 3514,
+        "U05305HT8SZ": 432
     },
     "proofreading_notes": {
         "U0718C8KXQ8": 1012,
@@ -454,7 +462,10 @@
         "U06KE431UDC": 5044,
         "U06KLDB83J7": 5054,
         "U06K12L8LK0": 5007,
-        "U06KM5532TE": 5055
+        "U06KM5532TE": 5055,
+        "U06JT4825E3": 5082,
+        "U073P3A7YMU": 3514,
+        "U05305HT8SZ": 432
     },
     "neuron_information": {
         "U05EWE31UCT": 4088,
