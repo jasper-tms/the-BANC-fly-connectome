@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-
-# Warp mesh files from JRC2018_VNC template space to FANC space
-# Currently only works with stl files, need to write support for obj
+"""
+Warp meshes from JRC2018_VNC_UNISEX template space to FANC space.
+Expects stl files as input.
+"""
 
 import sys
 import os
@@ -10,6 +11,9 @@ import stl  # pip install numpy-stl
 
 import navis
 import flybrains
+
+target_space = 'FANC'
+#target_space = 'JRCVNC2018F'
 
 
 def show_help():
@@ -36,13 +40,12 @@ def main():
         show_help()
         raise
 
-
     # Load
     mesh = stl.mesh.Mesh.from_file(input_filename)
     # Do the warping
-    mesh.v0 = navis.xform_brain(mesh.v0, source='JRCVNC2018U', target='FANC')
-    mesh.v1 = navis.xform_brain(mesh.v1, source='JRCVNC2018U', target='FANC')
-    mesh.v2 = navis.xform_brain(mesh.v2, source='JRCVNC2018U', target='FANC')
+    mesh.v0 = navis.xform_brain(mesh.v0, source='JRCVNC2018U', target=target_space)
+    mesh.v1 = navis.xform_brain(mesh.v1, source='JRCVNC2018U', target=target_space)
+    mesh.v2 = navis.xform_brain(mesh.v2, source='JRCVNC2018U', target=target_space)
     # Save
     mesh.save(output_folder + '/' + os.path.basename(input_filename))
 

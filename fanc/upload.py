@@ -7,6 +7,7 @@ See some examples at https://github.com/htem/FANC_auto_recon/blob/main/example_n
 
 from datetime import datetime, timezone
 from textwrap import dedent
+import time
 
 import numpy as np
 import pandas as pd
@@ -42,27 +43,31 @@ def new_cell(pt_position,
         raise ValueError(f"Segment {segid} already has a cell ID, {cell_ids.loc[cell_ids.pt_root_id == segid, column_name].values[0]}")
     if pt_type not in ['soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan']:
         raise ValueError(f'pt_type "{pt_type}" is not valid')
-    start_ids = {
-        'descending': 1,
-        'ascending': 2_000,
-        'brain motor': 6_000,
-        'VNC motor': 8_000,
-        'brain sensory': 10_000,
-        'neck sensory': 30_000,
-        'VNC sensory': 50_000,
-        'brain intrinsic': 100_000,
-        'VNC intrinsic': 200_000,
-        'brain glia': 1_000_000,
-        'VNC glia': 2_000_000,
+    id_ranges = {
+        'descending': range(1, 1_999),
+        'ascending': range(2_000, 5_999),
+        'brain motor': range(6_000, 7_999),
+        'VNC motor': range(8_000, 9_999),
+        'brain sensory': range(10_000, 29_999),
+        'neck sensory': range(30_000, 49_999),
+        'VNC sensory': range(50_000, 99_999),
+        'brain intrinsic': range(100_000, 199_999),
+        'VNC intrinsic': range(200_000, 299_999),
+        'brain glia': range(1_000_000, 1_199_999),
+        'VNC glia': range(2_000_000, 2_199_999),
     }
     if cell_type not in start_ids.keys():
         raise ValueError(f'cell_type "{cell_type}" is not valid')
-    start_id = start_ids[cell_type]
-    while start_id in cell_ids['id'].values:
-        start_id += 1
+    id_range = id_ranges[cell_type]
+    max_existing_id = cell_ids.loc[cell_ids[column_name].isin(id_range), column_name].max()
+    upload_id = int(max_existing_id) + 1
+    while client.annotation.get_annotation(table_name, upload_id) != []:
+        print(f'WARNING: ID {upload_id} already exists in {table_name},'
+              ' incrementing by 1 to try to find an unused ID.')
+        upload_id += 1
     stage = client.annotation.stage_annotations(table_name, id_field=True)
-    stage.add(id=start_id,
-              **{column_name: start_id},
+    stage.add(id=upload_id,
+              **{column_name: upload_id},
               pt_position=np.array(pt_position),
               tag=pt_type,
               valid=True)
@@ -96,6 +101,7 @@ def new_cell(pt_position,
         print(stage.annotation_dataframe)
     else:
         response = client.annotation.upload_staged_annotations(stage)
+        time.sleep(1)
         print('New cell ID posted:', response)
         if cell_type == 'descending':
             try_annotate_neuron(segid, ('anterior-posterior projection pattern', 'descending'), user_id)

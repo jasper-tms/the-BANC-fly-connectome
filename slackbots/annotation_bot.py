@@ -200,7 +200,7 @@ def process_message(message: str,
                        + msg)
             return msg
         table_name, bounding_box, exclude_tags = todos[roi]
-        if bounding_box is not None:
+        if not isinstance(bounding_box, dict):
             bounding_box = {table_name: {'pt_position': bounding_box}}
 
         root_ids = caveclient.materialize.live_live_query(

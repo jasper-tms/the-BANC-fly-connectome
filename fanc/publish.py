@@ -67,16 +67,17 @@ def publish_mesh_to_gcloud(segids,
     for the upload to succeed. Please ask one of them to run this function for
     you when you have a list of neurons you're ready to make public.
 
-    See a complete list of IDs of public neurons via one of the following
-    links, depending on which template space you want to see neurons in:
+    Get a complete list of IDs of public neurons by running the function
+    `list_public_segment_ids()`, or by opening one of the the following
+    links in your browser, depending on which space you want to see neurons in:
     https://console.cloud.google.com/storage/browser/lee-lab_female-adult-nerve-cord/meshes/FANC/FANC_neurons/meshes
     https://console.cloud.google.com/storage/browser/lee-lab_female-adult-nerve-cord/meshes/JRC2018_VNC_FEMALE/FANC_neurons/meshes
     Not implemented yet: https://console.cloud.google.com/storage/browser/lee-lab_female-adult-nerve-cord/meshes/JRC2018_VNC_UNISEX/FANC_neurons/meshes
     Not implemented yet: https://console.cloud.google.com/storage/browser/lee-lab_female-adult-nerve-cord/meshes/JRC2018_VNC_MALE/FANC_neurons/meshes
 
     These neurons can be viewed by entering their ID(s) into one of the following neuroglancer links:
-    FANC: https://neuromancer-seung-import.appspot.com/?json_url=https://global.daf-apis.com/nglstate/api/v1/5104409098846208
-    JRC2018_VNC_FEMALE: https://neuromancer-seung-import.appspot.com/?json_url=https://global.daf-apis.com/nglstate/api/v1/6230309005688832
+    FANC: https://ng.fanc.community/published-neurons-viewer
+    JRC2018_VNC_FEMALE: https://ng.fanc.community/published-neurons-aligned-to-template-viewer
     JRC2018_VNC_UNISEX: Not implemented yet
     JRC2018_VNC_MALE: Not implemented yet
 
