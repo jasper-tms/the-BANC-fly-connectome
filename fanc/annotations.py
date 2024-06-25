@@ -32,6 +32,7 @@ cell_info = {
                 'bristle mechanosensory neuron at gustatory sensillum': {}},
             'hair plate neuron': {},
             'campaniform sensillum neuron': {},
+            'olfactory receptor neuron': {},
             'gustatory neuron': {},
             'thermosensory neuron': {},
             'hygrosensory neuron': {}},
