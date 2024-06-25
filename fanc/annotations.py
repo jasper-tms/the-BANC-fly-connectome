@@ -120,6 +120,7 @@ cell_info = {
         'midplane': {}},
     'body part innervated': {
         'innervates antenna': {},
+        'innervates maxillary palp': {},
         'innervates proboscis': {},
         'innervates retina': {},
         'innervates ocelli': {},
