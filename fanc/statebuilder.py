@@ -289,7 +289,9 @@ def render_scene(neurons=None,
     chained_sb = ChainedStateBuilder([standard_state] + additional_states)
 
     # Turn state into a dict, then add some last settings manually
-    state = chained_sb.render_state([neurons] + additional_data, return_as='dict')
+    state = chained_sb.render_state([neurons] + additional_data,
+                                    return_as='dict',
+                                    target_site='cave-explorer')
     if outlines_layer:
         state['layers'].insert(2, ngl_info.outlines_layer)
     ngl_info.final_json_tweaks(state)
@@ -299,6 +301,8 @@ def render_scene(neurons=None,
         return state
     elif return_as == 'url':
         json_id = client.state.upload_state_json(state)
-        return client.state.build_neuroglancer_url(json_id, ngl_info.ngl_app_url)
+        return client.state.build_neuroglancer_url(json_id,
+                                                   ngl_info.ngl_app_url,
+                                                   'cave-explorer')
     else:
         raise ValueError('"return_as" must be "json" or "url" but was {}'.format(return_as))
