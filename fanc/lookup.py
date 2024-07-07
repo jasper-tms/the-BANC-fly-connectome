@@ -269,12 +269,15 @@ def all_annotations(source_tables=default_annotation_sources,
         table['created'] = table['created'].apply(datetime.date)
         if 'user_id' not in table.columns:
             table['user_id'] = None
-        if column_name != 'tag2':
+        if column_name == 'tag2':
+            table['tag'] = table['tag2']
+            table['tag2'] = None
+        else:
             if 'tag2' not in table.columns:
                 table['tag2'] = None
+            if 'tag' in table.columns and column_name != 'tag':
+                table.drop(columns='tag', inplace=True)
             table.rename(columns={column_name: 'tag'}, inplace=True)
-        else:
-            table['tag'] = table['tag2']
         if (table['tag'] == 't').any():
             if not (table['tag'] == 't').all():
                 raise ValueError(f'Column "{column_name}" in table "{table_name}"'
