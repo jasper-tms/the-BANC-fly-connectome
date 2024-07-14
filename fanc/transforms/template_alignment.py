@@ -4,17 +4,19 @@ Transform points and neurons between the BANC and the 2018 Janelia templates
 """
 
 import os
-import subprocess
+from typing import Literal
 
 import numpy as np
 
 from .. import template_spaces
 
 
+vnc_template_voxel_size = 0.40  # µm per voxel
 vnc_template_plane_of_symmetry_x_voxel = 329
-vnc_template_plane_of_symmetry_x_microns = 329 * 0.400
+vnc_template_plane_of_symmetry_x_microns = 329 * vnc_template_voxel_size
+brain_template_voxel_size = 0.38  # µm per voxel
 brain_template_plane_of_symmetry_x_voxel = 825
-brain_template_plane_of_symmetry_x_microns = 825 * 0.380
+brain_template_plane_of_symmetry_x_microns = 825 * brain_template_voxel_size
 
 
 def align_mesh(mesh, target_space='JRC2018_VNC_FEMALE', inplace=True):
@@ -64,18 +66,23 @@ def align_mesh(mesh, target_space='JRC2018_VNC_FEMALE', inplace=True):
         return mesh
 
 
-def warp_points_BANC_to_brain_template(points,
-                                       input_units='nanometers',
-                                       output_units='microns',
-                                       reflect=False):
+def warp_points_BANC_to_template(points,
+                                 brain_or_vnc: Literal['brain', 'vnc'],
+                                 input_units='nanometers',
+                                 output_units='microns',
+                                 reflect=False):
     """
     Transform point coordinates from the BANC to the corresponding point
-    location in the 2018 Janelia Female Brain Template (JRC2018_FEMALE).
+    location in the 2018 Janelia Female Brain or VNC Template
 
     Parameters
     ---------
     points (numpy.ndarray) :
         An Nx3 numpy array representing x,y,z point coordinates in the BANC
+
+    brain_or_vnc (str) :
+        Must be set to 'brain' or 'vnc'. Whether to warp points to the brain
+        template (JRC2018_FEMALE) or the VNC template (JRC2018_VNC_FEMALE).
 
     input_units (str) :
         The units of the points you provided as an input. Set to 'nm',
@@ -88,33 +95,30 @@ def warp_points_BANC_to_brain_template(points,
 
     output_units (str) :
         The units you want points returned to you in. Same set of
-        options as for `input_units`, except that the pixel size of the
-        output space, JRC2018_FEMALE, is (0.38, 0.38, 0.38) µm.
+        options as for `input_units`, the only difference being that the
+        pixel size of the output space is either 0.38 µm for the brain
+        template or 0.40 µm for the VNC template.
         Default is microns.
 
     reflect (bool) :
         Whether to reflect the point coordinates across the midplane of
-        the JRC2018_FEMALE template before returning them. This
-        reflection moves points' x coordinates from the left to the
-        right side of the brain template or vice versa, but does not
-        affect their y coordinates (anterior-posterior axis) or z
-        coordinates (dorsal-ventral axis).
+        the template before returning them. This reflection moves points'
+        x coordinates from the left to the right side of the template or
+        vice versa, but does not affect their y or z coordinates.
         Default is False.
 
     Returns
     -------
-    An Nx3 numpy array representing x,y,z point coordinates in
-    JRC2018_FEMALE, in units specified by `output_units`.
+    An Nx3 numpy array representing x,y,z point coordinates in the
+    brain or VNC template space, in units specified by `output_units`.
     """
-    import navis
-    import flybrains
-    # Only required for deprecated functions so not imported up top
     import transformix  # https://github.com/jasper-tms/pytransformix
 
     points = np.array(points, dtype=np.float64)
     if len(points.shape) == 1:
-        result = warp_points_BANC_to_brain_template(
+        result = warp_points_BANC_to_template(
             np.expand_dims(points, 0),
+            brain_or_vnc,
             input_units=input_units,
             output_units=output_units,
             reflect=reflect
@@ -123,6 +127,27 @@ def warp_points_BANC_to_brain_template(points,
             return result
         else:
             return result[0]
+
+    if brain_or_vnc == 'brain':
+        transform_params = os.path.join(
+            os.path.dirname(__file__),
+            'transform_parameters',
+            'brain',
+            'BANC_to_template.txt',
+        )
+        template_plane_of_symmetry_x_microns = brain_template_plane_of_symmetry_x_microns
+        template_voxel_size = brain_template_voxel_size
+    elif brain_or_vnc == 'vnc':
+        transform_params = os.path.join(
+            os.path.dirname(__file__),
+            'transform_parameters',
+            'vnc',
+            'BANC_to_template.txt',
+        )
+        template_plane_of_symmetry_x_microns = vnc_template_plane_of_symmetry_x_microns
+        template_voxel_size = vnc_template_voxel_size
+    else:
+        raise ValueError("The second argument must be set to 'brain' or 'vnc'.")
 
     if input_units in ['nm', 'nanometer', 'nanometers']:
         input_units = 'nanometers'
@@ -163,61 +188,84 @@ def warp_points_BANC_to_brain_template(points,
         points *= (4, 4, 45)
 
     points /= 1000  # Convert nm to microns as required for this transform
-    transform_params = os.path.join(
-        os.path.dirname(__file__),
-        'transform_parameters',
-        'brain',
-        'BANC_to_template.txt',
-    )
+
     # Do the transform. This requires input in microns and gives output in microns
     points = transformix.transform_points(points, transform_params)
 
     if reflect:
-        points[:, 0] = brain_template_plane_of_symmetry_x_microns * 2 - points[:, 0]
+        points[:, 0] = template_plane_of_symmetry_x_microns * 2 - points[:, 0]
 
     if output_units == 'nanometers':
         points *= 1000  # Convert microns to nm
     elif output_units == 'voxels':
-        points /= 0.38  # Convert microns to JRC2018_FEMALE voxels
+        points /= template_voxel_size  # Convert microns to template voxels
 
     return points
 
 
-def warp_points_brain_template_to_BANC(points,
-                                       input_units='microns',
-                                       output_units='nanometers',
+def warp_points_BANC_to_brain_template(points,
+                                       input_units='nanometers',
+                                       output_units='microns',
                                        reflect=False):
+    return warp_points_BANC_to_template(points,
+                                        'brain',
+                                        input_units=input_units,
+                                        output_units=output_units,
+                                        reflect=reflect)
+
+
+def warp_points_BANC_to_vnc_template(points,
+                                     input_units='nanometers',
+                                     output_units='microns',
+                                     reflect=False):
+    return warp_points_BANC_to_template(points,
+                                        'vnc',
+                                        input_units=input_units,
+                                        output_units=output_units,
+                                        reflect=reflect)
+
+
+def warp_points_template_to_BANC(points,
+                                 brain_or_vnc: Literal['brain', 'vnc'],
+                                 input_units='microns',
+                                 output_units='nanometers',
+                                 reflect=False):
     """
-    Transform point coordinates from the 2018 Janelia Female Brain Template
-    (JRC2018_FEMALE) to the corresponding point location in the BANC.
+    Transform point coordinates from the 2018 Janelia Female Brain or
+    VNC Template to the corresponding point location in the BANC.
 
     Parameters
     ---------
     points (numpy.ndarray) :
         An Nx3 numpy array representing x,y,z point coordinates in the
-        2018 Janelia Female Brain Template, JRC2018_FEMALE.
+        2018 Janelia Female Brain or VNC Template. The following
+        arguments `brain_or_vnc` and `input_units` specifies what space
+        these points are in and what units they are in.
+
+    brain_or_vnc (str) :
+        Must be set to 'brain' or 'vnc'. Whether to warp points to the brain
+        template (JRC2018_FEMALE) or the VNC template (JRC2018_VNC_FEMALE).
 
     input_units (str) :
         The units of the points you provided as an input. Set to 'nm',
         'nanometer', or 'nanometers' to indicate nanometers; 'um', 'µm',
         'micron', or 'microns' to indicate microns; or 'pixels' or
-        'voxels' to indicate pixel indices within the JRC2018_FEMALE
-        image volume, which has a pixel size of (0.38, 0.38, 0.38) µm.
+        'voxels' to indicate pixel indices within the template
+        image volume, which has a pixel size of 0.38 µm for the brain
+        template or 0.40 µm for the VNC template.
         Default is microns.
 
     output_units (str) :
         The units you want points returned to you in. Same set of
-        options as for `input_units`, except that the pixel size of the
-        output space, the BANC, is (4, 4, 45) nm.
+        options as for `input_units`, the only difference being that the
+        pixel size of the output space, the BANC, is (4, 4, 45) nm.
         Default is nanometers.
 
     reflect (bool) :
         Whether to reflect the point coordinates across the midplane of
-        the JRC2018_FEMALE template before warping them into
-        BANC-space. This reflection moves points' x coordinates from the
-        left to the right side of the brain template or vice versa, but
-        does not affect their y coordinates (anterior-posterior axis) or
-        z coordinates (dorsal-ventral axis).
+        the template before returning them. This reflection moves points'
+        x coordinates from the left to the right side of the template or
+        vice versa, but does not affect their y or z coordinates.
         Default is False.
 
     Returns
@@ -225,13 +273,13 @@ def warp_points_brain_template_to_BANC(points,
     An Nx3 numpy array representing x,y,z point coordinates in the BANC,
     in units specified by `output_units`.
     """
-    # Only required for deprecated functions so not imported up top
     import transformix  # https://github.com/jasper-tms/pytransformix
 
-    points = np.array(points)
+    points = np.array(points, dtype=np.float64)
     if len(points.shape) == 1:
-        result = warp_points_brain_template_to_BANC(
+        result = warp_points_template_to_BANC(
             np.expand_dims(points, 0),
+            brain_or_vnc,
             input_units=input_units,
             output_units=output_units,
             reflect=reflect
@@ -240,6 +288,27 @@ def warp_points_brain_template_to_BANC(points,
             return result
         else:
             return result[0]
+
+    if brain_or_vnc == 'brain':
+        transform_params = os.path.join(
+            os.path.dirname(__file__),
+            'transform_parameters',
+            'brain',
+            'template_to_BANC.txt',
+        )
+        template_plane_of_symmetry_x_microns = brain_template_plane_of_symmetry_x_microns
+        template_voxel_size = brain_template_voxel_size
+    elif brain_or_vnc == 'vnc':
+        transform_params = os.path.join(
+            os.path.dirname(__file__),
+            'transform_parameters',
+            'vnc',
+            'template_to_BANC.txt',
+        )
+        template_plane_of_symmetry_x_microns = vnc_template_plane_of_symmetry_x_microns
+        template_voxel_size = vnc_template_voxel_size
+    else:
+        raise ValueError("The second argument must be set to 'brain' or 'vnc'.")
 
     if input_units in ['nm', 'nanometer', 'nanometers']:
         input_units = 'nanometers'
@@ -277,17 +346,11 @@ def warp_points_brain_template_to_BANC(points,
     if input_units == 'nanometers':
         points /= 1000  # Convert nm to microns
     elif input_units == 'voxels':
-        points = points * 0.38  # Convert voxels to microns
+        points = points * template_voxel_size  # Convert voxels to microns
 
     if reflect:
-        points[:, 0] = brain_template_plane_of_symmetry_x_microns * 2 - points[:, 0]
+        points[:, 0] = template_plane_of_symmetry_x_microns * 2 - points[:, 0]
 
-    transform_params = os.path.join(
-        os.path.dirname(__file__),
-        'transform_parameters',
-        'brain',
-        'template_to_BANC.txt',
-    )
     # Do the transform. This requires input in microns and gives output in microns
     points = transformix.transform_points(points, transform_params)
 
@@ -298,3 +361,25 @@ def warp_points_brain_template_to_BANC(points,
     elif output_units == 'voxels':
         points /= (4, 4, 45)  # Convert nm to BANC voxels
     return points
+
+
+def warp_points_brain_template_to_BANC(points,
+                                       input_units='microns',
+                                       output_units='nanometers',
+                                       reflect=False):
+    return warp_points_template_to_BANC(points,
+                                        'brain',
+                                        input_units=input_units,
+                                        output_units=output_units,
+                                        reflect=reflect)
+
+
+def warp_points_vnc_template_to_BANC(points,
+                                     input_units='microns',
+                                     output_units='nanometers',
+                                     reflect=False):
+    return warp_points_template_to_BANC(points,
+                                        'vnc',
+                                        input_units=input_units,
+                                        output_units=output_units,
+                                        reflect=reflect)
