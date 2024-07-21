@@ -48,3 +48,9 @@ run_elastix \
     -s "5.6-9.8-3.8" \
     -w "4" \
     -n
+
+
+# Invert with 16 micron grid spacing
+invert_elastix \
+    "${img_fn/.nrrd/}"_elastix_to_fixed_template/elastix_Bspline/5.6-9.8-3.8spacing_4bendingweight_round2 \
+    -s "9.6-12-4.1"
