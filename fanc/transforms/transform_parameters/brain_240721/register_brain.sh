@@ -58,3 +58,10 @@ run_elastix \
     -s "9-9-5.8" \
     -w "16" \
     -n
+
+# Invert the transform using a slightly coarser grid spacing of 16 microns
+# (produced by "-s 11.7-9.6-8.7" in combination with the anisotropic
+# stretching caused by the initial affine transform).
+invert_elastix \
+    "${img_fn/.nrrd/}"_elastix_to_fixed_template/elastix_Bspline/9-9-5.8spacing_16bendingweight_round2 \
+    -s "11.7-9.6-8.7"
