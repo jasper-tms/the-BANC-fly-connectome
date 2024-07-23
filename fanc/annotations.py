@@ -371,9 +371,7 @@ cell_info = {
             'soma in abdominal ganglion': {}}},
     'anterior-posterior projection pattern': {
         'descending': {},
-        'ascending': {},
-        'local': {},
-        'intersegmental': {}},
+        'ascending': {}},
     'left-right projection pattern': {
         'unilateral': {},
         'bilateral': {},
