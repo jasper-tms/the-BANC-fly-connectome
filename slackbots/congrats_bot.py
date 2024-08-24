@@ -75,7 +75,7 @@ def provide_update(table_names=tables):
         top_counts = counts_diff[0:3].values.astype(int)
 
         msg += (
-            f"*`{table_name}` has {len(table_now)} total entries.*"
+            f"*`{table_name}` has {len(table_now)} total entries on {table_now.pt_root_id.nunique()} unique cells.*"
             f"\n:chart_with_upwards_trend:   {n_this_week} entries were added in the last 7 days."
             "\n:trophy:   Congrats and big thanks to this week's top contributors!"
             f"\n\t\t:first_place_medal:   <@{top_users_slackids[0]}> ({top_counts[0]} annotations)"
