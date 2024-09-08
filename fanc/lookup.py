@@ -771,7 +771,7 @@ def nucleusid_from_pt(points, nucleus_segmentation_path=None):
 # TODO implement the raise kwargs
 def soma_from_segid(segids,
                     table='default_soma_table',
-                    select_columns=['id', 'volume', 'pt_root_id', 'pt_position'],
+                    select_columns=['nucleus_id', 'pt_root_id', 'pt_position'],
                     timestamp='now',
                     raise_not_found=True,
                     raise_multiple=True):
@@ -785,12 +785,9 @@ def soma_from_segid(segids,
       The segment ID(s) to look up soma information for.
 
     table: str (default 'default_soma_table')
-      The name or nickname of the soma table to query. Available nicknames:
-        'default_soma_table' or 'neuron' or 'neurons' -> neuron_somas_dec2022
-        'all' or 'somas' -> somas_dec2022
-        'glia' -> glia_somas_dec2022
+      The name or nickname of the soma table to query.
 
-    select_columns: list of str (default ['id', 'volume', 'pt_root_id', 'pt_position'])
+    select_columns: list of str (default ['nucleus_id', 'pt_root_id', 'pt_position'])
       The columns to get from the soma table.
 
     timestamp: None or 'now' or datetime (default 'now')
@@ -825,27 +822,24 @@ def soma_from_segid(segids,
                        ' Use updated IDs or provide the timestamp where'
                        ' the ID(s) is valid.')
 
-    if table in [None, 'default_soma_table']:
-        table = client.info.get_datastack_info()['soma_table']
-        joins = [[table, 'id', 'somas_dec2022', 'id']]
-    elif table in ['all', 'somas']:
-        table = 'somas_dec2022'
-        joins = None
-    elif table in ['neurons', 'neuron']:
-        table = 'neuron_somas_dec2022'
-        joins = [[table, 'id', 'somas_dec2022', 'id']]
-    elif table == 'glia':
-        table = 'glia_somas_dec2022'
-        joins = [[table, 'id', 'somas_dec2022', 'id']]
-    else:
-        raise ValueError(f'Unknown table name {table}. See docstring for options.')
-    somas = client.materialize.live_live_query(
-        table,
-        joins=joins,
-        timestamp=timestamp,
-        filter_in_dict={'somas_dec2022': {'pt_root_id': segids}}
-    )
-    somas.rename(columns={'idx': 'id'}, inplace=True)
+    if table == 'default_soma_table':
+        somas = client.materialize.live_live_query(
+            'somas_v1a',
+            timestamp=timestamp,
+            filter_in_dict={'somas_v1a': {'pt_root_id': segids}}
+        )
+        somas_v1b = client.materialize.live_live_query(
+            'somas_v1b',
+            timestamp=timestamp,
+            filter_in_dict={'somas_v1b': {'pt_root_id': segids}}
+        )
+        somas['pt_position'] = somas['id'].map(
+            somas_v1b.set_index('id')['pt_position']).combine_first(
+            somas['pt_position']
+        )
+
+    somas.rename(columns={'idx': 'nucleus_id'}, inplace=True)
+    somas.rename(columns={'id': 'nucleus_id'}, inplace=True)
     return somas[select_columns]
 # --- END KEY ATTRIBUTES SECTION --- #
 
