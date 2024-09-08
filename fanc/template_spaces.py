@@ -41,6 +41,15 @@ template_info = {
 }
 
 
+def get_template_info(template_space):
+    if template_space not in template_info:
+        raise ValueError(
+            'template_space was {} but must be one of: '
+            '{}'.format(template_space, list(template_info.keys()))
+        )
+    return template_info[template_space]
+
+
 # For each list of aliases, the first one is the nickname
 # recognized by navis.xform_brain
 aliases = (
@@ -63,6 +72,8 @@ aliases = (
      'JRC2018_VNC_UNISEX_461',
      'UNISEX')
 )
+
+
 def to_navis_name(template_space):
     """
     Convert from any of a number of nicknames for a template space
@@ -93,7 +104,8 @@ def to_navis_name(template_space):
     for alias_list in aliases:
         if template_space in alias_list:
             return alias_list[0]
-    raise ValueError('template space name not recognized. See docstring for recognized names')
+    raise ValueError('Template space name not recognized.'
+                     ' See docstring for recognized names')
 
 
 def get_nrrd_metadata(template_space):
@@ -101,7 +113,7 @@ def get_nrrd_metadata(template_space):
     return {
         'space dimension': 3,
         'space units': ['microns', 'microns', 'microns'],
-        'space directions' : [
+        'space directions': [
             [voxel_size[0], 0, 0],
             [0, voxel_size[1], 0],
             [0, 0, voxel_size[2]]

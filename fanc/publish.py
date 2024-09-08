@@ -9,14 +9,15 @@ import cloudvolume
 
 from . import auth, lookup, transforms
 
-PUBLISHED_MESHES_CLOUDPATH = ('gs://lee-lab_female-adult-nerve-cord/'
-                              'meshes/{}/FANC_neurons')
+PUBLISHED_MESHES_CLOUDVOLUME = ('gs://lee-lab_female-adult-nerve-cord/'
+                                'meshes/{}/FANC_neurons')
+PUBLISHED_MESHES_GCLOUDPROJECT = 'prime-sunset-531'
 VALID_TEMPLATE_SPACES = ('FANC', 'JRC2018_VNC_FEMALE',
                          'JRC2018_VNC_UNISEX', 'JRC2018_VNC_MALE')
 
 
 def list_public_segment_ids(template_space='JRC2018_VNC_FEMALE',
-                            gcloud_path=PUBLISHED_MESHES_CLOUDPATH):
+                            cloudvolume_path=PUBLISHED_MESHES_CLOUDVOLUME):
     """
     List the segment IDs of all neurons that have been published to the
     specified template space.
@@ -24,10 +25,10 @@ def list_public_segment_ids(template_space='JRC2018_VNC_FEMALE',
     if template_space not in VALID_TEMPLATE_SPACES:
         raise ValueError('{} not in {}'.format(template_space,
                                                VALID_TEMPLATE_SPACES))
-    gcloud_path = gcloud_path.format(template_space)
+    cloudvolume_path = cloudvolume_path.format(template_space)
     # Implementation aided by GPT-4
-    url = f'https://storage.googleapis.com/{gcloud_path.split("/")[2]}'
-    params = {'prefix': '/'.join(gcloud_path.split('/')[3:])}
+    url = f'https://storage.googleapis.com/{cloudvolume_path.split("/")[2]}'
+    params = {'prefix': '/'.join(cloudvolume_path.split('/')[3:])}
 
     segids = []
     while True:
@@ -56,7 +57,9 @@ def list_public_segment_ids(template_space='JRC2018_VNC_FEMALE',
 
 def publish_mesh_to_gcloud(segids,
                            template_space='JRC2018_VNC_FEMALE',
-                           gcloud_path=PUBLISHED_MESHES_CLOUDPATH):
+                           cloudvolume_path=PUBLISHED_MESHES_CLOUDVOLUME,
+                           link_to_cellid=True,
+                           timestamp='now'):
     """
     Download the mesh for a neuron, warp it into alignment with the specified
     VNC template (optional), and upload it to a public google cloud storage bucket.
@@ -81,6 +84,30 @@ def publish_mesh_to_gcloud(segids,
     JRC2018_VNC_UNISEX: Not implemented yet
     JRC2018_VNC_MALE: Not implemented yet
 
+    Parameters
+    ----------
+    segids: int or iterable of ints
+      The segment ID(s) of the neuron(s) to be published.
+
+    template_space: str
+      The name of the template space to which the neurons should be aligned
+      before being published. Must be 'JR2018_VNC_FEMALE' or 'FANC'.
+
+    cloudvolume_path: str, default set by publish.PUBLISHED_MESHES_CLOUDVOLUME
+      A path to a CloudVolume (typically on google cloud storage) where
+      the published neurons should be uploaded. The path should contain
+      a placeholder {} for the template_space.
+
+    link_to_cellid: bool, default True
+      Whether to add an alias to the mesh in the cloudvolume that allows
+      the mesh to be loaded by the cell ID of the neuron it represents.
+
+    timestamp: 'now' (default) OR datetime OR None
+      The timestamp at which to query the segment's publication
+      status and cell ID.
+      If 'now', use the current time.
+      If datetime, use the time specified by the user.
+      If None, use the timestamp of the latest materialization.
     """
     try:
         iter(segids)
@@ -92,10 +119,10 @@ def publish_mesh_to_gcloud(segids,
                                                VALID_TEMPLATE_SPACES))
 
     already_published_ids = list_public_segment_ids(template_space=template_space,
-                                                    gcloud_path=gcloud_path)
+                                                    cloudvolume_path=cloudvolume_path)
     already_published_ids = set(already_published_ids)
 
-    fancneurons_cloudvolume = cloudvolume.CloudVolume(gcloud_path.format(template_space))
+    fancneurons_cloudvolume = cloudvolume.CloudVolume(cloudvolume_path.format(template_space))
 
     mm = auth.get_meshmanager()
     for segid in segids:
@@ -110,24 +137,136 @@ def publish_mesh_to_gcloud(segids,
         mesh = cloudvolume.mesh.Mesh(mesh.vertices, mesh.faces, segid=segid)
         fancneurons_cloudvolume.mesh.put(mesh)
         del mesh
+        if link_to_cellid:
+            add_cellid_alias(segid,
+                             template_space=template_space,
+                             cloudvolume_path=cloudvolume_path,
+                             force=True,
+                             timestamp=timestamp)
+
+
+def add_cellid_alias(segid,
+                     template_space='JRC2018_VNC_FEMALE',
+                     cloudvolume_path=PUBLISHED_MESHES_CLOUDVOLUME,
+                     force=False,
+                     timestamp='now'):
+    return add_mesh_alias(
+        segid,
+        lookup.cellid_from_segid(segid, timestamp=timestamp),
+        cloudvolume_path.format(template_space) + '/meshes',
+        force=force
+    )
+
+
+def add_mesh_alias(meshid,
+                   alias,
+                   gcloud_mesh_folder,
+                   gcloud_project=PUBLISHED_MESHES_GCLOUDPROJECT,
+                   force=False):
+    """
+    Add an alias to a mesh in the google cloud storage bucket.
+
+    Parameters
+    ---------
+    meshid: int or iterable of ints
+      The mesh ID(s) for which the alias should be added.
+
+    alias: int or iterable of ints
+      The alias(es) to be added to the mesh(es).
+      (Technically this can be a string or any object that can be
+      converted to a string, but neuroglancer only knows how to load
+      meshes by integer IDs.)
+
+    gcloud_mesh_folder: str
+      The path to the folder in the google cloud storage bucket where
+      the mesh(es) are stored.
+
+    force: bool
+      Whether to overwrite the alias if it already exists.
+    """
+    from google.cloud import storage
+    from google.cloud.exceptions import NotFound
+    gcs_client = storage.Client(project=gcloud_project)
+    bucket = gcs_client.get_bucket(gcloud_mesh_folder.replace('gs://', '').split('/')[0])
+    mesh_folder = '/'.join(gcloud_mesh_folder.replace('gs://', '').split('/')[1:])
+
+    try:
+        iter(meshid)
+        meshids = meshid
+    except TypeError:
+        meshids = [meshid]
+    try:
+        iter(alias)
+        if isinstance(alias, str):
+            raise TypeError
+        aliases = alias
+    except TypeError:
+        aliases = [alias]
+
+    for meshid, alias in zip(meshids, aliases):
+        blob = bucket.blob(f'{mesh_folder}/{alias}:0')
+        try:
+            if force:
+                # Pretend the file doesn't exist
+                raise NotFound('')
+            blob.reload()
+            print(f'Blob {blob.name} already exists, skipping.')
+        except NotFound:
+            try:
+                bucket.blob(f'{mesh_folder}/{meshid}:0:1').reload()
+                print(f'Mesh {meshid} exists. Adding alias named {alias}.')
+                blob.upload_from_string(
+                    f'{{"fragments":["{meshid}:0:1"]}}',
+                    content_type='application/json'
+                )
+            except NotFound:
+                print(f'Mesh {meshid} does not exist. Cannot add alias named {alias}.')
 
 
 def publish_all_meshes(published_tag='publication',
                        tag_location=('neuron_information', 'tag2'),
                        template_space='JRC2018_VNC_FEMALE',
-                       gcloud_path=PUBLISHED_MESHES_CLOUDPATH,
+                       cloudvolume_path=PUBLISHED_MESHES_CLOUDVOLUME,
+                       timestamp='now',
                        n=None):
     """
     Copy to a public location the meshes of all neurons marked as
     published.
+
+    Parameters
+    ---------
+    published_tag: str
+      The tag used to mark neurons as published.
+
+    tag_location: tuple
+      A 2-tuple of (CAVE table name, column name) indicating the annotation
+      table column where the published_tag should be looked for.
+
+    template_space: str
+      The name of the template space to which the neurons should be aligned
+      before being published. Must be 'JR2018_VNC_FEMALE' or 'FANC'.
+
+    cloudvolume_path: str
+      A path to a CloudVolume (typically on google cloud storage) where
+      the published neurons should be uploaded. The path should contain
+      a placeholder {} for the template_space.
+
+    timestamp: 'now' (default) OR datetime OR None
+      The timestamp at which to query the segment's publication
+      status and cell ID.
+      If 'now', use the current time.
+      If datetime, use the time specified by the user.
+      If None, use the timestamp of the latest materialization.
     """
     segids_with_published_annotation = lookup.cells_annotated_with(
         published_tag,
         source_tables=[tag_location],
+        timestamp=timestamp
     )
     publish_mesh_to_gcloud(segids_with_published_annotation[:n],
                            template_space=template_space,
-                           gcloud_path=gcloud_path)
+                           cloudvolume_path=cloudvolume_path)
+
 
 def publish_skeleton_to_catmaid(segids,
                                 catmaid_instance=None):
@@ -144,13 +283,13 @@ def publish_to_bcio(cave_token):
     Rerun the export procedure on BrainCircuits.io to export published root_ids to
     the the `fruitfly_fanc_public` project. The function may take several minutes
     to complete. It should return `Export successful` message.
-    
+
     Exported files are accessible at:
     https://api.braincircuits.io/data/fruitfly_fanc_public/
     """
     import requests
     return requests.get(f'https://api.braincircuits.io/publish/dataset?project=fruitfly_fanc_public&cave_token={cave_token}')
-    
+
 
 def _configure_template_cloudvolumes(template_space='JRC2018_VNC_FEMALE'):
     """
@@ -161,12 +300,11 @@ def _configure_template_cloudvolumes(template_space='JRC2018_VNC_FEMALE'):
     """
     print('Uploading {}_4iso.nrrd image data'.format(template_space))
     import npimage  # pip install numpyimage
-    import npimage.operations
     # Load VNC template from local file (you must have this file in this folder)
     # Use xyz order because that's what cloudvolume wants
     template_image_data = npimage.load('{}_4iso.nrrd'.format(template_space),
                                        dim_order='xyz')
-    template_image_data_8bit = npimage.operations.to_8bit(template_image_data)
+    template_image_data_8bit = npimage.to_8bit(template_image_data)
 
     # Open a CloudVolume
     gcloud_path = ('gs://lee-lab_female-adult-nerve-cord/VNC_templates/'

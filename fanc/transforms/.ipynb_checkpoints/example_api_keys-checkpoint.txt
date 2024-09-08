@@ -1,1 +1,0 @@
-“FANC”:{“website": "https://catmaid3.hms.harvard.edu/catmaidvnc", "username": "None", "password": "None", "token": “YOUR_TOKEN”,”cloud_volume_url": “YOUR_CLOUDVOLUME_URL}}

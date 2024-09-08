@@ -131,6 +131,7 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
                     annotation: str or tuple[str, str] or bool,
                     user_id: int,
                     table_name='cell_info',
+                    recursive=False,
                     convert_given_point_to_anchor_point=True,
                     resolve_duplicate_anchor_points=False,
                     select_nth_anchor_point=0) -> dict:
@@ -218,6 +219,7 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         raise TypeError(f'user_id must be an integer but got "{user_id}".')
 
     stage = client.annotation.stage_annotations(table_name)
+    parent_posting_result = []
     try:
         allowed_to_post = annotations.is_allowed_to_post(segid, annotation,
                                                          table_name=table_name,
@@ -226,6 +228,27 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         if not e.args or not e.args[0].startswith('No annotation rules found for table'):
             raise e
         allowed_to_post = True
+    except annotations.MissingParentAnnotationError as e:
+        if not recursive:
+            raise
+        print(f'Missing parent annotation "{e.missing_annotation}",'
+              ' attempting to post it...')
+        parent_posting_result = annotate_neuron(
+            point,
+            e.missing_annotation,
+            user_id,
+            table_name=table_name,
+            recursive=True,
+            convert_given_point_to_anchor_point=False,
+            resolve_duplicate_anchor_points=resolve_duplicate_anchor_points,
+            select_nth_anchor_point=select_nth_anchor_point
+        )
+        print(f'Success posting parent annotation "{e.missing_annotation}"'
+              f' with ID {parent_posting_result}')
+        time.sleep(3)
+        allowed_to_post = annotations.is_allowed_to_post(segid, annotation,
+                                                         table_name=table_name,
+                                                         raise_errors=True)
     if not allowed_to_post:
         raise ValueError(f'"{annotation}" is not allowed to be posted to'
                          f' segment {segid} in table "{table_name}".')
@@ -255,6 +278,9 @@ def annotate_neuron(neuron: 'segID (int) or point (xyz)',
         raise TypeError('annotation must be a string or a tuple of 2 strings')
 
     response = client.annotation.upload_staged_annotations(stage)
+    if not isinstance(parent_posting_result, list):
+        parent_posting_result = [parent_posting_result]
+    response = parent_posting_result + response
     if isinstance(response, list) and len(response) == 1:
         return response[0]
     else:

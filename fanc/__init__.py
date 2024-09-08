@@ -14,5 +14,5 @@ from . import (
 )
 
 from .auth import *
-from .render_neurons import render_neuron_into_template_space
+from .render_neurons import *
 from .visualize import plot_neurons

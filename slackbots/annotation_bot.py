@@ -57,6 +57,7 @@ banc.use_auth_token_key('banc_service_account')
 # Setup
 verbosity = 2
 convert_given_point_to_anchor_point = False
+annotate_recursively = False
 
 caveclient = banc.get_caveclient()
 tables = ['cell_info', 'backbone_proofread', 'proofreading_notes']
@@ -356,36 +357,40 @@ def process_message(message: str,
                         f" `{list(point)}`, annotation `{annotation}`"
                         f" to table `{table}`.")
             try:
-                annotation_id = banc.upload.annotate_neuron(
+                annotation_ids = banc.upload.annotate_neuron(
                     neuron, annotation, cave_user_id, table_name=table,
+                    recursive=annotate_recursively,
                     convert_given_point_to_anchor_point=convert_given_point_to_anchor_point
                 )
                 uploaded_data = caveclient.annotation.get_annotation(table,
-                                                                     annotation_id)[0]
+                                                                     annotation_ids)
                 msg = (f"Upload to `{table}` succeeded:\n"
                        f"- Segment {segid}\n"
-                       f"- Point coordinate `{uploaded_data['pt_position']}`\n"
-                       f"- Annotation ID: {annotation_id}")
-                if 'proofread' in uploaded_data:
-                    msg += f"\n- Annotation: `{uploaded_data['proofread']}`"
-                    record_upload(annotation_id, segid,
-                                  uploaded_data['proofread'],
-                                  cave_user_id, table)
-                elif 'tag' in uploaded_data and 'tag2' in uploaded_data:
-                    msg += f"\n- Annotation: `{uploaded_data['tag']}`"
-                    msg += f"\n- Annotation class: `{uploaded_data['tag2']}`"
-                    record_upload(annotation_id, segid,
-                                  uploaded_data['tag2'] + ': ' + uploaded_data['tag'],
-                                  cave_user_id, table)
-                elif 'tag' in uploaded_data:
-                    msg += f"\n- Annotation: `{uploaded_data['tag']}`"
-                    record_upload(annotation_id, segid,
-                                  uploaded_data['tag'],
-                                  cave_user_id, table)
-                else:
-                    msg = (msg + "\n\nWARNING: Something went wrong with recording"
-                           " your upload on the slackbot server. Please send Jasper"
-                           " a screenshot of your message and this response.")
+                       f"- Point coordinate `{uploaded_data[0]['pt_position']}`\n")
+                for anno in uploaded_data:
+                    if msg.count('\n') > 3:
+                        msg += '\n\n'
+                    msg += f"- Annotation ID: {anno['id']}"
+                    if 'proofread' in anno:
+                        msg += f"\n- Annotation: `{anno['proofread']}`"
+                        record_upload(anno['id'], segid,
+                                      anno['proofread'],
+                                      cave_user_id, table)
+                    elif 'tag' in anno and 'tag2' in anno:
+                        msg += f"\n- Annotation: `{anno['tag']}`"
+                        msg += f"\n- Annotation class: `{anno['tag2']}`"
+                        record_upload(anno['id'], segid,
+                                      anno['tag2'] + ': ' + anno['tag'],
+                                      cave_user_id, table)
+                    elif 'tag' in anno:
+                        msg += f"\n- Annotation: `{anno['tag']}`"
+                        record_upload(anno['id'], segid,
+                                      anno['tag'],
+                                      cave_user_id, table)
+                    else:
+                        msg = (msg + "\n\nWARNING: Something went wrong with recording"
+                               " your upload on the slackbot server. Please send Jasper"
+                               " a screenshot of your message and this response.")
                 return msg
             except Exception as e:
                 return f"ERROR: Annotation failed due to\n`{type(e)}`\n```{e}```"
