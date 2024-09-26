@@ -283,7 +283,6 @@ def render_scene(neurons=None,
         additional_states.append(StateBuilder([synapses_config]))
         additional_data.append(None)
 
-
     # Build a state with the requested layers
     standard_state = StateBuilderDefaultSettings([img_config, seg_config])
     chained_sb = ChainedStateBuilder([standard_state] + additional_states)

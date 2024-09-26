@@ -327,13 +327,15 @@ def process_message(message: str,
         invalidity_errors = []
         for table in tables:
             if annotation.replace(' ', '_').replace('-', '_') == table:
-                annotation = True
+                annotation_to_post = True
+            else:
+                annotation_to_post = annotation
             try:
-                if not banc.annotations.is_valid_annotation(annotation,
+                if not banc.annotations.is_valid_annotation(annotation_to_post,
                                                             table_name=table,
                                                             response_on_unrecognized_table=True,
                                                             raise_errors=True):
-                    raise ValueError(f'Invalid annotation "{annotation}"'
+                    raise ValueError(f'Invalid annotation "{annotation_to_post}"'
                                      f' for table "{table}".')
             except Exception as e:
                 invalidity_errors.append(e)
@@ -350,7 +352,7 @@ def process_message(message: str,
                         " to request permissions.")
 
             if fake:
-                banc.annotations.is_allowed_to_post(segid, annotation,
+                banc.annotations.is_allowed_to_post(segid, annotation_to_post,
                                                     response_on_unrecognized_table=True,
                                                     table_name=table)
                 return (f"FAKE: Would upload segment {segid}, point"
@@ -358,7 +360,7 @@ def process_message(message: str,
                         f" to table `{table}`.")
             try:
                 annotation_ids = banc.upload.annotate_neuron(
-                    neuron, annotation, cave_user_id, table_name=table,
+                    neuron, annotation_to_post, cave_user_id, table_name=table,
                     recursive=annotate_recursively,
                     convert_given_point_to_anchor_point=convert_given_point_to_anchor_point
                 )

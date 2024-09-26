@@ -9,7 +9,6 @@ client = auth.get_caveclient()
 info = client.info.get_datastack_info()
 
 ngl_app_url = info['viewer_site']
-#ngl_app_url = 'https://neuromancer-seung-import.appspot.com/'
 voxel_size = (info['viewer_resolution_x'],
               info['viewer_resolution_y'],
               info['viewer_resolution_z'])
@@ -41,7 +40,6 @@ zoom_2d = 16
 
 outlines_layer = {'type': 'segmentation', 'source': {'url': 'precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/region_outlines', 'subsources': {'mesh': True, 'bounds': True, 'properties': True}, 'enableDefaultSubsources': False}, 'tab': 'segments', 'meshSilhouetteRendering': 2, 'segments': ['1'], 'segmentDefaultColor': '#2a7fff', 'pick': False, 'name': 'region outlines'}
 
-
 def final_json_tweaks(state):
     """
     Apply some final changes to the neuroglancer state that I didn't take the
@@ -69,8 +67,6 @@ def final_json_tweaks(state):
     state['crossSectionOrientation'] = [0, 1, 0, 0]
     state['projectionOrientation'] = [0, 1, 0, 0]
     state.update({
-        'gpuMemoryLimit': 4_000_000_000,
-        'systemMemoryLimit': 4_000_000_000,
-        'concurrentDownloads': 64,
-        'jsonStateServer': 'https://global.daf-apis.com/nglstate/api/v1/post'
+        'gpuMemoryLimit': 6_000_000_000,
+        'systemMemoryLimit': 8_000_000_000,
     })
