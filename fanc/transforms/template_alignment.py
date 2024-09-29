@@ -55,15 +55,13 @@ def align_mesh(mesh,
       If true, replace the vertices of the given mesh object. If false, return
       a copy, leaving the given mesh object unchanged.
     """
-    raise NotImplementedError('This function has not yet been adapted from'
-                              ' FANC for use in the BANC.')
     import navis
     import flybrains
     if isinstance(mesh, int):
         inplace = False
         mm = auth.get_meshmanager()
         mesh = mm.mesh(seg_id=mesh)
-    if not inplace:
+    elif not inplace:
         mesh = mesh.copy()
 
     if not hasattr(mesh, 'vertices') or not hasattr(mesh, 'faces'):
@@ -75,12 +73,23 @@ def align_mesh(mesh,
     elif input_units not in ['nm', 'nanometer', 'nanometers']:
         raise ValueError("Unrecognized value provided for input_units. Set it"
                          " to 'nanometers' or 'microns'.")
-    # First remove any mesh faces in the neck connective or brain,
-    # since those can't be warped to the VNC template
-    # This cutoff is 75000voxels * 4.3nm/voxel, plus a small epsilon
-    y_cutoff = 322500 + 1e-4
-    # Find row numbers of vertices that are out of bounds
-    out_of_bounds_vertices = (mesh.vertices[:, 1] < y_cutoff).nonzero()[0]
+
+    brain_or_vnc = 'vnc' if 'vnc' in target_space.lower() else 'brain'
+    if brain_or_vnc == 'vnc':
+        # First remove any mesh faces in the neck connective or brain,
+        # since those can't be warped to the VNC template
+        # This cutoff is 125000voxels * 4nm/voxel, plus a small epsilon
+        y_cutoff = 125000 * 4 + 1e-4
+        # Find row numbers of vertices that are out of bounds
+        out_of_bounds_vertices = (mesh.vertices[:, 1] < y_cutoff).nonzero()[0]
+    elif brain_or_vnc == 'brain':
+        # First remove any mesh faces in the neck connective or VNC, since those
+        # can't be warped to the brain template
+        # This cutoff is 80000voxels * 4nm/voxel, minus a small epsilon
+        y_cutoff = 80000 * 4 - 1e-4
+        # Find row numbers of vertices that are out of bounds
+        out_of_bounds_vertices = (mesh.vertices[:, 1] > y_cutoff).nonzero()[0]
+
     in_bounds_faces = np.isin(mesh.faces,
                               out_of_bounds_vertices,
                               invert=True).all(axis=1)
@@ -89,7 +98,19 @@ def align_mesh(mesh,
 
     target = template_spaces.to_navis_name(target_space)
     print(f'Warping into alignment with {target}')
-    mesh.vertices = navis.xform_brain(mesh.vertices, source='FANC', target=target)
+
+    mesh.vertices = warp_points_BANC_to_template(mesh.vertices,
+                                                 brain_or_vnc=brain_or_vnc,
+                                                 input_units=input_units,
+                                                 output_units='microns')
+    if brain_or_vnc == 'vnc' and target != 'JRCVNC2018F':
+        mesh.vertices = navis.xform_brain(mesh.vertices,
+                                          source='JRCVNC2018F',
+                                          target=target)
+    if brain_or_vnc == 'brain' and target != 'JRC2018F':
+        mesh.vertices = navis.xform_brain(mesh.vertices,
+                                          source='JRC2018F',
+                                          target=target)
     if output_units in ['nm', 'nanometer', 'nanometers']:
         mesh.vertices *= 1000
 
