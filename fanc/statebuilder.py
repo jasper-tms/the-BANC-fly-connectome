@@ -69,7 +69,7 @@ def render_scene(neurons=None,
 
     annotation_units: 'voxel' (Default) or 'nm'
         Whether annotation data is provided in units of voxels or nanometers.
-        If in nanometers, data will be divided by `fanc.ngl_info.voxel_size` to
+        If in nanometers, data will be divided by `banc.ngl_info.voxel_size` to
         convert to voxels.
 
     synapses_layer: bool (default True)

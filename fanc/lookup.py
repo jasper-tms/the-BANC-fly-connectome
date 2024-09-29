@@ -425,7 +425,7 @@ def svid_from_pt(points: 'Nx3 iterable', service_url=default_svid_lookup_url):
     This function relies on an external service hosted on services.itanna.io,
     created and maintained by Eric Perlman, which provides very fast svid
     lookups. If this service is down, you can try the slower version
-    instead, `fanc.lookup.segid_from_pt_cv()`.
+    instead, `banc.lookup.segid_from_pt_cv()`.
 
     Arguments
     ---------

@@ -35,7 +35,7 @@ def make_colormip(seg_id: int,
 
     target_space: str, default 'JRC2018_VNC_UNISEX_461'
         The template space to render the neuron into.
-        See fanc.template_spaces.template_info for a list of template spaces
+        See banc.template_spaces.template_info for a list of template spaces
         that can be provided for this argument. Most of the colormips provided
         by Janelia FlyLight are in the JRC2018_VNC_UNISEX_461 space, so that's
         the default here.
@@ -141,7 +141,7 @@ def render_neuron_into_template_space(seg_id: int,
         The segment ID from the FANC segmentation to render.
 
     target_space: str
-       See fanc.template_spaces.template_info for a list of template spaces that can be
+       See banc.template_spaces.template_info for a list of template spaces that can be
        provided for this argument.
 
     level_of_detail: 'vertices' (default), 'faces', or 'skeleton'

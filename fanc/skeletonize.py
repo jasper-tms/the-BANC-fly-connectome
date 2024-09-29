@@ -27,8 +27,8 @@ def get_pcg_skeleton(segid, **kwargs):
 
     Examples
     --------
-    >>> skel = fanc.skeletonize.get_pcg_skeleton(648518346481082458)
-    >>> fanc.statebuilder.render_scene(annotations=skel.vertices, annotation_units='nm')
+    >>> skel = banc.skeletonize.get_pcg_skeleton(720575941455137261)
+    >>> banc.statebuilder.render_scene(annotations=skel.vertices, annotation_units='nm')
 
     This example pulls a skeleton of the "homepage" FANC neuron, then renders
     a neuroglancer scene with the skeleton nodes displayed as point annotations.
