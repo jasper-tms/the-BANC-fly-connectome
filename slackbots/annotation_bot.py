@@ -154,6 +154,10 @@ def process_message(message: str,
     """
     while '  ' in message:
         message = message.replace('  ', ' ')
+    # Some symbols and special characters get converted strangely on
+    # their way from slack to python, so revert them.
+    message = message.replace('&gt;', '>')
+    message = message.replace('…', '...')
 
     # This is a dict specifying how to do different types of searches.
     # Each entry is a search name followed by a 3-tuple of:
@@ -245,9 +249,6 @@ def process_message(message: str,
         return ("CAVE appears to be offline. Please wait a few minutes"
                 f" and try again: `{type(e)}`\n```{e}```")
 
-    # Because HTML or something, the '>' character typed into slack
-    # is reaching this code as '&gt;', so revert it for readability.
-    message = message.replace('&gt;', '>')
 
     command_chars = ['?', '!', '-']
     try:
