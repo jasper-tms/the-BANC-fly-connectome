@@ -113,7 +113,9 @@ def make_colormip(seg_id: int,
                 colormip[i, j, :] = hsv2rgb(hsv).astype(np.uint8)
 
     colormip = colormip.transpose(1, 0, 2).astype(np.uint8)  # Flip xyc to yxc
-    colormip = np.vstack([np.zeros((90, 573, 3), dtype=np.uint8), colormip]).astype(np.uint8)
+    if target_space == 'JRC2018_VNC_UNISEX_461':
+        # Add the 90 pixel header that all Janelia VNC colormips have
+        colormip = np.vstack([np.zeros((90, 573, 3), dtype=np.uint8), colormip]).astype(np.uint8)
     if not save:
         return colormip
     if save_path is None:
