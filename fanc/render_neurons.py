@@ -11,7 +11,7 @@ from . import template_spaces, transforms
 
 
 def make_colormip(seg_id: int,
-                  target_space: str = 'JRC2018_VNC_UNISEX_461',
+                  target_space: str = 'brain',
                   level_of_detail: Literal['faces', 'vertices', 'skeleton'] = 'vertices',
                   save: bool = False,
                   save_path: Optional[str] = None,
@@ -31,14 +31,16 @@ def make_colormip(seg_id: int,
     Parameters
     ----------
     seg_id : int or list of ints
-        The segment ID(s) from the FANC segmentation to make colormips of
+        The segment ID(s) from the BANC segmentation to make colormips of
 
-    target_space: str, default 'JRC2018_VNC_UNISEX_461'
-        The template space to render the neuron into.
-        See banc.template_spaces.template_info for a list of template spaces
-        that can be provided for this argument. Most of the colormips provided
-        by Janelia FlyLight are in the JRC2018_VNC_UNISEX_461 space, so that's
-        the default here.
+    target_space: str, default 'brain'
+        Which space to render the color MIP in.
+        Set this to 'brain' to use the most common brain space
+          for Janelia's colormips, JRC2018_UNISEX_20x_HR.
+        Set this to 'VNC' to use the most common VNC space for
+          Janelia's colormips, JRC2018_VNC_UNISEX_461.
+        See banc.template_spaces.template_info for a full list of
+          template spaces that can be provided for this argument.
 
     level_of_detail: 'vertices' (default), 'faces', or 'skeleton'
         See docstring for render_neuron_into_template_space for details.
@@ -83,6 +85,11 @@ def make_colormip(seg_id: int,
         return
     except TypeError:
         pass
+
+    if target_space.lower() == 'brain':
+        target_space = 'JRC2018_UNISEX_20x_HR'
+    elif target_space.lower() == 'vnc':
+        target_space = 'JRC2018_VNC_UNISEX_461'
 
     from skimage.color import rgb2hsv, hsv2rgb
     rendered_image = render_neuron_into_template_space(
@@ -133,14 +140,14 @@ def render_neuron_into_template_space(seg_id: int,
                                       compress: bool = True,
                                       verbose: bool = False) -> Optional[np.ndarray]:
     """
-    Create an image volume in .nrrd format with dimensions matching a
-    specified VNC template space, containing a rendering of a neuron
-    from FANC aligned to that VNC template space.
+    Create an image volume in .nrrd format containing a rendering of a
+    neuron from the BANC aligned to some template space, with the image
+    volume's dimensions and voxel size matching the template space.
 
     Parameters
     ----------
     seg_id : int
-        The segment ID from the FANC segmentation to render.
+        The segment ID from the BANC segmentation to render.
 
     target_space: str
        See banc.template_spaces.template_info for a list of template spaces that can be
