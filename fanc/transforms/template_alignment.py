@@ -78,8 +78,8 @@ def align_mesh(mesh,
     if brain_or_vnc == 'vnc':
         # First remove any mesh faces in the neck connective or brain,
         # since those can't be warped to the VNC template
-        # This cutoff is 125000voxels * 4nm/voxel, plus a small epsilon
-        y_cutoff = 125000 * 4 + 1e-4
+        # This cutoff is 131000voxels * 4nm/voxel, plus a small epsilon
+        y_cutoff = 131000 * 4 + 1e-4
         # Find row numbers of vertices that are out of bounds
         out_of_bounds_vertices = (mesh.vertices[:, 1] < y_cutoff).nonzero()[0]
     elif brain_or_vnc == 'brain':
