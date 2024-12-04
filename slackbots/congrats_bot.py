@@ -66,6 +66,12 @@ def provide_update(table_names=tables):
         n_this_week = len(table_now) - len(table_then)
         counts_now = table_now.user_id.value_counts()
         counts_then = table_then.user_id.value_counts()
+        for user in counts_now.index:
+            if user not in counts_then.index:
+                counts_then[user] = 0
+        for user in counts_then.index:
+            if user not in counts_now.index:
+                counts_now[user] = 0
         counts_diff = (counts_now - counts_then).sort_values(ascending=False)
         top_users_caveids = counts_diff[0:3].index
         top_users_slackids = [[slackid
