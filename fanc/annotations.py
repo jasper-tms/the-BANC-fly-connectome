@@ -370,6 +370,10 @@ cell_info = {
             'soma in T3': {},
             'soma in abdominal ganglion': {}}},
     'anterior-posterior projection pattern': {
+        'leg local': {
+            'T1 leg local': {},
+            'T2 leg local': {},
+            'T3 leg local': {}},
         'descending': {},
         'ascending': {}},
     'left-right projection pattern': {
@@ -377,7 +381,12 @@ cell_info = {
         'bilateral': {},
         'midplane': {}},
     'body part innervated': {
-        'innervates antenna': {},
+        'innervates antenna': {
+            'innervates scape': {},
+            'innervates pedicel': {},
+            'innervates funiculus': {
+                'innervates sacculus': {}},
+            'innervates arista': {}},
         'innervates maxillary palp': {},
         'innervates proboscis': {},
         'innervates retina': {},
