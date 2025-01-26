@@ -327,12 +327,17 @@ def delete_annotation(segid: int,
             anno_query = annotation
             anno_returned = annotation
 
-        annos = client.materialize.live_live_query(
-            table_name,
-            datetime.now(timezone.utc),
-            filter_equal_dict={table_name: {annotation_column: anno_query,
-                                            'pt_root_id': segid}}
-        )
+        try:
+            annos = client.materialize.live_live_query(
+                table_name,
+                datetime.now(timezone.utc),
+                filter_equal_dict={table_name: {annotation_column: anno_query,
+                                                'pt_root_id': segid}}
+            )
+        except HTTPError as e:
+            if 'invalid input syntax for type boolean' not in str(e):
+                raise e
+
         if 'user_id' not in annos.columns:
             annos['user_id'] = None
         for i, match in annos.loc[annos['user_id'] == user_id].iterrows():
