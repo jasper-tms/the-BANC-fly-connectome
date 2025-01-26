@@ -526,7 +526,8 @@ FANC_cell_info['publication'] = {
 
 proofreading_notes = [
     'spans neck',
-    'damaged',
+    'soma is damaged',
+    'arbor is damaged',
     'thoroughly proofread',
     'merge monster',
 ]
