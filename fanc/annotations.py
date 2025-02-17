@@ -360,7 +360,7 @@ cell_info = {
         'soma on left': {},
         'soma on right': {},
         'soma on midline': {}},
-    'soma segment': {
+    'soma region': {
         'soma in brain': {
             'soma in central brain': {},
             'soma in optic lobe': {}},
@@ -394,6 +394,7 @@ cell_info = {
         'innervates neck': {},
         'innervates corpus cardiacum': {},
         'innervates corpus allatum': {},
+        'innervates aorta': {},
         'innervates leg': {
             'innervates T1 leg': {
                 'innervates thorax': {},
