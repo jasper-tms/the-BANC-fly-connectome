@@ -232,9 +232,9 @@ def process_message(message: str,
 
     if message.startswith('synapses'):
         if len(message) < len('synapses x'):
-            return ("Send me a message like 'synapses 648518346486614449'"
+            return ("Send me a message like 'synapses 720575941535411994'"
                     " to see inputs and outputs from one neuron, or 'synapses"
-                    " 648518346486614449 648518346490269367' to see synapses from"
+                    " 720575941535411994 720575941593843589' to see synapses from"
                     " the first neuron to the second one.")
         segids = message[len('synapses '):].split(' ')
 
@@ -258,11 +258,11 @@ def process_message(message: str,
             outputs['radius_nm'] = radius_nm
             outputs = outputs[['post_pt_position', 'radius_nm']]
             outputs = outputs.rename(columns={'post_pt_position': 'pt_position'})
-            return fanc.statebuilder.render_scene(
+            return banc.statebuilder.render_scene(
                 neurons=segid,
                 annotations=[{'name': 'inputs', 'type': shape, 'data': inputs},
                              {'name': 'outputs', 'type': shape, 'data': outputs}],
-                annotation_units='voxels'
+                annotation_units='nm'
             )
         elif len(segids) == 2:
             try:
@@ -280,11 +280,11 @@ def process_message(message: str,
             pre_pts = pre_pts.rename(columns={'pre_pt_position': 'pt_position'})
             post_pts = synapses[['post_pt_position', 'radius_nm']]
             post_pts = post_pts.rename(columns={'post_pt_position': 'pt_position'})
-            return fanc.statebuilder.render_scene(
+            return banc.statebuilder.render_scene(
                 neurons=[pre_id, post_id],
                 annotations=[{'name': 'presynaptic points', 'type': shape, 'data': pre_pts},
                              {'name': 'postsynaptic points', 'type': shape, 'data': post_pts}],
-                annotation_units='voxels'
+                annotation_units='nm'
             )
 
     if message.startswith(('get', 'find')):
