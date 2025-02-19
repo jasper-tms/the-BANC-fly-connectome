@@ -237,23 +237,31 @@ def process_message(message: str,
                     " 648518346486614449 648518346490269367' to see synapses from"
                     " the first neuron to the second one.")
         segids = message[len('synapses '):].split(' ')
+
+        # Hardcoded for now, might make this configurable later
+        radius_nm = 0
+        #radius_nm = 1000
+        shape = 'spheres' if radius_nm > 0 else 'points'
         if len(segids) == 1:
             try:
                 segid = int(segids[0])
             except:
                 return f'Could not convert "{segids[0]}" to an integer.'
+            now = datetime.now(timezone.utc)
             inputs = caveclient.materialize.synapse_query(post_ids=segid,
-                                                      timestamp=datetime.now(timezone.utc))
-            inputs['radius_nm'] = 1000
+                                                          timestamp=now)
+            inputs['radius_nm'] = radius_nm
+            inputs = inputs[['pre_pt_position', 'radius_nm']]
+            inputs = inputs.rename(columns={'pre_pt_position': 'pt_position'})
             outputs = caveclient.materialize.synapse_query(pre_ids=segid,
-                                                       timestamp=datetime.now(timezone.utc))
-            outputs['radius_nm'] = 1000
+                                                           timestamp=now)
+            outputs['radius_nm'] = radius_nm
+            outputs = outputs[['post_pt_position', 'radius_nm']]
+            outputs = outputs.rename(columns={'post_pt_position': 'pt_position'})
             return fanc.statebuilder.render_scene(
                 neurons=segid,
-                annotations=[{'name': 'inputs', 'type': 'points', #'spheres',
-                              'data': inputs[['pre_pt_position', 'radius_nm']]},
-                             {'name': 'outputs', 'type': 'points', #'spheres',
-                              'data': outputs[['post_pt_position', 'radius_nm']]}],
+                annotations=[{'name': 'inputs', 'type': shape, 'data': inputs},
+                             {'name': 'outputs', 'type': shape, 'data': outputs}],
                 annotation_units='voxels'
             )
         elif len(segids) == 2:
@@ -267,15 +275,15 @@ def process_message(message: str,
                 return f'Could not convert "{segids[1]}" to an integer.'
             synapses = caveclient.materialize.synapse_query(pre_ids=pre_id,
                                                             post_ids=post_id)
-            synapses['radius_nm'] = 1000
-            pre_pts = synapses[['pre_pt_position', 'radius_nm']].rename(columns={'pre_pt_position': 'pt_position'})
-            post_pts = synapses[['post_pt_position', 'radius_nm']].rename(columns={'post_pt_position': 'pt_position'})
+            synapses['radius_nm'] = radius_nm
+            pre_pts = synapses[['pre_pt_position', 'radius_nm']]
+            pre_pts = pre_pts.rename(columns={'pre_pt_position': 'pt_position'})
+            post_pts = synapses[['post_pt_position', 'radius_nm']]
+            post_pts = post_pts.rename(columns={'post_pt_position': 'pt_position'})
             return fanc.statebuilder.render_scene(
                 neurons=[pre_id, post_id],
-                annotations=[{'name': 'presynaptic points', 'type': 'points', #'spheres',
-                              'data': pre_pts},
-                             {'name': 'postsynaptic points', 'type': 'points', #'spheres',
-                              'data': post_pts}],
+                annotations=[{'name': 'presynaptic points', 'type': shape, 'data': pre_pts},
+                             {'name': 'postsynaptic points', 'type': shape, 'data': post_pts}],
                 annotation_units='voxels'
             )
 
