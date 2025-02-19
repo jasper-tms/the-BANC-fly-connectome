@@ -1,6 +1,7 @@
 {
     "description": "This file lists which users have permissions to post to which CAVE tables through slackbots. The keys are names of CAVE tables, and the value for each table is a mapping from Slack user IDs to CAVE user IDs. Slackbots in this folder will open this file and make sure that any user trying to post data to a CAVE table is listed here as having access to that CAVE table.",
     "cell_info": {
+        "U08A67GR622": 2820,
         "U01AF45U4FP": 355,
         "U033DAVMQF5": 1781,
         "U04B5EN4VC0": 2658,
@@ -186,9 +187,12 @@
         "U07KQENAELR": 5681,
         "U07JX82P8CF": 5669,
         "U07JX83TVAB": 5712,
-        "U07KQEQ6B2M": 5688
+        "U07KQEQ6B2M": 5688,
+        "U06BBJLPQFR": 4768,
+        "U06BUJDRJDS": 4816
     },
     "backbone_proofread": {
+        "U08A67GR622": 2820,
         "U01AF45U4FP": 355,
         "U033DAVMQF5": 1781,
         "U04B5EN4VC0": 2658,
@@ -294,6 +298,7 @@
         "U06KLRA0L8J": 5087,
         "U06K7J03XLK": 5074,
         "U06KC2GM0P8": 5038,
+        "UNGU4J0LQ": 52,
         "ULH3QL2CF": 125,
         "UQL45UV7W": 100,
         "U02G0UG000Y": 1782,
@@ -361,9 +366,12 @@
         "U07KQENAELR": 5681,
         "U07JX82P8CF": 5669,
         "U07JX83TVAB": 5712,
-        "U07KQEQ6B2M": 5688
+        "U07KQEQ6B2M": 5688,
+        "U06BBJLPQFR": 4768,
+        "U06BUJDRJDS": 4816
     },
     "proofreading_notes": {
+        "U08A67GR622": 2820,
         "U01AF45U4FP": 355,
         "U033DAVMQF5": 1781,
         "U04B5EN4VC0": 2658,
@@ -461,6 +469,7 @@
         "U06K7J03XLK": 5074,
         "U06KC2GM0P8": 5038,
         "UQ49M0807": 92,
+        "UNGU4J0LQ": 52,
         "ULH3QL2CF": 125,
         "UQL45UV7W": 100,
         "U06LMQ612Q0": 3953,
@@ -536,7 +545,9 @@
         "U07KQENAELR": 5681,
         "U07JX82P8CF": 5669,
         "U07JX83TVAB": 5712,
-        "U07KQEQ6B2M": 5688
+        "U07KQEQ6B2M": 5688,
+        "U06BBJLPQFR": 4768,
+        "U06BUJDRJDS": 4816
     },
     "neuron_information": {
         "U02DUFYKG8M": 1345,
