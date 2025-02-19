@@ -57,7 +57,7 @@ def align_mesh(mesh,
     """
     import navis
     import flybrains
-    if isinstance(mesh, int):
+    if isinstance(mesh, (int, np.integer)):
         inplace = False
         mm = auth.get_meshmanager()
         mesh = mm.mesh(seg_id=mesh)

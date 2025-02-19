@@ -51,9 +51,9 @@ def final_json_tweaks(state):
             layer['selectedAlpha'] = 0.4
             layer['tab'] = 'segments'
             layer['toolBindings'] = {
-                "M": "grapheneMergeSegments",
-                "C": "grapheneMulticutSegments",
-                "F": "grapheneFindPath"
+                'M': 'grapheneMergeSegments',
+                'C': 'grapheneMulticutSegments',
+                'F': 'grapheneFindPath'
             }
         if layer['name'] == nuclei['name']:
             layer['visible'] = False

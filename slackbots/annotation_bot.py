@@ -224,6 +224,61 @@ def process_message(message: str,
         import random
         return msg + ". Here are 5:\n```" + str(random.sample(todos, 5))[1:-1] + "```"
 
+    try:
+        caveclient.materialize.version = caveclient.materialize.most_recent_version()
+    except Exception as e:
+        return ("CAVE appears to be offline. Please wait a few minutes"
+                f" and try again: `{type(e)}`\n```{e}```")
+
+    if message.startswith('synapses'):
+        if len(message) < len('synapses x'):
+            return ("Send me a message like 'synapses 648518346486614449'"
+                    " to see inputs and outputs from one neuron, or 'synapses"
+                    " 648518346486614449 648518346490269367' to see synapses from"
+                    " the first neuron to the second one.")
+        segids = message[len('synapses '):].split(' ')
+        if len(segids) == 1:
+            try:
+                segid = int(segids[0])
+            except:
+                return f'Could not convert "{segids[0]}" to an integer.'
+            inputs = caveclient.materialize.synapse_query(post_ids=segid,
+                                                      timestamp=datetime.now(timezone.utc))
+            inputs['radius_nm'] = 1000
+            outputs = caveclient.materialize.synapse_query(pre_ids=segid,
+                                                       timestamp=datetime.now(timezone.utc))
+            outputs['radius_nm'] = 1000
+            return fanc.statebuilder.render_scene(
+                neurons=segid,
+                annotations=[{'name': 'inputs', 'type': 'points', #'spheres',
+                              'data': inputs[['pre_pt_position', 'radius_nm']]},
+                             {'name': 'outputs', 'type': 'points', #'spheres',
+                              'data': outputs[['post_pt_position', 'radius_nm']]}],
+                annotation_units='voxels'
+            )
+        elif len(segids) == 2:
+            try:
+                pre_id = int(segids[0])
+            except:
+                return f'Could not convert "{segids[0]}" to an integer.'
+            try:
+                post_id = int(segids[1])
+            except:
+                return f'Could not convert "{segids[1]}" to an integer.'
+            synapses = caveclient.materialize.synapse_query(pre_ids=pre_id,
+                                                            post_ids=post_id)
+            synapses['radius_nm'] = 1000
+            pre_pts = synapses[['pre_pt_position', 'radius_nm']].rename(columns={'pre_pt_position': 'pt_position'})
+            post_pts = synapses[['post_pt_position', 'radius_nm']].rename(columns={'post_pt_position': 'pt_position'})
+            return fanc.statebuilder.render_scene(
+                neurons=[pre_id, post_id],
+                annotations=[{'name': 'presynaptic points', 'type': 'points', #'spheres',
+                              'data': pre_pts},
+                             {'name': 'postsynaptic points', 'type': 'points', #'spheres',
+                              'data': post_pts}],
+                annotation_units='voxels'
+            )
+
     if message.startswith(('get', 'find')):
         search_terms = message[message.find(' ')+1:].strip('"\'')
 
@@ -242,13 +297,6 @@ def process_message(message: str,
 
         return ("Search successful. View your results: " +
                 banc.lookup.cells_annotated_with(search_terms, return_as='url'))
-
-    try:
-        caveclient.materialize.version = caveclient.materialize.most_recent_version()
-    except Exception as e:
-        return ("CAVE appears to be offline. Please wait a few minutes"
-                f" and try again: `{type(e)}`\n```{e}```")
-
 
     command_chars = ['?', '!', '-']
     try:

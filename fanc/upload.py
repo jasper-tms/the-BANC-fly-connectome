@@ -41,7 +41,7 @@ def new_cell(pt_position,
         raise ValueError(f'Point {pt_position} is a location with no segmentation')
     if segid in cell_ids.pt_root_id.values:
         raise ValueError(f"Segment {segid} already has a cell ID, {cell_ids.loc[cell_ids.pt_root_id == segid, column_name].values[0]}")
-    if pt_type not in ['soma', 'peripheral nerve', 'neck connective', 'cut-off soma', 'orphan']:
+    if pt_type not in ['soma', 'peripheral nerve', 'neck connective', 'backbone', 'cut-off soma', 'orphan']:
         raise ValueError(f'pt_type "{pt_type}" is not valid')
     id_ranges = {
         'descending': range(1, 1_999),

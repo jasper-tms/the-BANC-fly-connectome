@@ -99,10 +99,10 @@ def proofreading_status(segids: int or list[int],
     return results.loc[segids].to_list()
 
 
-def num_proofread_neurons(source_tables: str or list[str] = default_proofreading_tables,
+def all_proofread_neurons(source_tables: str or list[str] = default_proofreading_tables,
                           timestamp='now') -> int:
     """
-    Count the number of unique neurons that have been marked as proofread.
+    Get the segment IDs of all neurons that have been marked as proofread.
     """
     if timestamp in ['now', 'live']:
         timestamp = datetime.utcnow()
@@ -110,7 +110,15 @@ def num_proofread_neurons(source_tables: str or list[str] = default_proofreading
     client = auth.get_caveclient()
     tables = [client.materialize.live_live_query(table_name, timestamp)
               for table_name in source_tables]
-    return pd.concat(tables).pt_root_id.nunique()
+    return pd.concat(tables).pt_root_id.unique()
+
+
+def num_proofread_neurons(source_tables: str or list[str] = default_proofreading_tables,
+                          timestamp='now') -> int:
+    """
+    Count the number of unique neurons that have been marked as proofread.
+    """
+    return len(all_proofread_neurons(source_tables=source_tables, timestamp=timestamp))
 
 
 def cells_annotated_with(tags: str or list[str],
