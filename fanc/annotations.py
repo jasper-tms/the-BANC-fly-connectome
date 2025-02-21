@@ -50,7 +50,7 @@ cell_info = {
             'gustatory neuron': {},
             'thermosensory neuron': {},
             'hygrosensory neuron': {}},
-        'central neuron': {
+        'CNS neuron': {
             'optic lobe intrinsic': {
                 'centrifugal': {
                     'C2': {},
@@ -747,10 +747,10 @@ cell_info = {
                     'OA-AL2b2': {}}},
             'central brain intrinsic': {},
             'VNC intrinsic': {}},
-        'efferent': {
+        'efferent neuron': {
             'motor neuron': {},
             'UM neuron': {},
-            'endocrine': {}},
+            'endocrine neuron': {}},
         'glia': {
             'trachea': {},
             'astrocyte': {},
