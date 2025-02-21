@@ -35,7 +35,6 @@ cell_info = {
         'sensory neuron': {
             'unknown sensory subtype': {},
             'photoreceptor neuron': {
-                'R1-6': {},
                 'R7': {},
                 'R8': {}},
             'chordotonal neuron': {
