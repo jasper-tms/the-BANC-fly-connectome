@@ -308,7 +308,7 @@ cell_info = {
                     'Y11': {},
                     'Y12': {}}},
             'visual projection': {
-                'LC': {
+                'lobula columnar': {
                     'LC4': {},
                     'LC6': {},
                     'LC9': {},
@@ -363,7 +363,7 @@ cell_info = {
                     'LCe07': {},
                     'LCe08': {},
                     'LCe09': {}},
-                'LT': {
+                'lobula tangential': {
                     'LT1a': {},
                     'LT1b': {},
                     'LT1c': {},
@@ -488,19 +488,19 @@ cell_info = {
                     'LTe74': {},
                     'LTe75': {},
                     'LTe76': {}},
-                'LPC': {
+                'lobula plate columnar': {
                     'LPC1': {},
                     'LPC2': {}},
-                'LPLC': {
+                'lobula plate lobula columnar': {
                     'LPLC1': {},
                     'LPLC2': {},
                     'LPLC4': {}},
-                'LLPC': {
+                'lobula lobula plate columnar': {
                     'LLPC1': {},
                     'LLPC2': {},
                     'LLPC3': {},
                     'LLPC4': {}},
-                'LPT': {
+                'lobula plate tangential': {
                     'LPT04_HST': {},
                     'LPT21': {},
                     'LPT22': {},
@@ -520,8 +520,13 @@ cell_info = {
                     'LPT52': {},
                     'LPT54': {},
                     'LPTe01': {},
-                    'LPTe02': {}},
-                'MeMe': {
+                    'LPTe02': {},
+                    'Nod1': {},
+                    'Nod2': {},
+                    'Nod3': {},
+                    'Nod5': {},
+                    'H2': {}},
+                'medulla medulla': {
                     'MeMe_e02': {},
                     'MeMe_e03': {},
                     'MeMe_e04': {},
@@ -529,7 +534,7 @@ cell_info = {
                     'MeMe_e06': {},
                     'MeMe_e07': {},
                     'MeMe_e08': {}},
-                'MeTu': {
+                'medulla tubercle': {
                     'MeTu1': {},
                     'MeTu2a': {},
                     'MeTu2b': {},
@@ -541,9 +546,9 @@ cell_info = {
                     'MeTu4c': {},
                     'MeTu4d': {},
                     'MeTu4_unknown': {}},
-                'MeLp': {
+                'medulla lobula plate': {
                     'MeLp1': {}},
-                'aMe': {
+                'amacrine medulla': {
                     'aMe1': {},
                     'aMe3': {},
                     'aMe5': {},
@@ -557,7 +562,7 @@ cell_info = {
                     'aMe20': {},
                     'aMe25': {},
                     'aMe26': {}},
-                'VS': {
+                'vertical system': {
                     'VSm': {},
                     'VS1': {},
                     'VS2': {},
@@ -569,7 +574,7 @@ cell_info = {
                     'VS8': {},
                     'VST1': {},
                     'VST2': {}},
-                'MT': {
+                'medulla tangential': {
                     'MTe01a': {},
                     'MTe01b': {},
                     'MTe02': {},
@@ -624,22 +629,14 @@ cell_info = {
                     'MTe51': {},
                     'MTe52': {},
                     'MTe53': {},
-                    'MTe54': {}},
-                'Nod': {
-                    'Nod1': {},
-                    'Nod2': {},
-                    'Nod3': {},
-                    'Nod5': {}},
-                'H': {
-                    'H2': {}},
-                'HS': {
+                    'MTe54': {},
+                    'MC65': {}},
+                'horizontal system': {
                     'HSE': {},
                     'HSN': {},
-                    'HSS': {}},
-                'MC': {
-                    'MC65': {}}},
+                    'HSS': {}}},
             'visual centrifugal': {
-                'LT': {
+                'lobula tangential': {
                     'LT34': {},
                     'LT36': {},
                     'LT37': {},
@@ -650,21 +647,21 @@ cell_info = {
                     'LT42': {},
                     'LT56': {},
                     'LT70': {}},
-                'LPT': {
+                'lobula plate tangential': {
                     'LPT53': {},
                     'LPT57': {},
                     'LPT58': {}},
-                'aMe': {
+                'amacrine medulla': {
                     'aMe4': {},
                     'aMe17a1': {},
                     'aMe17a2': {},
                     'aMe17b': {},
                     'aMe17c': {}},
-                'mAL': {
+                'medial antennal lobula': {
                     'mALC3': {},
                     'mALC4': {},
                     'mALC5': {}},
-                'cM': {
+                'centrifugal medulla': {
                     'cM01a': {},
                     'cM01b': {},
                     'cM01c': {},
@@ -689,13 +686,13 @@ cell_info = {
                     'cM17': {},
                     'cM18': {},
                     'cM19': {}},
-                'cML': {
+                'centrifugal medulla lobula': {
                     'cML01': {},
                     'cML02': {}},
-                'cMLLP': {
+                'centrifugal medulla lobula lobula plate': {
                     'cMLLP01': {},
                     'cMLLP02': {}},
-                'cL': {
+                'centrifugal lobula': {
                     'cL01': {},
                     'cL02a': {},
                     'cL02b': {},
@@ -723,23 +720,23 @@ cell_info = {
                     'cL22a': {},
                     'cL22b': {},
                     'cL22c': {}},
-                'cLM': {
+                'centrifugal lobula medulla': {
                     'cLM01': {}},
-                'cLP': {
+                'centrifugal lobula plate': {
                     'cLP01': {},
                     'cLP02': {},
                     'cLP03': {},
                     'cLP04': {},
                     'cLP05': {},
                     'cLPL01': {}},
-                'cLLP': {
+                'centrifugal lobula lobula plate': {
                     'cLLP02': {}},
-                'cLLPM': {
+                'centrifugal lobula lobula plate medulla': {
                     'cLLPM01': {},
                     'cLLPM02': {}},
-                'VC': {
+                'ventral centrifugal': {
                     'VCH': {}},
-                'OA': {
+                'optic anterior': {
                     'OA-AL2b1': {},
                     'OA-AL2b2': {},
                     'OA-AL2i1': {},
