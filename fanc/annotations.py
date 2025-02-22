@@ -757,9 +757,10 @@ cell_info = {
             'trachea': {},
             'astrocyte': {},
             'cortex glia': {},
-            'ensheathing glia': {},
-            'perineural glia': {},
-            'subperineural glia': {}}},
+            'neuropil ensheathing glia': {},
+            'nervous system ensheathing glia': {
+                'perineural glia': {},
+                'subperineural glia': {}}}},
     'hemilineage': {
         '0A': {},
         '0B': {},
