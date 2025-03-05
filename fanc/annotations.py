@@ -1025,6 +1025,7 @@ cell_info = {
         'soma in brain': {
             'soma in central brain': {},
             'soma in optic lobe': {}},
+        'soma in neck connective': {},
         'soma in VNC': {
             'soma in T1': {},
             'soma in T2': {},
@@ -1097,7 +1098,8 @@ cell_info = {
         'innervates abdomen': {}},
     'body side innervated': {
         'innervates left side of body': {},
-        'innervates right side of body': {}},
+        'innervates right side of body': {},
+        'innervates both sides of body': {}},
     'muscle innervated': {
         'innervates tergopleural promotor': {},
         'innervates pleural promotor': {},
