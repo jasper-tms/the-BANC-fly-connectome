@@ -745,7 +745,7 @@ cell_info = {
                     'OA-AL2i4': {},
                     'OA-ASM1': {}}},
             'central brain intrinsic': {
-              "kenyon cell": {}},
+                'kenyon cell': {}},
             'VNC intrinsic': {}},
         'efferent neuron': {
             'motor neuron': {},
