@@ -7,6 +7,7 @@ to which many users can post annotations, in order to maintain some consistency
 in which annotations are posted to the table.
 """
 
+from typing import Tuple, Union
 from datetime import datetime, timezone
 
 import anytree
@@ -1320,7 +1321,7 @@ def guess_class(annotation: str, table_name: str = default_table) -> str:
     return annotation_nodes[0].parent.name
 
 
-def is_valid_annotation(annotation: str or tuple[str, str] or bool,
+def is_valid_annotation(annotation: Union[str, Tuple[str, str], bool],
                         table_name: str = default_table,
                         response_on_unrecognized_table='raise',
                         raise_errors: bool = True) -> bool:
@@ -1372,8 +1373,8 @@ def is_valid_annotation(annotation: str or tuple[str, str] or bool,
                          annotations, raise_errors=raise_errors)
 
 
-def parse_annotation_pair(annotation: str or tuple[str, str],
-                          table_name: str = default_table) -> tuple[str, str]:
+def parse_annotation_pair(annotation: Union[str, Tuple[str, str]],
+                          table_name: str = default_table) -> Tuple[str, str]:
     """
     Convert any of the following into a proper (annotation_class, annotation) tuple:
     - A single annotation (str). In this case the annotation_class will be
@@ -1512,7 +1513,7 @@ class MissingParentAnnotationError(Exception):
 
 
 def is_allowed_to_post(segid: int,
-                       annotation: str or tuple[str, str] or bool,
+                       annotation: Union[str, Tuple[str, str], bool],
                        table_name: str = default_table,
                        response_on_unrecognized_table='raise',
                        raise_errors: bool = True) -> bool:

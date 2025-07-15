@@ -5,6 +5,7 @@ Upload data to CAVE tables
 See some examples at https://github.com/htem/FANC_auto_recon/blob/main/example_notebooks/update_cave_tables.ipynb
 """
 
+from typing import Literal, Tuple, Union
 from datetime import datetime, timezone
 from textwrap import dedent
 import time
@@ -12,7 +13,6 @@ import time
 import numpy as np
 import pandas as pd
 from requests.exceptions import HTTPError
-from caveclient import CAVEclient
 from caveclient.chunkedgraph import root_id_int_list_check
 from cloudvolume import CloudVolume
 from cloudvolume.lib import green, red
@@ -21,10 +21,10 @@ from . import annotations, auth, lookup, statebuilder
 
 
 def new_cell(pt_position,
-             pt_type: ['soma', 'peripheral nerve', 'neck connective', 'backbone'],
-             cell_type: ['descending', 'ascending', 'brain motor', 'VNC motor',
-                         'brain sensory', 'neck sensory', 'VNC sensory',
-                         'brain intrinsic', 'VNC intrinsic', 'brain glia', 'VNC glia'],
+             pt_type: Literal['soma', 'peripheral nerve', 'neck connective', 'backbone'],
+             cell_type: Literal['descending', 'ascending', 'brain motor', 'VNC motor',
+                 'brain sensory', 'neck sensory', 'VNC sensory',
+                 'brain intrinsic', 'VNC intrinsic', 'brain glia', 'VNC glia'],
              user_id: int,
              cell_ids_table=lookup.default_cellid_source,
              add_to_soma_table=False,
@@ -128,7 +128,7 @@ def new_cell(pt_position,
 
 
 def annotate_neuron(neuron: 'segID (int) or point (xyz)',
-                    annotation: str or tuple[str, str] or bool,
+                    annotation: Union[str, Tuple[str, str], bool],
                     user_id: int,
                     table_name='cell_info',
                     recursive=False,
