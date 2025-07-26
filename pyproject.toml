@@ -50,5 +50,3 @@ include = ["banc*"]
 
 [tool.setuptools.package-data]
 "banc.transforms" = ["transform_parameters/*.txt"]
-
- 
