@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate skeletons from FANC segmentation objects (meshes).
+Generate skeletons from BANC segmentation objects (meshes).
 
 See examples of running these skeletonization functions at:
 https://github.com/htem/FANC_auto_recon/blob/main/example_notebooks/skeletonization.ipynb
@@ -19,18 +19,19 @@ from . import auth
 
 def get_pcg_skeleton(segid, **kwargs):
     """
-    Create a skeleton from an object in the FANC segmentation.
+    Create a skeleton from an object in the BANC segmentation.
 
     This function just calls pcg_skel.pcg_skeleton, so its main purpose
     is just to inform you that pcg_skel is the recommended way to
-    generate a skeleton from a FANC neuron.
+    generate a skeleton from a BANC neuron.
 
     Examples
     --------
-    >>> skel = banc.skeletonize.get_pcg_skeleton(720575941455137261)
-    >>> banc.statebuilder.render_scene(annotations=skel.vertices, annotation_units='nm')
+    >>> segment_id = 720575941431071113
+    >>> skel = banc.skeletonize.get_pcg_skeleton(segment_id)
+    >>> banc.statebuilder.render_scene(neurons=segment_id, annotations=skel.vertices, annotation_units='nm')
 
-    This example pulls a skeleton of the "homepage" FANC neuron, then renders
+    This example pulls a skeleton of an example BANC neuron, then renders
     a neuroglancer scene with the skeleton nodes displayed as point annotations.
     """
     if 'client' not in kwargs:
@@ -61,7 +62,7 @@ def skeletonize_neuron(seg_id,
                        cloudvolume=None,
                        voxel_resolution=skeletonization_defaults['voxel_resolution']):
     """
-    Skeletonize a neuron from a FANC segmentation object (mesh).
+    Skeletonize a neuron from a BANC segmentation object (mesh).
 
     This function is more flexible than get_pcg_skeleton (there are a
     ton of parameters that you could tweak if you're really motivated to
