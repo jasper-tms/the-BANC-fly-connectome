@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "banc"
-version = "0.5.2"
+version = "0.5.3"
 description = "Tools for the GridTape-TEM dataset of an adult female fly's Brain And Nerve Cord"
 readme.file = "README.md"
 readme.content-type = "text/markdown"

@@ -46,4 +46,4 @@ jobs:
           name: v${{ steps.get_version.outputs.version }}
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN_FOR_RELEASES }}
