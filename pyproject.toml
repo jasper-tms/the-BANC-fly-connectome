@@ -19,10 +19,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-urls = {
-    Homepage = "https://banc.community",
-    Repository = "https://github.com/jasper-tms/the-BANC-fly-connectome"
-}
 requires-python = ">=3.6"
 dependencies = [
     "numpy",
@@ -47,6 +43,10 @@ dependencies = [
     "pcg_skel",
     "anytree",
 ]
+
+[project.urls]
+Homepage = "https://banc.community"
+Repository = "https://github.com/jasper-tms/the-BANC-fly-connectome"
 
 [tool.setuptools.packages.find]
 include = ["banc*"]
