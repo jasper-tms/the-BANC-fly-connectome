@@ -1,22 +1,22 @@
 {
     "dimensions": {
         "x": [
-            4e-9,
+            "0.000000004",
             "m"
         ],
         "y": [
-            4e-9,
+            "0.000000004",
             "m"
         ],
         "z": [
-            4.5e-8,
+            "0.000000045",
             "m"
         ]
     },
     "position": [
-        137363.484375,
-        35365.28515625,
-        2493.5
+        125097.5,
+        122589.5,
+        2827.5
     ],
     "crossSectionOrientation": [
         0,
@@ -24,20 +24,23 @@
         0,
         0
     ],
-    "crossSectionScale": 3.2390070208687294,
+    "crossSectionScale": 15.1354,
     "projectionOrientation": [
-        0,
-        1,
-        0,
-        0
+        -0.1193,
+        0.079,
+        0.023,
+        0.9895
     ],
-    "projectionScale": 1644.5523155751928,
+    "projectionScale": 267323.4663,
     "layers": [
         {
             "type": "image",
             "source": "precomputed://gs://seunglab_lee_fly_cns_001_alignment/aligned/v0",
             "tab": "source",
-            "name": "BANC EM"
+            "name": "BANC EM",
+            "segments": [
+
+            ]
         },
         {
             "type": "segmentation",
@@ -50,12 +53,15 @@
             "tab": "segments",
             "selectedAlpha": 0.4,
             "segments": [
-                "720575941455137261",
-                "720575941651657457"
+
             ],
-            "colorSeed": 1078632127,
-            "name": "segmentation proofreading",
-            "visible": false
+            "colorSeed": 3952451009,
+            "segmentColors": {
+                "720575941450261831": "#00ff00",
+                "720575941518561971": "#0000ff",
+                "720575941545083784": "#ff0000"
+            },
+            "name": "segmentation proofreading"
         },
         {
             "type": "segmentation",
@@ -69,112 +75,60 @@
                 "enableDefaultSubsources": false
             },
             "pick": false,
-            "tab": "segments",
+            "tab": "rendering",
+            "objectAlpha": 0.35,
             "meshSilhouetteRendering": 2,
             "segments": [
                 "1",
-                "!2",
-                "!4",
-                "!3"
+                "2"
             ],
             "segmentQuery": "<id",
-            "colorSeed": 2939100304,
+            "colorSeed": 260226408,
             "segmentColors": {
-                "1": "#2a7fff"
+                "1": "#f0f2f4",
+                "2": "#e7e9d8"
             },
             "name": "region outlines"
         },
         {
             "type": "segmentation",
-            "source": {
-                "url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/fafb_783_meshes_elastix_tpsreg_240721",
-                "subsources": {
-                    "properties": true,
-                    "mesh": true
-                },
-                "enableDefaultSubsources": false
-            },
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/fafb_783_meshes_elastix_tpsreg_240721",
             "tab": "segments",
             "segments": [
-                "720575940627787609",
-                "720575940644438551"
+
             ],
             "colorSeed": 2860966783,
-            "name": "fafb v783 imported",
-            "archived": true
+            "name": "fafb v783 imported"
         },
         {
             "type": "segmentation",
-            "source": {
-                "url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/hemibrain_v1.2.1_meshes_elastix_tpsreg_240721",
-                "subsources": {
-                    "properties": true,
-                    "mesh": true
-                },
-                "enableDefaultSubsources": false
-            },
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/hemibrain_v1.2.1_meshes_elastix_tpsreg_240721",
             "tab": "segments",
             "segments": [
-                "1170939344"
+
             ],
             "colorSeed": 2830100975,
-            "name": "hemibrain v1.2.1 imported",
-            "archived": true
+            "name": "hemibrain v1.2.1 imported"
         },
         {
             "type": "segmentation",
-            "source": {
-                "url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/mirrored_hemibrain_v1.2.1_meshes_elastix_tpsreg_240721",
-                "subsources": {
-                    "properties": true,
-                    "mesh": true
-                },
-                "enableDefaultSubsources": false
-            },
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/mirrored_hemibrain_v1.2.1_meshes_elastix_tpsreg_240721",
             "tab": "segments",
             "segments": [
-                "1170939344"
+
             ],
             "colorSeed": 3019710613,
-            "name": "hemibrain v1.2.1 imported, mirrored",
-            "archived": true
+            "name": "hemibrain v1.2.1 imported, mirrored"
         },
         {
             "type": "segmentation",
-            "source": {
-                "url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/fanc_1116_meshes_elastix_tpsreg_240721",
-                "subsources": {
-                    "properties": true,
-                    "mesh": true
-                },
-                "enableDefaultSubsources": false
-            },
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721",
             "tab": "segments",
             "segments": [
-                "10538",
-                "10854"
-            ],
-            "name": "fanc v1116 imported",
-            "archived": true
-        },
-        {
-            "type": "segmentation",
-            "source": {
-                "url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721",
-                "subsources": {
-                    "properties": true,
-                    "mesh": true
-                },
-                "enableDefaultSubsources": false
-            },
-            "tab": "segments",
-            "segments": [
-                "10751",
-                "10760"
+
             ],
             "colorSeed": 1741371904,
-            "name": "manc v1.2.1 imported",
-            "archived": true
+            "name": "manc v1.2.1 imported"
         },
         {
             "type": "image",
@@ -211,18 +165,29 @@
             "segments": [
 
             ],
-            "name": "nuclei (v1)",
-            "archived": true
+            "name": "nuclei (v1)"
         },
         {
             "type": "segmentation",
-            "source": "precomputed://gs://zetta_lee_fly_cns_001_mito/250423_mito/seg",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/neuron_meshes",
             "tab": "segments",
             "segments": [
-
+                "720575941566847847",
+                "720575941560383347",
+                "720575941597489344",
+                "720575941472734048",
+                "720575941565105206",
+                "720575941603635190"
             ],
-            "name": "mitochondria (v1)",
-            "archived": true
+            "name": "v626 neurons",
+            "segmentColors": {
+                "720575941472734048": "#1b08f9",
+                "720575941560383347": "#3270e3",
+                "720575941565105206": "#5219ed",
+                "720575941566847847": "#54bcd1",
+                "720575941597489344": "#1025f5",
+                "720575941603635190": "#8a2be2"
+            }
         }
     ],
     "showSlices": false,

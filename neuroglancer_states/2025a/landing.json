@@ -1,213 +1,297 @@
 {
-  "dimensions": {
-    "x": ["0.000000004", "m"],
-    "y": ["0.000000004", "m"],
-    "z": ["0.000000045", "m"]
-  },
-  "position": [125097.5, 122589.5, 2827.5],
-  "crossSectionOrientation": [0, 1, 0, 0],
-  "crossSectionScale": [15.1354],
-  "projectionOrientation": [-0.1193, 0.079, 0.023, 0.9895],
-  "projectionScale": [267323.4663],
-  "layers": [
-    {
-      "type": "image",
-      "source": ["precomputed://gs://seunglab_lee_fly_cns_001_alignment/aligned/v0"],
-      "tab": "source",
-      "name": "BANC EM",
-      "toolBindings": {},
-      "segments": {},
-      "segmentColors": {}
+    "dimensions": {
+        "x": [
+            "0.000000004",
+            "m"
+        ],
+        "y": [
+            "0.000000004",
+            "m"
+        ],
+        "z": [
+            "0.000000045",
+            "m"
+        ]
     },
-    {
-      "type": "segmentation",
-      "source": ["graphene://middleauth+https://cave.fanc-fly.com/segmentation/table/wclee_fly_cns_001"],
-      "tab": "segments",
-      "name": "segmentation proofreading",
-      "toolBindings": {
-        "M": "grapheneMergeSegments",
-        "C": "grapheneMulticutSegments",
-        "F": "grapheneFindPath"
-      },
-      "selectedAlpha": 0.4,
-      "segments": ["720575941447863316", "720575941593683051", "720575941476980785", "720575941441906779", "720575941515630947", "720575941633589179", "720575941455535923", "720575941454918195", "720575941626534090", "720575941477443358", "720575941629726246", "720575941504921906", "720575941653553169", "720575941681023421", "720575941440001343", "720575941516704761", "720575941611824358", "720575941569367546", "720575941574838280", "720575941439395903", "720575941631629292", "720575941574549768", "720575941531178469", "720575941571547912", "720575941490705865", "720575941536695066", "720575941535148778", "720575941561632045", "720575941659328592", "720575941432966432", "720575941507368005", "720575941569814130", "720575941466022422", "720575941471698752", "720575941603718073", "720575941444962474", "720575941553773959", "720575941633109664", "720575941691005080", "720575941565499543", "720575941564152722", "720575941595303717", "720575941441643099", "720575941688631414", "720575941566182966", "720575941437329708", "720575941568317230", "720575941407841071", "720575941393745046", "720575941497322880", "720575941527162905", "720575941558704164"],
-      "colorSeed": 3952451009,
-      "segmentColors": {
-        "720575941393745046": "#089c39",
-        "720575941407841071": "#ff1493",
-        "720575941432966432": "#089c39",
-        "720575941437329708": "#ff1493",
-        "720575941439395903": "#089c39",
-        "720575941440001343": "#089c39",
-        "720575941441643099": "#089c39",
-        "720575941441906779": "#089c39",
-        "720575941444962474": "#089c39",
-        "720575941447863316": "#ff1493",
-        "720575941450261831": "#00ff00",
-        "720575941454918195": "#089c39",
-        "720575941455535923": "#089c39",
-        "720575941466022422": "#089c39",
-        "720575941471698752": "#089c39",
-        "720575941476980785": "#089c39",
-        "720575941477443358": "#ff1493",
-        "720575941490705865": "#089c39",
-        "720575941497322880": "#ff1493",
-        "720575941504921906": "#ff1493",
-        "720575941507368005": "#089c39",
-        "720575941515630947": "#ff1493",
-        "720575941516704761": "#089c39",
-        "720575941518561971": "#0000ff",
-        "720575941527162905": "#ff1493",
-        "720575941531178469": "#089c39",
-        "720575941535148778": "#089c39",
-        "720575941536695066": "#089c39",
-        "720575941545083784": "#ff0000",
-        "720575941553773959": "#089c39",
-        "720575941558704164": "#ff1493",
-        "720575941561632045": "#089c39",
-        "720575941564152722": "#089c39",
-        "720575941565499543": "#089c39",
-        "720575941566182966": "#089c39",
-        "720575941568317230": "#089c39",
-        "720575941569367546": "#089c39",
-        "720575941569814130": "#089c39",
-        "720575941571547912": "#089c39",
-        "720575941574549768": "#089c39",
-        "720575941574838280": "#089c39",
-        "720575941593683051": "#ff1493",
-        "720575941595303717": "#089c39",
-        "720575941603718073": "#089c39",
-        "720575941611824358": "#089c39",
-        "720575941626534090": "#089c39",
-        "720575941629726246": "#ff1493",
-        "720575941631629292": "#089c39",
-        "720575941633109664": "#089c39",
-        "720575941633589179": "#089c39",
-        "720575941653553169": "#089c39",
-        "720575941659328592": "#089c39",
-        "720575941681023421": "#089c39",
-        "720575941688631414": "#089c39",
-        "720575941691005080": "#089c39"
-      }
-    },
-    {
-      "type": "segmentation",
-      "source": {
-        "url": ["precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/region_outlines"],
-        "subsources": {
-          "bounds": [true],
-          "properties": [true],
-          "mesh": [true]
+    "position": [
+        125097.5,
+        122589.5,
+        2827.5
+    ],
+    "crossSectionOrientation": [
+        0,
+        1,
+        0,
+        0
+    ],
+    "crossSectionScale": 15.1354,
+    "projectionOrientation": [
+        -0.1193,
+        0.079,
+        0.023,
+        0.9895
+    ],
+    "projectionScale": 267323.4663,
+    "layers": [
+        {
+            "type": "image",
+            "source": "precomputed://gs://seunglab_lee_fly_cns_001_alignment/aligned/v0",
+            "tab": "source",
+            "name": "BANC EM",
+            "segments": [
+
+            ]
         },
-        "enableDefaultSubsources": [false]
-      },
-      "tab": "rendering",
-      "name": "region outlines",
-      "toolBindings": {},
-      "segments": ["1", "2"],
-      "colorSeed": 260226408,
-      "segmentColors": {
-        "1": "#f0f2f4",
-        "2": "#e7e9d8"
-      },
-      "pick": false,
-      "objectAlpha": 0.35,
-      "meshSilhouetteRendering": 2,
-      "segmentQuery": "<id"
+        {
+            "type": "segmentation",
+            "source": "graphene://middleauth+https://cave.fanc-fly.com/segmentation/table/wclee_fly_cns_001",
+            "toolBindings": {
+                "M": "grapheneMergeSegments",
+                "C": "grapheneMulticutSegments",
+                "F": "grapheneFindPath"
+            },
+            "tab": "segments",
+            "selectedAlpha": 0.4,
+            "segments": [
+
+            ],
+            "colorSeed": 3952451009,
+            "segmentColors": {
+                "720575941450261831": "#00ff00",
+                "720575941518561971": "#0000ff",
+                "720575941545083784": "#ff0000"
+            },
+            "name": "segmentation proofreading"
+        },
+        {
+            "type": "segmentation",
+            "source": {
+                "url": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/region_outlines",
+                "subsources": {
+                    "bounds": true,
+                    "properties": true,
+                    "mesh": true
+                },
+                "enableDefaultSubsources": false
+            },
+            "pick": false,
+            "tab": "rendering",
+            "objectAlpha": 0.35,
+            "meshSilhouetteRendering": 2,
+            "segments": [
+                "1",
+                "2"
+            ],
+            "segmentQuery": "<id",
+            "colorSeed": 260226408,
+            "segmentColors": {
+                "1": "#f0f2f4",
+                "2": "#e7e9d8"
+            },
+            "name": "region outlines"
+        },
+        {
+            "type": "segmentation",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/fafb_783_meshes_elastix_tpsreg_240721",
+            "tab": "segments",
+            "segments": [
+
+            ],
+            "colorSeed": 2860966783,
+            "name": "fafb v783 imported"
+        },
+        {
+            "type": "segmentation",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/hemibrain_v1.2.1_meshes_elastix_tpsreg_240721",
+            "tab": "segments",
+            "segments": [
+
+            ],
+            "colorSeed": 2830100975,
+            "name": "hemibrain v1.2.1 imported"
+        },
+        {
+            "type": "segmentation",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/mirrored_hemibrain_v1.2.1_meshes_elastix_tpsreg_240721",
+            "tab": "segments",
+            "segments": [
+
+            ],
+            "colorSeed": 3019710613,
+            "name": "hemibrain v1.2.1 imported, mirrored"
+        },
+        {
+            "type": "segmentation",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721",
+            "tab": "segments",
+            "segments": [
+
+            ],
+            "colorSeed": 1741371904,
+            "name": "manc v1.2.1 imported"
+        },
+        {
+            "type": "image",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/templates/JRC2018F_aligned240721_to_BANC.ng",
+            "tab": "rendering",
+            "opacity": 0.55,
+            "name": "JRC2018F atlas imported",
+            "archived": true
+        },
+        {
+            "type": "image",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/synapses/v1.1/synapsecloud_sizethresh6_blursigma1.ng",
+            "tab": "rendering",
+            "opacity": 0.55,
+            "name": "synapse cloud (v1.1)",
+            "archived": true
+        },
+        {
+            "type": "segmentation",
+            "source": "precomputed://gs://zetta_lee_fly_cns_001_synapse/240623_run/seg",
+            "pick": false,
+            "tab": "source",
+            "segments": [
+
+            ],
+            "name": "postsynapses (v1.1)",
+            "archived": true
+        },
+        {
+            "type": "segmentation",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/nuclei/seg_v1",
+            "tab": "segments",
+            "selectedAlpha": 0.8,
+            "segments": [
+
+            ],
+            "name": "nuclei (v1)"
+        },
+        {
+            "type": "segmentation",
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/neuron_meshes",
+            "tab": "segments",
+            "segments": [
+                "720575941447863316",
+                "720575941593683051",
+                "720575941476980785",
+                "720575941441906779",
+                "720575941515630947",
+                "720575941633589179",
+                "720575941455535923",
+                "720575941454918195",
+                "720575941626534090",
+                "720575941477443358",
+                "720575941629726246",
+                "720575941504921906",
+                "720575941653553169",
+                "720575941681023421",
+                "720575941440001343",
+                "720575941516704761",
+                "720575941611824358",
+                "720575941569367546",
+                "720575941574838280",
+                "720575941439395903",
+                "720575941631629292",
+                "720575941574549768",
+                "720575941531178469",
+                "720575941571547912",
+                "720575941490705865",
+                "720575941536695066",
+                "720575941535148778",
+                "720575941561632045",
+                "720575941659328592",
+                "720575941432966432",
+                "720575941507368005",
+                "720575941569814130",
+                "720575941466022422",
+                "720575941471698752",
+                "720575941603718073",
+                "720575941444962474",
+                "720575941553773959",
+                "720575941633109664",
+                "720575941691005080",
+                "720575941565499543",
+                "720575941564152722",
+                "720575941595303717",
+                "720575941441643099",
+                "720575941688631414",
+                "720575941566182966",
+                "720575941437329708",
+                "720575941568317230",
+                "720575941407841071",
+                "720575941393745046",
+                "720575941497322880",
+                "720575941527162905",
+                "720575941558704164"
+            ],
+            "name": "v626 neurons",
+            "segmentColors": {
+                "720575941393745046": "#089c39",
+                "720575941407841071": "#ff1493",
+                "720575941432966432": "#089c39",
+                "720575941437329708": "#ff1493",
+                "720575941439395903": "#089c39",
+                "720575941440001343": "#089c39",
+                "720575941441643099": "#089c39",
+                "720575941441906779": "#089c39",
+                "720575941444962474": "#089c39",
+                "720575941447863316": "#ff1493",
+                "720575941454918195": "#089c39",
+                "720575941455535923": "#089c39",
+                "720575941466022422": "#089c39",
+                "720575941471698752": "#089c39",
+                "720575941476980785": "#089c39",
+                "720575941477443358": "#ff1493",
+                "720575941490705865": "#089c39",
+                "720575941497322880": "#ff1493",
+                "720575941504921906": "#ff1493",
+                "720575941507368005": "#089c39",
+                "720575941515630947": "#ff1493",
+                "720575941516704761": "#089c39",
+                "720575941527162905": "#ff1493",
+                "720575941531178469": "#089c39",
+                "720575941535148778": "#089c39",
+                "720575941536695066": "#089c39",
+                "720575941553773959": "#089c39",
+                "720575941558704164": "#ff1493",
+                "720575941561632045": "#089c39",
+                "720575941564152722": "#089c39",
+                "720575941565499543": "#089c39",
+                "720575941566182966": "#089c39",
+                "720575941568317230": "#089c39",
+                "720575941569367546": "#089c39",
+                "720575941569814130": "#089c39",
+                "720575941571547912": "#089c39",
+                "720575941574549768": "#089c39",
+                "720575941574838280": "#089c39",
+                "720575941593683051": "#ff1493",
+                "720575941595303717": "#089c39",
+                "720575941603718073": "#089c39",
+                "720575941611824358": "#089c39",
+                "720575941626534090": "#089c39",
+                "720575941629726246": "#ff1493",
+                "720575941631629292": "#089c39",
+                "720575941633109664": "#089c39",
+                "720575941633589179": "#089c39",
+                "720575941653553169": "#089c39",
+                "720575941659328592": "#089c39",
+                "720575941681023421": "#089c39",
+                "720575941688631414": "#089c39",
+                "720575941691005080": "#089c39"
+            }
+        }
+    ],
+    "showSlices": false,
+    "gpuMemoryLimit": 6000000000,
+    "systemMemoryLimit": 8000000000,
+    "selectedLayer": {
+        "visible": true,
+        "layer": "segmentation proofreading"
     },
-    {
-      "type": "segmentation",
-      "source": ["precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/fafb_783_meshes_elastix_tpsreg_240721"],
-      "tab": "segments",
-      "name": "fafb v783 imported",
-      "toolBindings": {},
-      "segments": [],
-      "colorSeed": 2860966783,
-      "segmentColors": {}
-    },
-    {
-      "type": "segmentation",
-      "source": ["precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/hemibrain_v1.2.1_meshes_elastix_tpsreg_240721"],
-      "tab": "segments",
-      "name": "hemibrain v1.2.1 imported",
-      "toolBindings": {},
-      "segments": [],
-      "colorSeed": 2830100975,
-      "segmentColors": {}
-    },
-    {
-      "type": "segmentation",
-      "source": ["precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/mirrored_hemibrain_v1.2.1_meshes_elastix_tpsreg_240721"],
-      "tab": "segments",
-      "name": "hemibrain v1.2.1 imported, mirrored",
-      "toolBindings": {},
-      "segments": [],
-      "colorSeed": 3019710613,
-      "segmentColors": {}
-    },
-    {
-      "type": "segmentation",
-      "source": ["precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/imported_meshes/manc_v1.2.1_meshes_elastix_tpsreg_240721"],
-      "tab": "segments",
-      "name": "manc v1.2.1 imported",
-      "toolBindings": {},
-      "segments": [],
-      "colorSeed": 1741371904,
-      "segmentColors": {}
-    },
-    {
-      "type": "image",
-      "source": ["precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/templates/JRC2018F_aligned240721_to_BANC.ng"],
-      "tab": "rendering",
-      "name": "JRC2018F atlas imported",
-      "toolBindings": {},
-      "segments": {},
-      "segmentColors": {},
-      "opacity": 0.55,
-      "archived": true
-    },
-    {
-      "type": "image",
-      "source": ["precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/synapses/v1.1/synapsecloud_sizethresh6_blursigma1.ng"],
-      "tab": "rendering",
-      "name": "synapse cloud (v1.1)",
-      "toolBindings": {},
-      "segments": {},
-      "segmentColors": {},
-      "opacity": 0.55,
-      "archived": true
-    },
-    {
-      "type": "segmentation",
-      "source": ["precomputed://gs://zetta_lee_fly_cns_001_synapse/240623_run/seg"],
-      "tab": "source",
-      "name": "postsynapses (v1.1)",
-      "toolBindings": {},
-      "segments": [],
-      "segmentColors": {},
-      "pick": false,
-      "archived": true
-    },
-    {
-      "type": "segmentation",
-      "source": ["precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/nuclei/seg_v1"],
-      "tab": "segments",
-      "name": "nuclei (v1)",
-      "toolBindings": {},
-      "selectedAlpha": 0.8,
-      "segments": [],
-      "segmentColors": {}
+    "layout": "xy-3d",
+    "layerListPanel": {
+        "visible": true
     }
-  ],
-  "showSlices": [false],
-  "gpuMemoryLimit": [6000000000],
-  "systemMemoryLimit": [8000000000],
-  "selectedLayer": {
-    "visible": [true],
-    "layer": ["segmentation proofreading"]
-  },
-  "layout": ["xy-3d"],
-  "layerListPanel": {
-    "visible": [true]
-  }
 }
+
