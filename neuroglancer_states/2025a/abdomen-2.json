@@ -4,11 +4,11 @@
     "y": ["0.000000004", "m"],
     "z": ["0.000000045", "m"]
   },
-  "position": [140988.2969, 36705.4766, 2498.5],
+  "position": [125097.5, 122589.5, 2827.5],
   "crossSectionOrientation": [0, 1, 0, 0],
-  "crossSectionScale": [0.5686],
-  "projectionOrientation": [0, 1, 0, 0],
-  "projectionScale": [366763.3877],
+  "crossSectionScale": [15.1354],
+  "projectionOrientation": [-0.1193, 0.079, 0.023, 0.9895],
+  "projectionScale": [267323.4663],
   "layers": [
     {
       "type": "image",
@@ -30,9 +30,54 @@
         "F": "grapheneFindPath"
       },
       "selectedAlpha": 0.4,
-      "segments": ["720575941493078142", "720575941455137261"],
+      "segments": ["720575941579572561", "720575941595182629", "720575941535910849", "720575941529911525", "720575941503444162", "720575941403875952", "720575941562109440", "720575941571565307", "720575941488656332", "720575941415606556", "720575941667542515", "720575941611258076", "720575941574046056", "720575941591284364", "720575941522117707", "720575941731588395", "720575941488244169", "720575941490687689", "720575941680133053", "720575941508293666", "720575941495589499", "720575941450075463", "720575941588633740", "720575941399300387", "720575941528213158", "720575941503531058", "720575941490096334", "720575941659397456", "720575941610949962", "720575941520388855", "720575941573488392", "720575941475795306", "720575941411332719", "720575941479258563", "720575941608946921", "720575941526677348", "720575941631691680", "720575941577595125", "720575941558882163", "720575941565211239", "720575941569607282"],
       "colorSeed": 3952451009,
-      "segmentColors": {}
+      "segmentColors": {
+        "720575941399300387": "#efc7e6",
+        "720575941403875952": "#efc7e6",
+        "720575941411332719": "#efc7e6",
+        "720575941415606556": "#efc7e6",
+        "720575941450075463": "#efc7e6",
+        "720575941450261831": "#00ff00",
+        "720575941475795306": "#efc7e6",
+        "720575941479258563": "#efc7e6",
+        "720575941488244169": "#efc7e6",
+        "720575941488656332": "#efc7e6",
+        "720575941490096334": "#f1ddbb",
+        "720575941490687689": "#efc7e6",
+        "720575941495589499": "#efc7e6",
+        "720575941503444162": "#efc7e6",
+        "720575941503531058": "#efc7e6",
+        "720575941508293666": "#efc7e6",
+        "720575941518561971": "#0000ff",
+        "720575941520388855": "#efc7e6",
+        "720575941522117707": "#efc7e6",
+        "720575941526677348": "#f1ddbb",
+        "720575941528213158": "#efc7e6",
+        "720575941529911525": "#efc7e6",
+        "720575941535910849": "#efc7e6",
+        "720575941545083784": "#ff0000",
+        "720575941558882163": "#efc7e6",
+        "720575941562109440": "#efc7e6",
+        "720575941565211239": "#efc7e6",
+        "720575941569607282": "#efc7e6",
+        "720575941571565307": "#f1ddbb",
+        "720575941573488392": "#efc7e6",
+        "720575941574046056": "#efc7e6",
+        "720575941577595125": "#efc7e6",
+        "720575941579572561": "#efc7e6",
+        "720575941588633740": "#efc7e6",
+        "720575941591284364": "#efc7e6",
+        "720575941595182629": "#efc7e6",
+        "720575941608946921": "#efc7e6",
+        "720575941610949962": "#efc7e6",
+        "720575941611258076": "#efc7e6",
+        "720575941631691680": "#f1ddbb",
+        "720575941659397456": "#efc7e6",
+        "720575941667542515": "#efc7e6",
+        "720575941680133053": "#efc7e6",
+        "720575941731588395": "#efc7e6"
+      }
     },
     {
       "type": "segmentation",
@@ -45,17 +90,19 @@
         },
         "enableDefaultSubsources": [false]
       },
-      "tab": "segments",
+      "tab": "rendering",
       "name": "region outlines",
       "toolBindings": {},
-      "segments": ["1", "!2", "!4", "!3"],
+      "segments": ["1", "2"],
       "colorSeed": 260226408,
-      "pick": false,
-      "meshSilhouetteRendering": 2,
-      "segmentQuery": "<id",
       "segmentColors": {
-        "1": "#2a7fff"
-      }
+        "1": "#f0f2f4",
+        "2": "#e7e9d8"
+      },
+      "pick": false,
+      "objectAlpha": 0.35,
+      "meshSilhouetteRendering": 2,
+      "segmentQuery": "<id"
     },
     {
       "type": "segmentation",
@@ -63,10 +110,9 @@
       "tab": "segments",
       "name": "fafb v783 imported",
       "toolBindings": {},
-      "segments": ["720575940627787609", "720575940644438551"],
+      "segments": [],
       "colorSeed": 2860966783,
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     },
     {
       "type": "segmentation",
@@ -74,10 +120,9 @@
       "tab": "segments",
       "name": "hemibrain v1.2.1 imported",
       "toolBindings": {},
-      "segments": ["1170939344"],
+      "segments": [],
       "colorSeed": 2830100975,
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     },
     {
       "type": "segmentation",
@@ -85,10 +130,9 @@
       "tab": "segments",
       "name": "hemibrain v1.2.1 imported, mirrored",
       "toolBindings": {},
-      "segments": ["1170939344"],
+      "segments": [],
       "colorSeed": 3019710613,
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     },
     {
       "type": "segmentation",
@@ -96,10 +140,9 @@
       "tab": "segments",
       "name": "manc v1.2.1 imported",
       "toolBindings": {},
-      "segments": ["10751", "10760"],
+      "segments": [],
       "colorSeed": 1741371904,
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     },
     {
       "type": "image",
@@ -109,8 +152,8 @@
       "toolBindings": {},
       "segments": {},
       "segmentColors": {},
-      "archived": true,
-      "opacity": 0.55
+      "opacity": 0.55,
+      "archived": true
     },
     {
       "type": "image",
@@ -121,7 +164,7 @@
       "segments": {},
       "segmentColors": {},
       "opacity": 0.55,
-      "visible": false
+      "archived": true
     },
     {
       "type": "segmentation",
@@ -130,8 +173,9 @@
       "name": "postsynapses (v1.1)",
       "toolBindings": {},
       "segments": [],
+      "segmentColors": {},
       "pick": false,
-      "segmentColors": {}
+      "archived": true
     },
     {
       "type": "segmentation",
@@ -141,11 +185,9 @@
       "toolBindings": {},
       "selectedAlpha": 0.8,
       "segments": [],
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     }
   ],
-  "showAxisLines": [false],
   "showSlices": [false],
   "gpuMemoryLimit": [6000000000],
   "systemMemoryLimit": [8000000000],
@@ -153,5 +195,8 @@
     "visible": [true],
     "layer": ["segmentation proofreading"]
   },
-  "layout": ["xy"]
+  "layout": ["xy-3d"],
+  "layerListPanel": {
+    "visible": [true]
+  }
 }

@@ -4,11 +4,11 @@
     "y": ["0.000000004", "m"],
     "z": ["0.000000045", "m"]
   },
-  "position": [140988.2969, 36705.4766, 2498.5],
+  "position": [125097.5, 122589.5, 2827.5],
   "crossSectionOrientation": [0, 1, 0, 0],
-  "crossSectionScale": [0.5686],
-  "projectionOrientation": [0, 1, 0, 0],
-  "projectionScale": [366763.3877],
+  "crossSectionScale": [15.1354],
+  "projectionOrientation": [-0.1193, 0.079, 0.023, 0.9895],
+  "projectionScale": [267323.4663],
   "layers": [
     {
       "type": "image",
@@ -30,9 +30,48 @@
         "F": "grapheneFindPath"
       },
       "selectedAlpha": 0.4,
-      "segments": ["720575941493078142", "720575941455137261"],
+      "segments": ["720575941449780405", "720575941588099140", "720575941603110134", "720575941454380013", "720575941432483425", "720575941484914242", "720575941484914498", "720575941585908446", "720575941589105292", "720575941513444089", "720575941410682479", "720575941430258647", "720575941553702042", "720575941623743434", "720575941508146978", "720575941547120161", "720575941462808077", "720575941588254206", "720575941545764232", "720575941505915682", "720575941599758121", "720575941558268943", "720575941603103990", "720575941652113685", "720575941402863216", "720575941454079539", "720575941494208128", "720575941473001568", "720575941604209142", "720575941623285450", "720575941519595447", "720575941671326631", "720575941626721900", "720575941480581856", "720575941662402360"],
       "colorSeed": 3952451009,
-      "segmentColors": {}
+      "segmentColors": {
+        "720575941402863216": "#efc7e6",
+        "720575941410682479": "#efc7e6",
+        "720575941430258647": "#efc7e6",
+        "720575941432483425": "#efc7e6",
+        "720575941449780405": "#efc7e6",
+        "720575941450261831": "#00ff00",
+        "720575941454079539": "#efc7e6",
+        "720575941454380013": "#efc7e6",
+        "720575941462808077": "#efc7e6",
+        "720575941473001568": "#efc7e6",
+        "720575941480581856": "#efc7e6",
+        "720575941484914242": "#efc7e6",
+        "720575941484914498": "#efc7e6",
+        "720575941494208128": "#efc7e6",
+        "720575941505915682": "#efc7e6",
+        "720575941508146978": "#efc7e6",
+        "720575941513444089": "#efc7e6",
+        "720575941518561971": "#0000ff",
+        "720575941519595447": "#efc7e6",
+        "720575941545083784": "#ff0000",
+        "720575941545764232": "#efc7e6",
+        "720575941547120161": "#efc7e6",
+        "720575941553702042": "#efc7e6",
+        "720575941558268943": "#efc7e6",
+        "720575941585908446": "#efc7e6",
+        "720575941588099140": "#efc7e6",
+        "720575941588254206": "#efc7e6",
+        "720575941589105292": "#efc7e6",
+        "720575941599758121": "#efc7e6",
+        "720575941603103990": "#efc7e6",
+        "720575941603110134": "#efc7e6",
+        "720575941604209142": "#efc7e6",
+        "720575941623285450": "#efc7e6",
+        "720575941623743434": "#efc7e6",
+        "720575941626721900": "#efc7e6",
+        "720575941652113685": "#efc7e6",
+        "720575941662402360": "#efc7e6",
+        "720575941671326631": "#efc7e6"
+      }
     },
     {
       "type": "segmentation",
@@ -45,17 +84,19 @@
         },
         "enableDefaultSubsources": [false]
       },
-      "tab": "segments",
+      "tab": "rendering",
       "name": "region outlines",
       "toolBindings": {},
-      "segments": ["1", "!2", "!4", "!3"],
+      "segments": ["1", "2"],
       "colorSeed": 260226408,
-      "pick": false,
-      "meshSilhouetteRendering": 2,
-      "segmentQuery": "<id",
       "segmentColors": {
-        "1": "#2a7fff"
-      }
+        "1": "#f0f2f4",
+        "2": "#e7e9d8"
+      },
+      "pick": false,
+      "objectAlpha": 0.35,
+      "meshSilhouetteRendering": 2,
+      "segmentQuery": "<id"
     },
     {
       "type": "segmentation",
@@ -63,10 +104,9 @@
       "tab": "segments",
       "name": "fafb v783 imported",
       "toolBindings": {},
-      "segments": ["720575940627787609", "720575940644438551"],
+      "segments": [],
       "colorSeed": 2860966783,
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     },
     {
       "type": "segmentation",
@@ -74,10 +114,9 @@
       "tab": "segments",
       "name": "hemibrain v1.2.1 imported",
       "toolBindings": {},
-      "segments": ["1170939344"],
+      "segments": [],
       "colorSeed": 2830100975,
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     },
     {
       "type": "segmentation",
@@ -85,10 +124,9 @@
       "tab": "segments",
       "name": "hemibrain v1.2.1 imported, mirrored",
       "toolBindings": {},
-      "segments": ["1170939344"],
+      "segments": [],
       "colorSeed": 3019710613,
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     },
     {
       "type": "segmentation",
@@ -96,10 +134,9 @@
       "tab": "segments",
       "name": "manc v1.2.1 imported",
       "toolBindings": {},
-      "segments": ["10751", "10760"],
+      "segments": [],
       "colorSeed": 1741371904,
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     },
     {
       "type": "image",
@@ -109,8 +146,8 @@
       "toolBindings": {},
       "segments": {},
       "segmentColors": {},
-      "archived": true,
-      "opacity": 0.55
+      "opacity": 0.55,
+      "archived": true
     },
     {
       "type": "image",
@@ -121,7 +158,7 @@
       "segments": {},
       "segmentColors": {},
       "opacity": 0.55,
-      "visible": false
+      "archived": true
     },
     {
       "type": "segmentation",
@@ -130,8 +167,9 @@
       "name": "postsynapses (v1.1)",
       "toolBindings": {},
       "segments": [],
+      "segmentColors": {},
       "pick": false,
-      "segmentColors": {}
+      "archived": true
     },
     {
       "type": "segmentation",
@@ -141,11 +179,9 @@
       "toolBindings": {},
       "selectedAlpha": 0.8,
       "segments": [],
-      "segmentColors": {},
-      "archived": true
+      "segmentColors": {}
     }
   ],
-  "showAxisLines": [false],
   "showSlices": [false],
   "gpuMemoryLimit": [6000000000],
   "systemMemoryLimit": [8000000000],
@@ -153,5 +189,8 @@
     "visible": [true],
     "layer": ["segmentation proofreading"]
   },
-  "layout": ["xy"]
+  "layout": ["xy-3d"],
+  "layerListPanel": {
+    "visible": [true]
+  }
 }
