@@ -1,8 +1,13 @@
 ## Neuroglancer states
 
-Each file here specifies a neuroglancer state, through which you can view BANC neurons in different ways. To load one of these states, go to the url `https://ng.banc.community/{filename}` where you replace `{filename}` with the name of one of the files in this folder (without the `.json` at the end). Here are some links to get you started:
+Each file here specifies a neuroglancer state which allows you to interact with BANC neurons in some way. To open one of these states, go to the url `https://ng.banc.community/{filename}` where you replace `{filename}` with the name of one of the files in this folder, without `.json`. For example:
 
-- [Not available until 2025] https://ng.banc.community/published-neurons-viewer
-- [Not available until 2025] https://ng.banc.community/published-neurons-aligned-to-template-viewer
+- For viewing published neurons: https://ng.banc.community/view
+- For BANC community members to proofread cells (merging and splitting incorrectly attached parts of neurons): https://ng.banc.community/edit
+- View an example synapse: https://ng.banc.community/2025a/example-synapse
+- etc for any other file in this folder or subfolder
 
-(If ever these shorten links aren't working, try using the full URL, which is `https://spelunker.cave-explorer.org/#!https://raw.githubusercontent.com/jasper-tms/the-BANC-fly-connectome/main/neuroglancer_states/{filename}`)
+If the BANC link shorter isn't responding, try the full URLs instead:
+- https://spelunker.cave-explorer.org/#!https://raw.githubusercontent.com/jasper-tms/the-BANC-fly-connectome/main/neuroglancer_states/view.json
+- https://spelunker.cave-explorer.org/#!https://raw.githubusercontent.com/jasper-tms/the-BANC-fly-connectome/main/neuroglancer_states/edit.json
+- etc
