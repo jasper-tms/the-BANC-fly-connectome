@@ -41,21 +41,12 @@
         },
         {
             "type": "segmentation",
-            "source": "graphene://middleauth+https://cave.fanc-fly.com/segmentation/table/wclee_fly_cns_001",
-            "toolBindings": {
-                "M": "grapheneMergeSegments",
-                "C": "grapheneMulticutSegments",
-                "F": "grapheneFindPath"
-            },
+            "source": "precomputed://gs://lee-lab_brain-and-nerve-cord-fly-connectome/neuron_meshes",
             "tab": "segments",
-            "selectedAlpha": 0.4,
             "segments": [
-                "720575941455137261",
-                "720575941651657457"
+
             ],
-            "colorSeed": 1078632127,
-            "name": "segmentation proofreading",
-            "visible": false
+            "name": "v626 neurons"
         },
         {
             "type": "segmentation",
@@ -96,12 +87,10 @@
             },
             "tab": "segments",
             "segments": [
-                "720575940627787609",
-                "720575940644438551"
+
             ],
             "colorSeed": 2860966783,
-            "name": "fafb v783 imported",
-            "archived": true
+            "name": "fafb v783 imported"
         },
         {
             "type": "segmentation",
@@ -115,11 +104,10 @@
             },
             "tab": "segments",
             "segments": [
-                "1170939344"
+
             ],
             "colorSeed": 2830100975,
-            "name": "hemibrain v1.2.1 imported",
-            "archived": true
+            "name": "hemibrain v1.2.1 imported"
         },
         {
             "type": "segmentation",
@@ -133,11 +121,10 @@
             },
             "tab": "segments",
             "segments": [
-                "1170939344"
+
             ],
             "colorSeed": 3019710613,
-            "name": "hemibrain v1.2.1 imported, mirrored",
-            "archived": true
+            "name": "hemibrain v1.2.1 imported, mirrored"
         },
         {
             "type": "segmentation",
@@ -151,11 +138,9 @@
             },
             "tab": "segments",
             "segments": [
-                "10538",
-                "10854"
+
             ],
-            "name": "fanc v1116 imported",
-            "archived": true
+            "name": "fanc v1116 imported"
         },
         {
             "type": "segmentation",
@@ -169,12 +154,10 @@
             },
             "tab": "segments",
             "segments": [
-                "10751",
-                "10760"
+
             ],
             "colorSeed": 1741371904,
-            "name": "manc v1.2.1 imported",
-            "archived": true
+            "name": "manc v1.2.1 imported"
         },
         {
             "type": "image",
@@ -211,8 +194,7 @@
             "segments": [
 
             ],
-            "name": "nuclei (v1)",
-            "archived": true
+            "name": "nuclei (v1)"
         },
         {
             "type": "segmentation",
@@ -230,7 +212,7 @@
     "systemMemoryLimit": 8000000000,
     "selectedLayer": {
         "visible": true,
-        "layer": "segmentation proofreading"
+        "layer": "v626 neurons"
     },
     "layout": "xy-3d",
     "layerListPanel": {
