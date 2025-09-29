@@ -1577,7 +1577,8 @@ def is_allowed_to_post(segid: int,
             filter_equal_dict={table_name: {
                 'valid_id': segid,
                 'proofread': {True: 't', False: 'f'}[annotation]
-            }}
+            }},
+            allow_missing_lookups=lookup.allow_missing_lookups
         )
         if raise_errors and not existing_annos.empty:
             raise ValueError(f'Segment {segid} already has this annotation'
