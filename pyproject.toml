@@ -36,7 +36,7 @@ dependencies = [
     "connected-components-3d",
     "fill_voids",
     "task-queue",
-    "caveclient",
+    "caveclient>=8.0.0",
     "cloud-files",
     "urllib3",
     "trimesh",

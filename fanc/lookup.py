@@ -286,16 +286,16 @@ def all_annotations(source_tables=default_annotation_sources,
             table['tag2'] = None
         else:
             if 'tag2' not in table.columns:
-                table['tag2'] = None
+                table['tag2'] = '-'
             if 'tag' in table.columns and column_name != 'tag':
                 table.drop(columns='tag', inplace=True)
             table.rename(columns={column_name: 'tag'}, inplace=True)
-        if (table['tag'] == 't').any():
-            if not (table['tag'] == 't').all():
-                raise ValueError(f'Column "{column_name}" in table "{table_name}"'
-                                 ' contains "t" and other values. This is unexpected.')
+        if table['tag'].dtype.name == 'boolean':
             # For boolean columns, use the table name as the tag
-            table['tag'] = table_name.replace('_', ' ')
+            table['tag'] = table['tag'].map({
+                True: table_name.replace('_', ' '),
+                False: 'False'
+            })
             # Only include the table name as a tag once for each neuron
             table.drop_duplicates(subset=['pt_root_id'], keep='last', inplace=True)
 
@@ -389,16 +389,16 @@ def annotations(segids: int or list[int],
             table['user_id'] = None
         if column_name != 'tag2':
             if 'tag2' not in table.columns:
-                table['tag2'] = None
+                table['tag2'] = '-'
             table.rename(columns={column_name: 'tag'}, inplace=True)
         else:
             table['tag'] = table['tag2']
-        if (table['tag'] == 't').any():
-            if not (table['tag'] == 't').all():
-                raise ValueError(f'Column "{column_name}" in table "{table_name}"'
-                                 ' contains "t" and other values. This is unexpected.')
+        if table['tag'].dtype.name == 'boolean':
             # For boolean columns, use the table name as the tag
-            table['tag'] = table_name.replace('_', ' ')
+            table['tag'] = table['tag'].map({
+                True: table_name.replace('_', ' '),
+                False: 'False'
+            })
             # Only include the table name as a tag once for each neuron
             table.drop_duplicates(subset=['pt_root_id'], keep='last', inplace=True)
         tables.append(table[['pt_root_id', 'tag', 'tag2', 'pt_position',
