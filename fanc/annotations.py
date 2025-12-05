@@ -1001,14 +1001,21 @@ cell_info = {
         '15B': {},
         '16B': {},
         '17A': {},
+        '17B': {},
+        '17X': {},
         '18B': {},
+        '18X': {},
         '19A': {},
         '19B': {},
-        '20A/22A': {},
+        '20A.22A': {},
+        '20B.21B.22B': {},
         '21A': {},
+        '21X': {},
         '23B': {},
         '24A': {},
-        '24B': {}},
+        '24B.25B': {},
+        '26X': {},
+        '27X': {}},
     'fast neurotransmitter': {
         'cholinergic': {},
         'GABAergic': {},
@@ -1032,7 +1039,17 @@ cell_info = {
             'soma in T1': {},
             'soma in T2': {},
             'soma in T3': {},
-            'soma in abdominal ganglion': {}}},
+            'soma in abdominal ganglion': {
+                'soma in A1': {},
+                'soma in A2': {},
+                'soma in A3': {},
+                'soma in A4': {},
+                'soma in A5': {},
+                'soma in A6': {},
+                'soma in A7': {},
+                'soma in A8': {},
+                'soma in A9': {},
+                'soma in A10': {}}}},
     'anterior-posterior projection pattern': {
         'descending': {},
         'ascending': {}},
@@ -1094,7 +1111,9 @@ cell_info = {
         'innervates notum': {
             'innervates scutum': {},
             'innervates scutellum': {}},
-        'innervates wing': {},
+        'innervates wing': {
+            'innervates tegula': {},
+            'innervates radius': {}},
         'innervates haltere': {},
         'innervates spiracle': {},
         'innervates abdomen': {}},
@@ -1196,6 +1215,9 @@ FANC_cell_info['publication'] = {
     'Stürner Brooks ... Eichler 2024': {},
     'Syed et al. 2024': {},
     'Guo et al. 2024': {},
+    'Dhawan et al. 2025': {},
+    'Lesser et al. 2025': {},
+    'Cachero ... Jefferis Donà 2025': {},
 }
 
 proofreading_notes = [

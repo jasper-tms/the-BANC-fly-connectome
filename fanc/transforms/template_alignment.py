@@ -3,8 +3,8 @@
 Transform points and neurons between the BANC and the 2018 Janelia templates
 """
 
+from typing import Union, Literal
 import os
-from typing import Literal
 
 import numpy as np
 
@@ -19,14 +19,15 @@ brain_template_plane_of_symmetry_x_voxel = 825
 brain_template_plane_of_symmetry_x_microns = 825 * brain_template_voxel_size
 
 
-def align_mesh(mesh,
-               target_space='JRC2018_VNC_FEMALE',
-               input_units='nanometers',
-               output_units='microns',
-               inplace=True):
+def align_mesh(mesh: Union[int, object],
+               target_space: str = 'JRC2018_VNC_FEMALE',
+               input_units: Literal['nanometers', 'microns'] = 'nanometers',
+               output_units: Literal['nanometers', 'microns'] = 'microns',
+               inplace: bool = True,
+               verbose: bool = False):
     """
-    Given a mesh of a neuron in FANC-space, warp its vertices' coordinates to
-    be aligned to a 2018 Janelia VNC template space.
+    Given a mesh of a neuron in BANC-space, warp its vertices' coordinates to
+    be aligned to a 2018 Janelia template space.
 
     Parameters
     ----------
@@ -52,17 +53,26 @@ def align_mesh(mesh,
       See `fanc.template_spaces` for more information about each template space.
 
     inplace : bool (default True)
-      If true, replace the vertices of the given mesh object. If false, return
+      If True, replace the vertices of the given mesh object. If False, return
       a copy, leaving the given mesh object unchanged.
+
+    verbose : bool (default False)
+      If True, print additional information during processing.
     """
     import navis
     import flybrains
-    if isinstance(mesh, (int, np.integer)):
+    if np.issubdtype(type(mesh), np.integer):
+        seg_id = mesh
         inplace = False
         mm = auth.get_meshmanager()
         mesh = mm.mesh(seg_id=mesh)
-    elif not inplace:
-        mesh = mesh.copy()
+    else:
+        try:
+            seg_id = mesh.segid
+        except AttributeError:
+            seg_id = 'mesh'
+        if not inplace:
+            mesh = mesh.copy()
 
     if not hasattr(mesh, 'vertices') or not hasattr(mesh, 'faces'):
         raise ValueError("The input mesh must have .vertices and .faces attributes"
@@ -99,7 +109,8 @@ def align_mesh(mesh,
     mesh.remove_unreferenced_vertices()
 
     target = template_spaces.to_navis_name(target_space)
-    print(f'Warping into alignment with {target}')
+    if verbose:
+        print(f'Warping {seg_id} into alignment with {target}')
 
     mesh.vertices = warp_points_BANC_to_template(mesh.vertices,
                                                  brain_or_vnc=brain_or_vnc,

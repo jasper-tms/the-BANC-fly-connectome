@@ -624,7 +624,7 @@ def cellid_from_segid(segids: int or list[int],
             [i for i in segids if i not in cell_ids.index]))
     if any(cell_ids.index.value_counts() > 1):
         raise ValueError("These segment IDs have multiple cell IDs: {}".format(
-            [segid for segid, count in cell_ids.index.value_counts().iteritems() if count > 1]))
+            [segid for segid, count in cell_ids.index.value_counts().items() if count > 1]))
     return cell_ids.loc[segids, column_name].to_list()
 # --- END SEGMENTATION/CHUNKEDGRAPH SECTION --- #
 

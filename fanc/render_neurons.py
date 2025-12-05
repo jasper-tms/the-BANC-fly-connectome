@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 
-from typing import Optional, Literal
+from typing import Optional, Literal, List, Union
 
 import numpy as np
 import tqdm
 import npimage
 import npimage.graphics
 
-from . import template_spaces, transforms
+from . import lookup, template_spaces, transforms
 
 
-def make_colormip(seg_id: int,
+def make_colormip(neuron: Union[int, List[int], str],
                   target_space: str = 'brain',
                   level_of_detail: Literal['faces', 'vertices', 'skeleton'] = 'vertices',
+                  composite: bool = False,
                   save: bool = False,
                   save_path: Optional[str] = None,
-                  verbose=False) -> Optional[np.ndarray]:
+                  verbose: bool = False) -> Optional[np.ndarray]:
     """
     Create a color MIP (depth-colored maximum intensity projection) image of a neuron.
 
@@ -30,8 +31,9 @@ def make_colormip(seg_id: int,
 
     Parameters
     ----------
-    seg_id : int or list of ints
-        The segment ID(s) from the BANC segmentation to make colormips of
+    neuron : int or list of ints or str
+        The segment ID(s) from the BANC segmentation to make colormips of,
+        or a cell type to look up seg_id(s) for using fanc.lookup.
 
     target_space: str, default 'brain'
         Which space to render the color MIP in.
@@ -44,6 +46,11 @@ def make_colormip(seg_id: int,
 
     level_of_detail: 'vertices' (default), 'faces', or 'skeleton'
         See docstring for render_neuron_into_template_space for details.
+
+    composite: bool, default False
+        If True, create a composite colormip by combining the colormips
+        of multiple seg_ids into a single image. If False, create a separate
+        colormip for each seg_id.
 
     save: bool, default False
         If True, save the colormip to a file.
@@ -58,9 +65,22 @@ def make_colormip(seg_id: int,
     verbose: bool, default False
         If True, print additional information about the rendering process.
     """
-    if isinstance(seg_id, str):
-        seg_id = int(seg_id)
+    if isinstance(neuron, str):
+        seg_id = lookup.cells_annotated_with(neuron)
+        if verbose:
+            print(f'Found {len(seg_id)} seg_id(s) for query "{neuron}": {seg_id}')
+        if composite and save and save_path is None:
+            neuron = neuron.replace(' ', '-')
+            segids_str = ','.join(map(str, seg_id))
+            save_path = f'{neuron}_{segids_str}_in_{target_space}.png'
+    else:
+        seg_id = neuron
+
     try:
+        if composite:
+            # This just skips the block below that makes one image per seg_id
+            # and proceeds to the block that renders all seg_ids in one image.
+            raise TypeError
         iter(seg_id)
         if isinstance(save_path, str):
             raise ValueError('Cannot specify a single save_path when rendering'
@@ -125,14 +145,19 @@ def make_colormip(seg_id: int,
         colormip = np.vstack([np.zeros((90, 573, 3), dtype=np.uint8), colormip]).astype(np.uint8)
     if not save:
         return colormip
+    if not isinstance(seg_id, str):
+        try:
+            seg_id = ','.join(map(str, seg_id))
+        except TypeError:
+            pass
     if save_path is None:
         save_path = f'{seg_id}_in_{target_space}.png'
     npimage.save(colormip, save_path)
     if verbose:
-        print(f'Saved colormip for seg_id {seg_id} in {target_space} to {save_path}')
+        print('Saved colormip to:', save_path)
 
 
-def render_neuron_into_template_space(seg_id: int,
+def render_neuron_into_template_space(seg_id: Union[int, List[int]],
                                       target_space: str,
                                       level_of_detail: Literal['faces', 'vertices', 'skeleton'] = 'vertices',
                                       save: bool = False,
@@ -147,7 +172,8 @@ def render_neuron_into_template_space(seg_id: int,
     Parameters
     ----------
     seg_id : int
-        The segment ID from the BANC segmentation to render.
+        The segment ID(s) from the BANC segmentation to render.
+        If multiple seg_ids are provided, they will be overlaid in the rendering.
 
     target_space: str
        See banc.template_spaces.template_info for a list of template spaces that can be
@@ -170,32 +196,40 @@ def render_neuron_into_template_space(seg_id: int,
     if level_of_detail == 'skeleton':
         raise NotImplementedError('Skeleton rendering is not yet implemented')
 
-    target_info = template_spaces.get_template_info(target_space)
-
-    if verbose:
-        print(f'Downloading and aligning mesh for seg_id {seg_id}')
-    my_mesh = transforms.template_alignment.align_mesh(seg_id, target_space)
-
-    # Convert from microns to pixels in the target space
-    my_mesh.vertices = my_mesh.vertices / target_info['voxel size']
-
     # Render into a target-space-sized numpy array
+    target_info = template_spaces.get_template_info(target_space)
     rendered_image = np.zeros(target_info['stack dimensions'], dtype=np.uint8)
-    if verbose:
-        print(f'Rendering mesh {level_of_detail} into {target_space} space')
-    if level_of_detail == 'faces':
-        for face in tqdm.tqdm(my_mesh.faces):
-            npimage.graphics.drawtriangle(
-                rendered_image,
-                my_mesh.vertices[face[0]],
-                my_mesh.vertices[face[1]],
-                my_mesh.vertices[face[2]],
-                255,
-                fill_value=255,
-                watertight=False
-            )
-    elif level_of_detail == 'vertices':
-        npimage.graphics.drawpoint(rendered_image, my_mesh.vertices, 255)
+
+    if isinstance(seg_id, str):
+        seg_ids = [int(seg_id)]
+    elif np.issubdtype(type(seg_id), np.integer):
+        seg_ids = [seg_id]
+    else:
+        seg_ids = seg_id
+
+    for seg_id in seg_ids:
+        my_mesh = transforms.template_alignment.align_mesh(
+            seg_id, target_space, verbose=verbose
+        )
+
+        # Convert from microns to pixels in the target space
+        my_mesh.vertices = my_mesh.vertices / target_info['voxel size']
+
+        if verbose:
+            print(f'Rendering mesh {level_of_detail} into {target_space} space')
+        if level_of_detail == 'faces':
+            for face in tqdm.tqdm(my_mesh.faces):
+                npimage.graphics.drawtriangle(
+                    rendered_image,
+                    my_mesh.vertices[face[0]],
+                    my_mesh.vertices[face[1]],
+                    my_mesh.vertices[face[2]],
+                    255,
+                    fill_value=255,
+                    watertight=False
+                )
+        elif level_of_detail == 'vertices':
+            npimage.graphics.drawpoint(rendered_image, my_mesh.vertices, 255)
 
     if not save:
         return rendered_image
