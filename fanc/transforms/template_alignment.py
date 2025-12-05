@@ -3,6 +3,7 @@
 Transform points and neurons between FANC and the 2018 Janelia VNC templates
 """
 
+from typing import Union, Literal
 import os
 
 import numpy as np
@@ -14,11 +15,12 @@ template_plane_of_symmetry_x_voxel = 329
 template_plane_of_symmetry_x_microns = 329 * 0.400
 
 
-def align_mesh(mesh,
-               target_space='JRC2018_VNC_FEMALE',
-               input_units='nanometers',
-               output_units='microns',
-               inplace=True):
+def align_mesh(mesh: Union[int, object],
+               target_space: str = 'JRC2018_VNC_FEMALE',
+               input_units: Literal['nanometers', 'microns'] = 'nanometers',
+               output_units: Literal['nanometers', 'microns'] = 'microns',
+               inplace: bool = True,
+               verbose: bool = False):
     """
     Given a mesh of a neuron in FANC-space, warp its vertices' coordinates to
     be aligned to a 2018 Janelia VNC template space.
@@ -47,17 +49,26 @@ def align_mesh(mesh,
       See `fanc.template_spaces` for more information about each template space.
 
     inplace : bool (default True)
-      If true, replace the vertices of the given mesh object. If false, return
+      If True, replace the vertices of the given mesh object. If False, return
       a copy, leaving the given mesh object unchanged.
+
+    verbose : bool (default False)
+      If True, print additional information during processing.
     """
     import navis
     import flybrains
-    if isinstance(mesh, (int, np.integer)):
+    if np.issubdtype(type(mesh), np.integer):
+        seg_id = mesh
         inplace = False
         mm = auth.get_meshmanager()
         mesh = mm.mesh(seg_id=mesh)
-    elif not inplace:
-        mesh = mesh.copy()
+    else:
+        try:
+            seg_id = mesh.segid
+        except AttributeError:
+            seg_id = 'mesh'
+        if not inplace:
+            mesh = mesh.copy()
 
     if not hasattr(mesh, 'vertices') or not hasattr(mesh, 'faces'):
         raise ValueError("The input mesh must have .vertices and .faces attributes"
@@ -83,8 +94,11 @@ def align_mesh(mesh,
     mesh.remove_unreferenced_vertices()
 
     target = template_spaces.to_navis_name(target_space)
-    print(f'Warping into alignment with {target}')
-    mesh.vertices = navis.xform_brain(mesh.vertices, source='FANC', target=target)
+    if verbose:
+        print(f'Warping {seg_id} into alignment with {target}')
+    mesh.vertices = navis.xform_brain(
+        mesh.vertices, source='FANC', target=target, verbose=verbose
+    )
     if output_units in ['nm', 'nanometer', 'nanometers']:
         mesh.vertices *= 1000
 
