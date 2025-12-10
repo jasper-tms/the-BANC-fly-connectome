@@ -65,6 +65,11 @@ def make_colormip(neuron: Union[int, List[int], str],
     verbose: bool, default False
         If True, print additional information about the rendering process.
     """
+    if target_space.lower() == 'brain':
+        target_space = 'JRC2018_UNISEX_20x_HR'
+    elif target_space.lower() == 'vnc':
+        target_space = 'JRC2018_VNC_UNISEX_461'
+
     if isinstance(neuron, str):
         seg_id = lookup.cells_annotated_with(neuron)
         if verbose:
@@ -105,11 +110,6 @@ def make_colormip(neuron: Union[int, List[int], str],
         return
     except TypeError:
         pass
-
-    if target_space.lower() == 'brain':
-        target_space = 'JRC2018_UNISEX_20x_HR'
-    elif target_space.lower() == 'vnc':
-        target_space = 'JRC2018_VNC_UNISEX_461'
 
     from skimage.color import rgb2hsv, hsv2rgb
     rendered_image = render_neuron_into_template_space(

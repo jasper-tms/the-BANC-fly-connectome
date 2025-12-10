@@ -104,7 +104,8 @@ def align_mesh(mesh: Union[int, object],
                               out_of_bounds_vertices,
                               invert=True).all(axis=1)
     if not in_bounds_faces.any():
-        raise ValueError("The mesh is entirely out of bounds of the target space.")
+        raise ValueError('The mesh is entirely out of bounds of the target space'
+                         f' "{target_space}".')
     mesh.update_faces(in_bounds_faces)
     mesh.remove_unreferenced_vertices()
 
