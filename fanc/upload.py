@@ -56,7 +56,7 @@ def new_cell(pt_position,
         'brain glia': range(1_000_000, 1_199_999),
         'VNC glia': range(2_000_000, 2_199_999),
     }
-    if cell_type not in start_ids.keys():
+    if cell_type not in id_ranges.keys():
         raise ValueError(f'cell_type "{cell_type}" is not valid')
     id_range = id_ranges[cell_type]
     max_existing_id = cell_ids.loc[cell_ids[column_name].isin(id_range), column_name].max()
