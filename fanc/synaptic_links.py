@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 
-import os
-from pathlib import Path
 import json
-import csv
 from secrets import token_hex
-import random
-import sqlite3
 
 import numpy as np
 import pandas as pd

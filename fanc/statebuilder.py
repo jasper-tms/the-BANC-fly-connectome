@@ -1,23 +1,10 @@
 #!/usr/bin/env python3
 
-import os
-import json
-
 import numpy as np
 import pandas as pd
 from matplotlib import cm, colors
-import vtk
-from meshparty import trimesh_vtk, trimesh_io, meshwork
-try:
-    from trimesh import exchange
-except ImportError:
-    from trimesh import io as exchange
 import pymaid
-from cloudvolume import CloudVolume
-from cloudvolume.frontends.precomputed import CloudVolumePrecomputed
-from nglui.statebuilder import (StateBuilder, ChainedStateBuilder,
-                                ImageLayerConfig, SegmentationLayerConfig,
-                                AnnotationLayerConfig, PointMapper, SphereMapper)
+from nglui.statebuilder import ViewerState
 
 from . import auth, lookup
 from .transforms import realignment
@@ -180,33 +167,33 @@ def render_scene(neurons=None,
             kwargs['bg_color'] == '#ffffff'
         misc_settings['perspectiveViewBackgroundColor'] = kwargs['bg_color']
 
-    # Make layers
-    img_config = ImageLayerConfig(
-        name=ngl_info.im['name'],
-        source=ngl_info.im['path']
-    )
-    seg_config = SegmentationLayerConfig(
-        name=ngl_info.seg['name'],
-        source=ngl_info.seg['path'],
-        selected_ids_column='pt_root_id',
-        color_column=color_column,
-        fixed_ids=None,
-        active=True
+    # Build the viewer state (nglui v4 API)
+    vs = ViewerState(
+        dimensions=list(ngl_info.voxel_size),
+        position=ngl_info.view_options.get('position'),
+        scale_3d=ngl_info.view_options.get('zoom_3d', 50000.0),
+        layout=ngl_info.view_options.get('layout', 'xy-3d'),
     )
 
-    def StateBuilderDefaultSettings(layers):
-        return StateBuilder(
-            layers=layers,
-            resolution=ngl_info.voxel_size,
-            view_kws=ngl_info.view_options
+    vs.add_image_layer(source=ngl_info.im['path'], name=ngl_info.im['name'])
+    vs.add_segmentation_layer(source=ngl_info.seg['path'], name=ngl_info.seg['name'])
+    if color_column:
+        vs.add_segments_from_data(
+            data=neurons,
+            segment_column='pt_root_id',
+            color_column=color_column,
+            name=ngl_info.seg['name'],
         )
+    else:
+        segments = neurons['pt_root_id'].dropna().tolist()
+        if segments:
+            vs.add_segments(segments=segments, name=ngl_info.seg['name'])
+    vs.set_viewer_properties(selected_layer=ngl_info.seg['name'])
 
-    # Additional layer(s)
-    additional_states = []
-    additional_data = []
+    # Annotation layer(s)
     if annotations is not None:
         if annotation_units in ['nm', 'nanometer', 'nanometers']:
-            annotation_layer_resolution = (1, 1, 1)
+            annotation_layer_resolution = [1, 1, 1]
         else:
             annotation_layer_resolution = None
 
@@ -237,64 +224,53 @@ def render_scene(neurons=None,
             elif isinstance(i['data'], pd.Series):
                 data = i['data'].to_frame(name='pt_position')
             elif isinstance(i['data'], pd.DataFrame):
-                data = i['data']
+                data = i['data'].copy()
             else:
                 raise TypeError('Could not convert annotation data to DataFrame')
 
-            if 'pt_root_id' in data.columns:
-                segid_column = 'pt_root_id'
-            else:
-                segid_column = None
+            segid_column = 'pt_root_id' if 'pt_root_id' in data.columns else None
 
             if i['type'] == 'points':
-                anno_mapper = PointMapper(point_column='pt_position',
-                                          linked_segmentation_column=segid_column)
+                vs.add_points(
+                    data=data,
+                    name=i['name'],
+                    point_column='pt_position',
+                    segment_column=segid_column,
+                    data_resolution=annotation_layer_resolution,
+                )
             elif i['type'] == 'spheres':
-                anno_mapper = SphereMapper(center_column='pt_position',
-                                           radius_column='radius_nm',
-                                           linked_segmentation_column=segid_column)
+                # nglui v4 ellipsoids take a 3-vector of radii per row;
+                # expand the scalar radius_nm column into (r, r, r).
+                data['radii_nm'] = data['radius_nm'].apply(lambda r: [r, r, r])
+                vs.add_ellipsoids(
+                    data=data,
+                    name=i['name'],
+                    center_column='pt_position',
+                    radii_column='radii_nm',
+                    segment_column=segid_column,
+                    data_resolution=annotation_layer_resolution,
+                )
             else:
                 raise NotImplementedError(f"Unrecognized annotation type: '{i['type']}'")
 
-            anno_layer = AnnotationLayerConfig(
-                name=i['name'],
-                mapping_rules=anno_mapper,
-                data_resolution=annotation_layer_resolution
-            )
-            additional_states.append(
-                StateBuilderDefaultSettings([anno_layer])
-            )
-            additional_data.append(data)
     if nuclei_layer:
-        nuclei_config = SegmentationLayerConfig(name=ngl_info.nuclei['name'],
-                                                source=ngl_info.nuclei['path'],
-                                                selected_ids_column='nucleus_id')
+        vs.add_segmentation_layer(
+            source=ngl_info.nuclei['path'],
+            name=ngl_info.nuclei['name'],
+        )
         if 'nuclei' in kwargs:
             try:
                 iter(kwargs['nuclei'])
-                nucleus_ids = kwargs['nuclei']
-            except:
+                nucleus_ids = list(kwargs['nuclei'])
+            except TypeError:
                 nucleus_ids = [kwargs['nuclei']]
-            nuclei_df = pd.DataFrame(columns=['nucleus_id'])
-            nuclei_df['nucleus_id'] = nucleus_ids
-            additional_data.append(nuclei_df)
-        else:
-            additional_data.append(None)
-        additional_states.append(StateBuilderDefaultSettings([nuclei_config]))
+            if nucleus_ids:
+                vs.add_segments(segments=nucleus_ids, name=ngl_info.nuclei['name'])
+
     if synapses_layer:
-        synapses_config = ImageLayerConfig(name=ngl_info.syn['name'],
-                                           source=ngl_info.syn['path'])
-        additional_states.append(StateBuilder([synapses_config]))
-        additional_data.append(None)
+        vs.add_image_layer(source=ngl_info.syn['path'], name=ngl_info.syn['name'])
 
-    # Build a state with the requested layers
-    standard_state = StateBuilderDefaultSettings([img_config, seg_config])
-    chained_sb = ChainedStateBuilder([standard_state] + additional_states)
-
-    # Turn state into a dict, then add some last settings manually
-    state = chained_sb.render_state([neurons] + additional_data,
-                                    return_as='dict',
-                                    target_site='cave-explorer')
+    state = vs.to_dict()
     if outlines_layer:
         state['layers'].insert(2, ngl_info.outlines_layer)
     ngl_info.final_json_tweaks(state)
@@ -306,6 +282,6 @@ def render_scene(neurons=None,
         json_id = client.state.upload_state_json(state)
         return client.state.build_neuroglancer_url(json_id,
                                                    ngl_info.ngl_app_url,
-                                                   'cave-explorer')
+                                                   'spelunker')
     else:
         raise ValueError('"return_as" must be "json" or "url" but was {}'.format(return_as))

@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 
-import os
-
 import numpy as np
 import requests
-import tqdm
 
 
 def fanc4_to_3(*pts, subpixel_interpolation=False, scale=2, return_dict=False):
@@ -110,7 +107,6 @@ def fanc3_to_4(*pts, mode='descent', precision=1, verbose=False):
     if len(pts) == 1:
         pts = pts[0]
     pts = np.array(pts, dtype=np.float64)
-    ndims = len(pts.shape)
 
     if mode == 'descent':
         # Use this mode if the v3 to v4 alignment

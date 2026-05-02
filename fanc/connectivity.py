@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import json
-import re
 import warnings
 import sqlite3
 

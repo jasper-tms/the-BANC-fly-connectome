@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "banc"
-version = "0.5.3"
+version = "0.6.0"
 description = "Tools for the GridTape-TEM dataset of an adult female fly's Brain And Nerve Cord"
 readme.file = "README.md"
 readme.content-type = "text/markdown"
@@ -29,7 +29,7 @@ dependencies = [
     "navis",
     "flybrains",
     "transformix",
-    "nglui",
+    "nglui>=4.0.0",
     "pyperclip",
     "numpyimage",
     "pandas",
@@ -43,6 +43,9 @@ dependencies = [
     "pcg_skel",
     "anytree",
 ]
+
+[project.optional-dependencies]
+all = ["vtk"]
 
 [project.urls]
 Homepage = "https://banc.community"

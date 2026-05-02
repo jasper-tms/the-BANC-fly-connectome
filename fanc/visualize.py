@@ -3,14 +3,7 @@
 import os
 
 import numpy as np
-from matplotlib import cm, colors
-import vtk
-from meshparty import trimesh_vtk, trimesh_io, meshwork
-from cloudvolume.frontends.precomputed import CloudVolumePrecomputed
-try:
-    from trimesh import exchange
-except ImportError:
-    from trimesh import io as exchange
+from matplotlib import cm
 
 from . import auth, connectivity
 from .transforms import template_alignment
@@ -87,6 +80,8 @@ def plot_neurons(segment_ids,
         output png image
         (generate two images with/without scale bar if you specify to plot it)
     """
+
+    from meshparty import trimesh_vtk, trimesh_io, meshwork
 
     if isinstance(segment_ids, (int, np.integer)):
         segment_ids = [segment_ids]
@@ -242,6 +237,8 @@ def scale_bar_actor_2D(center, camera, view='X', length=10000, color=(0, 0, 0), 
     Creates a scale bar actor very similar to trimesh_vtk.scale_bar_actor(), but on a specific plane with
     a given size.
     """
+    import vtk
+
     axes_actor = vtk.vtkCubeAxesActor2D()
     axes_actor.SetBounds(center[0], center[0]+length,
                          center[1], center[1]+length,
@@ -285,6 +282,11 @@ def scale_bar_actor_2D(center, camera, view='X', length=10000, color=(0, 0, 0), 
 
 
 def read_mesh_stl(filename):
+    try:
+        from trimesh import exchange
+    except ImportError:
+        from trimesh import io as exchange
+
     with open(filename, 'r') as fp:
         mesh_d = exchange.stl.load_stl(fp)
     vertices = mesh_d['vertices']
