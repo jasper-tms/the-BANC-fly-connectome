@@ -61,8 +61,8 @@ def provide_update(table_names=tables):
            " week's update on the amazing progress you all made in building the"
            " BANC connectome.\n\n")
     for table_name in table_names:
-        table_now = caveclient.materialize.live_live_query(table_name, timestamp=now)
-        table_then = caveclient.materialize.live_live_query(table_name, timestamp=then)
+        table_now = caveclient.materialize.live_live_query(table_name, timestamp=now, allow_missing_lookups=True)
+        table_then = caveclient.materialize.live_live_query(table_name, timestamp=then, allow_missing_lookups=True)
         n_this_week = len(table_now) - len(table_then)
         counts_now = table_now.user_id.value_counts()
         counts_then = table_then.user_id.value_counts()
