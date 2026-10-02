@@ -280,7 +280,8 @@ def all_annotations(source_tables=default_annotation_sources,
         table['source_table'] = table_name
         table['created'] = table['created'].apply(datetime.date)
         if 'user_id' not in table.columns:
-            table['user_id'] = None
+            # Match the dtype of tables that do have user IDs
+            table['user_id'] = pd.Series(pd.NA, index=table.index, dtype='Int32')
         if column_name == 'tag2':
             table['tag'] = table['tag2']
             table['tag2'] = None
@@ -303,6 +304,8 @@ def all_annotations(source_tables=default_annotation_sources,
         annos.append(table[['pt_root_id', 'tag', 'tag2', 'pt_position',
                             'user_id', 'source_table', 'created']])
 
+    # Leave out empty tables so they don't affect the combined column dtypes
+    annos = [table for table in annos if not table.empty] or annos[:1]
     annos = pd.concat(annos).sort_values(by='created').reset_index(drop=True)
     if group_by_segid:
         annos = annos.groupby('pt_root_id')['tag'].apply(list)
@@ -386,7 +389,8 @@ def annotations(segids: int or list[int],
         table['source_table'] = table_name
         table.sort_values(by='created', inplace=True)
         if 'user_id' not in table.columns:
-            table['user_id'] = None
+            # Match the dtype of tables that do have user IDs
+            table['user_id'] = pd.Series(pd.NA, index=table.index, dtype='Int32')
         if column_name != 'tag2':
             if 'tag2' not in table.columns:
                 table['tag2'] = '-'
@@ -403,6 +407,8 @@ def annotations(segids: int or list[int],
             table.drop_duplicates(subset=['pt_root_id'], keep='last', inplace=True)
         tables.append(table[['pt_root_id', 'tag', 'tag2', 'pt_position',
                             'user_id', 'source_table', 'created']])
+    # Leave out empty tables so they don't affect the combined column dtypes
+    tables = [table for table in tables if not table.empty] or tables[:1]
     table = pd.concat(tables).reset_index(drop=True)
 
     if return_details:
