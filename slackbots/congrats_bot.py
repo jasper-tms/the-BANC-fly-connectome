@@ -76,7 +76,8 @@ def provide_update(table_names=tables):
         top_users_caveids = counts_diff[0:3].index
         top_users_slackids = [[slackid
                                for slackid, caveid in users[table_name].items()
-                               if caveid == user_caveid][0]
+                               if caveid == user_caveid][0] if user_caveid in
+                              users[table_name].values() else user_caveid
                               for user_caveid in top_users_caveids]
         top_counts = counts_diff[0:3].values.astype(int)
         msg += f"*`{table_name}` has {len(table_now)} total entries on {table_now.pt_root_id.nunique()} unique cells.*"
