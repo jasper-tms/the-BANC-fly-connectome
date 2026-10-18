@@ -54,6 +54,46 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 import banc
 banc.use_auth_token_key('banc_service_account')
 
+
+def load_environment_variables_from_file(filename='.env.slack'):
+    """
+    Load environment variables from a file located next to this script.
+
+    The file is expected to contain lines of the form
+    `export SOME_VARIABLE=some_value` (the `export` keyword and surrounding
+    quotes around the value are both optional). Lines that are empty or that
+    start with `#` are ignored. Variables that are already present in the
+    environment are not overwritten.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to load, relative to this script's directory.
+
+    Returns
+    -------
+    None
+    """
+    filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
+    if not os.path.exists(filepath):
+        return
+    with open(filepath, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if line.startswith('export '):
+                line = line[len('export '):].strip()
+            if '=' not in line:
+                continue
+            name, value = line.split('=', 1)
+            name = name.strip()
+            value = value.strip().strip('"').strip("'")
+            os.environ.setdefault(name, value)
+
+
+load_environment_variables_from_file()
+
 # Setup
 verbosity = 2
 convert_given_point_to_anchor_point = False

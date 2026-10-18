@@ -1,0 +1,3 @@
+# Files holding environment variables with secrets (Slack tokens, etc.)
+.env
+.env.*
